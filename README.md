@@ -10,7 +10,7 @@ I also maintain minimal working examples for other programming stuff:
 
 ```
 ├── include/    Required libraries
-│  └── cgal/    GAL library
+│  └── CGAL/    CGAL library
 ├── obj/        Object files after compilation
 ├── bin/        Compiled MWE from examples/ directory
 ├── examples/   MWE for CGAL
