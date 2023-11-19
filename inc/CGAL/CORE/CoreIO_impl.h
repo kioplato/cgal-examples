@@ -11,11 +11,11 @@
  *       Zilin Du <zilin@cs.nyu.edu>
  *       Chee Yap <yap@cs.nyu.edu>
  *
- * WWW URL: https://cs.nyu.edu/exact/
+ * WWW URL: http://cs.nyu.edu/exact/
  * Email: exact@cs.nyu.edu
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.6/CGAL_Core/include/CGAL/CORE/CoreIO_impl.h $
- * $Id: CoreIO_impl.h 4d22c90 2023-01-04T10:06:45+01:00 Mael
+ * $URL: https://github.com/CGAL/cgal/blob/v5.4.5/CGAL_Core/include/CGAL/CORE/CoreIO_impl.h $
+ * $Id: CoreIO_impl.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/
 
@@ -103,7 +103,7 @@ int skip_comment_line (std::istream & in) {
     }
   } while (c == ' ' || c == '\t' || c == '\n');
 
-  if (in.eof())
+  if (c == EOF)
     core_io_error_handler("CoreIO::read_from_file()","unexpected end of file.");
 
   in.putback(c);
@@ -191,11 +191,7 @@ void read_base_number(std::istream& in, BigInt& m, long length, long maxBits) {
 
   buffer = new char[size+2];
   // read digits
-  for (int i=0; i<size; i++) {
-    c=skip_backslash_new_line(in);
-    if(in.eof()){
-      break;
-    }
+  for (int i=0; (i<size)&&((c=skip_backslash_new_line(in)) != EOF ); i++) {
     if (c != ' ' && c != '\t' && c != '\n')
       append_char(buffer, size, pos++, c);
   }
@@ -274,7 +270,7 @@ CGAL_INLINE_FUNCTION
 void writeToFile(const BigInt& z, std::ostream& out, int base, int charsPerLine) {
   BigInt c = abs(z);
 
-  // get the absolute value string
+  // get the absoulte value string
   char* buffer = new char[mpz_sizeinbase(c.get_mp(), base) + 2];
   mpz_get_str(buffer, base, c.get_mp());
   std::size_t length = std::strlen(buffer);
@@ -336,7 +332,7 @@ CGAL_INLINE_FUNCTION
 void writeToFile(const BigFloat& bf, std::ostream& out, int base, int charsPerLine) {
   BigInt c(CORE::abs(bf.m()));
 
-  // get the absolute value string
+  // get the absoulte value string
   char* buffer = new char[mpz_sizeinbase(c.get_mp(), base) + 2];
   mpz_get_str(buffer, base, c.get_mp());
   std::size_t length = std::strlen(buffer);

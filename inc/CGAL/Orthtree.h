@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Orthtree/include/CGAL/Orthtree.h $
-// $Id: Orthtree.h 01a7852 2022-11-16T13:58:05+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Orthtree/include/CGAL/Orthtree.h $
+// $Id: Orthtree.h 331ea28 2022-11-08T15:15:20+00:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Jackson Campolattaro, Simon Giraudot, Cédric Portaneri, Tong Zhao
@@ -277,7 +277,7 @@ public:
 
   // Non-necessary but just to be clear on the rule of 5:
 
-  // assignment operators deleted (PointRange is a ref)
+  // assignement operators deleted (PointRange is a ref)
   Orthtree& operator= (const Orthtree& other) = delete;
   Orthtree& operator= (Orthtree&& other) = delete;
   // Destructor
@@ -868,19 +868,19 @@ private: // functions :
   }
 
   /*!
-    \brief finds the `k` points within a specific radius that are
-    nearest to the center of `query_sphere`.
+    \brief finds the `k` points within a specific radius that are nearest to `query`.
 
     This function guarantees that there are no closer points than the ones returned,
     but it does not guarantee that it will return at least `k` points.
     For a query where the search radius encloses `k` or fewer points, all enclosed points will be returned.
-    If the search radius is too small, no points may be returned.
+    If the search radius passed is too small, no points may be returned.
     This function is useful when the user already knows how sparse the points are,
     or if they do not care about points that are too far away.
     Setting a small radius may have performance benefits.
 
     \tparam OutputIterator must be a model of `OutputIterator` that accepts points
-    \param query_sphere the region to search within
+    \param search_point the location to find points near
+    \param search_radius_squared the size of the region to search within
     \param k the number of points to find
     \param output the output iterator to add the found points to (in order of increasing distance)
    */

@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Ray_2.h $
-// $Id: Bbox_2_Ray_2.h 3a4e230 2022-11-22T12:22:42+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Ray_2.h $
+// $Id: Bbox_2_Ray_2.h 52164b1 2019-10-19T15:34:59+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -27,20 +27,18 @@ namespace Intersections {
 namespace internal {
 
 template <class K>
-typename K::Boolean
-do_intersect(const typename K::Ray_2& ray,
-             const CGAL::Bbox_2& bbox,
-             const K& k)
+bool do_intersect(const typename K::Ray_2& ray,
+                  const CGAL::Bbox_2& bbox,
+                  const K& k)
 {
   typedef typename K::Iso_rectangle_2                                   Iso_rectangle_2;
   return Intersections::internal::do_intersect(ray, Iso_rectangle_2(bbox), k);
 }
 
 template <class K>
-typename K::Boolean
-do_intersect(const CGAL::Bbox_2& bbox,
-             const typename K::Ray_2& ray,
-             const K& k)
+bool do_intersect(const CGAL::Bbox_2& bbox,
+                  const typename K::Ray_2& ray,
+                  const K& k)
 {
   return Intersections::internal::do_intersect(ray, bbox, k);
 }
@@ -49,17 +47,13 @@ do_intersect(const CGAL::Bbox_2& bbox,
 } // namespace Intersections
 
 template<typename K>
-typename K::Boolean
-do_intersect(const CGAL::Bbox_2& bbox,
-             const Ray_2<K>& ray)
+bool do_intersect(const CGAL::Bbox_2& bbox, const Ray_2<K>& ray)
 {
   return K().do_intersect_2_object()(bbox, ray);
 }
 
 template<typename K>
-typename K::Boolean
-do_intersect(const Ray_2<K>& ray,
-             const CGAL::Bbox_2& bbox)
+bool do_intersect(const Ray_2<K>& ray, const CGAL::Bbox_2& bbox)
 {
   return K().do_intersect_2_object()(ray, bbox);
 }

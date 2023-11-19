@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/STL_Extension/include/CGAL/Time_stamper.h $
-// $Id: Time_stamper.h e8d1095 2023-01-20T16:35:15+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/STL_Extension/include/CGAL/Time_stamper.h $
+// $Id: Time_stamper.h e9b7595 2021-05-04T11:45:57+02:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Jane Tournois
@@ -13,7 +13,6 @@
 #define CGAL_TIME_STAMPER_H
 
 #include <CGAL/Has_timestamp.h>
-#include <string>
 
 namespace CGAL {
 
@@ -67,11 +66,6 @@ struct Time_stamper
     return pt->time_stamp();
   }
 
-  static auto display_id(const T* pt)
-  {
-    return std::string("#") + std::to_string(pt->time_stamp());
-  }
-
   static std::size_t hash_value(const T* p) {
     if(nullptr == p)
       return std::size_t(-1);
@@ -105,11 +99,6 @@ public:
   static std::size_t time_stamp(const T*)
   {
     return 0;
-  }
-
-  static auto display_id(const T* pt)
-  {
-    return static_cast<const void*>(pt);
   }
 
   static std::size_t hash_value(const T* p) {

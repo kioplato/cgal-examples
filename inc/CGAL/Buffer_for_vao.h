@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/GraphicsView/include/CGAL/Buffer_for_vao.h $
-// $Id: Buffer_for_vao.h 4547818 2022-11-15T13:39:40+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/GraphicsView/include/CGAL/Buffer_for_vao.h $
+// $Id: Buffer_for_vao.h 2cbc381 2021-09-23T16:13:57+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -22,7 +22,6 @@
 #include <CGAL/Constrained_triangulation_plus_2.h>
 #include <CGAL/Cartesian_converter.h>
 #include <CGAL/IO/Color.h>
-#include <CGAL/assertions.h>
 
 #include <vector>
 #include <cstdlib>
@@ -59,7 +58,7 @@ namespace internal
       ++nb;
     }
 
-    CGAL_assertion(nb>0);
+    assert(nb>0);
     return (typename Kernel_traits<Vector>::Kernel::Construct_scaled_vector_3()
             (normal, 1.0/nb));
   }
@@ -106,7 +105,7 @@ namespace internal
     }
   };
 
-  // Specialization when K==Local_kernel, because there is no need of conversion here.
+  // Specialization when K==Local_kernel, because there is no need of convertion here.
   template<typename Local_kernel>
   struct Geom_utils<Local_kernel, Local_kernel>
   {
@@ -577,7 +576,7 @@ protected:
           add_gouraud_normal(m_vertex_normals_for_face[i]);
         }
         else
-        { // Here user does not provide all vertex normals: we use face normal instead
+        { // Here user does not provide all vertex normals: we use face normal istead
           // and thus we will not be able to use Gouraud
           add_gouraud_normal(normal);
         }
@@ -703,7 +702,7 @@ protected:
         else { ++(edges[p1][p2]); }
       }
 
-      // (1) We insert all the edges as constraint in the CDT.
+      // (1) We insert all the edges as contraint in the CDT.
       typename CDT::Vertex_handle previous=nullptr, first=nullptr;
       for (unsigned int i=0; i<m_points_of_face.size(); ++i)
       {
@@ -872,7 +871,7 @@ protected:
   }
 
 protected:
-  // Types useful for triangulation
+  // Types usefull for triangulation
   struct Vertex_info
   {
     Local_vector v;

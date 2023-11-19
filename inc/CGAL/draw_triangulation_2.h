@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Triangulation_2/include/CGAL/draw_triangulation_2.h $
-// $Id: draw_triangulation_2.h 4547818 2022-11-15T13:39:40+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Triangulation_2/include/CGAL/draw_triangulation_2.h $
+// $Id: draw_triangulation_2.h 2bbcabe 2021-11-11T17:23:37+01:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -15,13 +15,10 @@
 #include <CGAL/license/Triangulation_2.h>
 #include <CGAL/Qt/Basic_viewer_qt.h>
 
-#include <CGAL/draw_constrained_triangulation_2.h>
-
-#include <CGAL/Triangulation_2.h>
-
 #ifdef CGAL_USE_BASIC_VIEWER
 
 #include <CGAL/Qt/init_ogl_context.h>
+#include <CGAL/Triangulation_2.h>
 #include <CGAL/Random.h>
 
 namespace CGAL
@@ -54,7 +51,7 @@ public:
   /// @param at2 the t2 to view
   /// @param title the title of the window
   /// @param anofaces if true, do not draw faces (faces are not computed; this can be
-  ///        useful for very big object where this time could be long)
+  ///        usefull for very big object where this time could be long)
   SimpleTriangulation2ViewerQt(QWidget* parent, const T2& at2,
                                const char* title="Basic T2 Viewer",
                                bool anofaces=false,
@@ -136,10 +133,10 @@ protected:
 #define CGAL_T2_TYPE CGAL::Triangulation_2<Gt, Tds>
 
 template<class Gt, class Tds>
-void draw(const CGAL_T2_TYPE& at2)
+void draw(const CGAL_T2_TYPE& at2,
+          const char* title="Triangulation_2 Basic Viewer",
+          bool nofill=false)
 {
-  const char* title="Triangulation_2 Basic Viewer";
-  bool nofill=false;
 #if defined(CGAL_TEST_SUITE)
   bool cgal_test_suite=true;
 #else

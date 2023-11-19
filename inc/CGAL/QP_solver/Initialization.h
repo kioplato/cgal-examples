@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/QP_solver/include/CGAL/QP_solver/Initialization.h $
-// $Id: Initialization.h eed54a0 2022-11-15T18:45:39+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/QP_solver/include/CGAL/QP_solver/Initialization.h $
+// $Id: Initialization.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -182,7 +182,7 @@ init_x_O_v_i()
   x_O_v_i.reserve(qp_n);
   x_O_v_i.resize (qp_n);
 
-  // constants for comparisons:
+  // constants for comparisions:
   const L_entry l0(0);
   const U_entry u0(0);
 
@@ -372,7 +372,7 @@ init_basis()
     // Note: we maintain the information about the special artificial column in
     // the variable art_s_i and the vector s_art; in addition, however, we also
     // add a special "fake" column to art_A. This "fake" column has (in
-    // contrast to the special artificial column) only one nonzero entry,
+    // constrast to the special artificial column) only one nonzero entry,
     // namely a +-1 for the most infeasible row (see (C1) above).
 
     // add "fake" column to art_A:
@@ -578,7 +578,7 @@ init_solution()
   if (art_s_i > 0)
     minus_c_B[art_A.size()-1] *= ET(qp_n+qp_m); // Note: the idea here is to
                                                 // give more weight to the
-                                                // special artificial variable
+                                                // special artifical variable
                                                 // so that it gets removed very
                                                 // early, - todo kf: why?
 

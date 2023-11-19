@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Iso_rectangle_2.h $
-// $Id: Bbox_2_Iso_rectangle_2.h 3a4e230 2022-11-22T12:22:42+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Iso_rectangle_2.h $
+// $Id: Bbox_2_Iso_rectangle_2.h ce4cbe6 2020-03-19T11:41:57+01:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -21,19 +21,15 @@
 namespace CGAL {
 
 template <typename K>
-inline
-typename K::Boolean
-do_intersect(const Iso_rectangle_2<K>& rect,
-             const Bbox_2& box)
+inline bool do_intersect(const Iso_rectangle_2<K> &rect,
+                         const Bbox_2 &box)
 {
   return do_intersect(K::Iso_rectangle_2(box), rect);
 }
 
 template <typename K>
-inline
-typename K::Boolean
-do_intersect(const Bbox_2 &box,
-             const Iso_rectangle_2<K> &rect)
+inline bool do_intersect(const Bbox_2 &box,
+                         const Iso_rectangle_2<K> &rect)
 {
   return do_intersect(rect, box);
 }

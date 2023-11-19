@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Kernel_23/include/CGAL/Kernel_23/internal/Projection_traits_3.h $
-// $Id: Projection_traits_3.h 214e072 2022-09-22T12:02:53+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Kernel_23/include/CGAL/Kernel_23/internal/Projection_traits_3.h $
+// $Id: Projection_traits_3.h 45b5fd4 2022-07-06T12:58:49+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mariette Yvinec, Sebastien Loriot, Mael Rouxel-Labbé
@@ -13,13 +13,12 @@
 #define CGAL_INTERNAL_PROJECTION_TRAITS_3_H
 
 #include <CGAL/assertions.h>
-#include <CGAL/tags.h>
+
 #include <CGAL/Point_3.h>
 #include <CGAL/Segment_3.h>
 #include <CGAL/Triangle_3.h>
 
 #include <CGAL/Kernel/global_functions_2.h>
-#include <CGAL/Kernel_23/internal/Has_boolean_tags.h>
 
 namespace CGAL {
 
@@ -251,32 +250,6 @@ public:
 };
 
 template <class R, int dim>
-class Compare_signed_distance_to_line_projected_3
-{
-public:
-  typedef typename R::Point_3   Point_3;
-  typedef typename R::Point_2   Point_2;
-  typedef typename R::FT        RT;
-  typename R::FT x(const Point_3 &p) const { return Projector<R,dim>::x(p); }
-  typename R::FT y(const Point_3 &p) const { return Projector<R,dim>::y(p); }
-  typedef typename R::Comparison_result result_type;
-
-  Point_2 project(const Point_3& p) const
-  {
-    return Point_2(x(p),y(p));
-  }
-
-  result_type operator()(const Point_3& p,
-                         const Point_3& q,
-                         const Point_3& r,
-                         const Point_3& s) const
-  {
-    return typename R::Compare_signed_distance_to_line_2()
-      (  project(p), project(q), project(r), project(s) );
-  }
-};
-
-template <class R, int dim>
 class Less_signed_distance_to_line_projected_3
 {
 public:
@@ -285,7 +258,7 @@ public:
   typedef typename R::FT        RT;
   typename R::FT x(const Point_3 &p) const { return Projector<R,dim>::x(p); }
   typename R::FT y(const Point_3 &p) const { return Projector<R,dim>::y(p); }
-  typedef typename R::Boolean result_type;
+  typedef bool result_type;
 
   Point_2 project(const Point_3& p) const
   {
@@ -293,14 +266,15 @@ public:
   }
 
   result_type operator()(const Point_3& p,
-                         const Point_3& q,
-                         const Point_3& r,
-                         const Point_3& s) const
+                               const Point_3& q,
+                               const Point_3& r,
+                               const Point_3& s) const
   {
     return typename R::Less_signed_distance_to_line_2()
       (  project(p), project(q), project(r), project(s) );
   }
 };
+
 
 template <class R,int dim>
 class Squared_distance_projected_3
@@ -894,28 +868,11 @@ public:
   }
 };
 
-template <class R, int dim>
-class Projection_traits_3;
-
-template <class R, int dim, bool has_filtered_predicates>
-struct Projection_traits_base_3 {};
-
-template <class R, int dim>
-struct Projection_traits_base_3< R, dim, true> {
-  typedef Projection_traits_3<typename R::Exact_kernel, dim>  Exact_kernel;
-  Exact_kernel exact_kernel() const { return {}; }
-};
-
 // This is for projection traits along a specific canonical plane (xy, yz, xz)
 // The generic class for an arbitrary normal is CGAL::Projection_traits_3<K> (not in `internal`)
-template <class R, int dim>
-class Projection_traits_3
-    : public Projection_traits_base_3<
-          R, dim, internal::Has_filtered_predicates<R>::value> {
+template < class R, int dim >
+class Projection_traits_3 {
 public:
-  enum { Has_filtered_predicates = internal::Has_filtered_predicates<R>::value };
-  typedef Boolean_tag<Has_filtered_predicates> Has_filtered_predicates_tag;
-
   typedef Projection_traits_3<R,dim>   Traits;
   typedef R                                                   Rp;
   typedef typename R::FT                                      FT;
@@ -935,7 +892,6 @@ public:
   typedef Oriented_side_projected_3<Rp,dim>                   Oriented_side_2;
   typedef Angle_projected_3<Rp,dim>                           Angle_2;
   typedef Side_of_oriented_circle_projected_3<Rp,dim>         Side_of_oriented_circle_2;
-  typedef Compare_signed_distance_to_line_projected_3<Rp,dim> Compare_signed_distance_to_line_2;
   typedef Less_signed_distance_to_line_projected_3<Rp,dim>    Less_signed_distance_to_line_2;
   typedef Side_of_bounded_circle_projected_3<Rp,dim>          Side_of_bounded_circle_2;
   typedef Compare_distance_projected_3<Rp,dim>                Compare_distance_2;
@@ -964,7 +920,6 @@ public:
   typedef typename Rp::Construct_segment_3                    Construct_segment_2;
   typedef typename Rp::Construct_translated_point_3           Construct_translated_point_2;
   typedef typename Rp::Construct_midpoint_3                   Construct_midpoint_2;
-  typedef typename Rp::Construct_barycenter_3                 Construct_barycenter_2;
   typedef typename Rp::Construct_vector_3                     Construct_vector_2;
   typedef typename Rp::Construct_scaled_vector_3              Construct_scaled_vector_2;
   typedef typename Rp::Construct_triangle_3                   Construct_triangle_2;
@@ -972,7 +927,7 @@ public:
 
 
   struct Less_xy_2 {
-    typedef typename R::Boolean result_type;
+    typedef bool result_type;
     bool operator()(const Point_2& p, const Point_2& q) const
     {
       Compare_x_2 cx;
@@ -986,7 +941,7 @@ public:
 
 
   struct Less_yx_2 {
-    typedef typename R::Boolean result_type;
+    typedef bool result_type;
     bool operator()(const Point_2& p, const Point_2& q) const
     {
       Compare_y_2 cy;
@@ -999,7 +954,7 @@ public:
   };
 
   struct Equal_2 {
-    typedef typename R::Boolean result_type;
+    typedef bool result_type;
     bool operator()(const Point_2& p, const Point_2& q) const
     {
 
@@ -1010,7 +965,7 @@ public:
   };
 
   struct Left_turn_2 {
-    typedef typename R::Boolean result_type;
+    typedef bool result_type;
     bool operator()(const Point_2& p, const Point_2& q, const Point_2& r) const
     {
 
@@ -1020,7 +975,7 @@ public:
   };
 
   struct Collinear_2 {
-    typedef typename R::Boolean result_type;
+    typedef bool result_type;
     bool operator()(const Point_2& p, const Point_2& q, const Point_2& r) const
     {
       Orientation_2 ori;
@@ -1071,10 +1026,6 @@ public:
   Less_yx_2
   less_yx_2_object() const
     { return Less_yx_2();}
-
-  Compare_signed_distance_to_line_2
-    compare_signed_distance_to_line_2_object() const
-    {return Compare_signed_distance_to_line_2();}
 
   Less_signed_distance_to_line_2
     less_signed_distance_to_line_2_object() const
@@ -1149,9 +1100,6 @@ public:
 
   Construct_midpoint_2  construct_midpoint_2_object() const
     {return Construct_midpoint_2();}
-
-  Construct_barycenter_2  construct_barycenter_2_object() const
-    {return Construct_barycenter_2();}
 
   Construct_vector_2  construct_vector_2_object() const
     {return Construct_vector_2();}

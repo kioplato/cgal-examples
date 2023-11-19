@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/simplify_polyline.h $
-// $Id: simplify_polyline.h 0ff7882 2022-12-06T22:21:06+01:00 Mael
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/simplify_polyline.h $
+// $Id: simplify_polyline.h 5ab80cd 2020-11-03T14:58:56+01:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -13,9 +13,9 @@
 #ifndef CGAL_POLYGON_MESH_PROCESSING_SIMPLIFY_POLYLINE_H
 #define CGAL_POLYGON_MESH_PROCESSING_SIMPLIFY_POLYLINE_H
 
-#include <CGAL/license/Polygon_mesh_processing/geometric_repair.h>
+#include <CGAL/license/Polygon_mesh_processing/repair.h>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <type_traits>
@@ -28,13 +28,12 @@ namespace experimental {
 enum Polyline_simplification_algorithms { DOUGLAS_PEUCKER, ITERATIVE };
 
 template <typename PointRangeIn, typename PointRangeOut,
-          typename NamedParametersIn = parameters::Default_named_parameters,
-          typename NamedParametersOut = parameters::Default_named_parameters>
+          typename NamedParametersIn, typename NamedParametersOut>
 void simplify_polyline(const PointRangeIn& input,
                              PointRangeOut& output,
                        const double max_squared_frechet_distance,
-                       const NamedParametersIn& np_in = parameters::default_values(),
-                       const NamedParametersOut& np_out = parameters::default_values())
+                       const NamedParametersIn& np_in,
+                       const NamedParametersOut& np_out)
 {
   using parameters::choose_parameter;
   using parameters::get_parameter;
@@ -45,7 +44,7 @@ void simplify_polyline(const PointRangeIn& input,
 
   typedef typename GetPointMap<PointRangeIn, NamedParametersIn>::type Point_map_in;
   typedef typename GetPointMap<PointRangeOut, NamedParametersOut>::type Point_map_out;
-  typedef typename Point_set_processing_3_np_helper<PointRangeIn, NamedParametersIn>::Geom_traits Kernel;
+  typedef typename Point_set_processing_3::GetK<PointRangeIn, NamedParametersIn>::Kernel Kernel;
 
   Point_map_in in_pm = choose_parameter<Point_map_in>(get_parameter(np_in, internal_np::point_map));
   Point_map_out out_pm = choose_parameter<Point_map_out>(get_parameter(np_out, internal_np::point_map));
@@ -103,7 +102,7 @@ void simplify_polyline(const PointRangeIn& input,
             ++ei; // we skip ei-1
           else
           {
-            bi=ei-1; // ei-1 shall not be skipped
+            bi=ei-1; // ei-1 shall not be skipt
             break;
           }
         }
@@ -178,9 +177,28 @@ void simplify_polyline(const PointRangeIn& input,
           output.push_back(input[i]);
           put(out_pm, output.back(), get(in_pm, input[i]));
         }
-      //TODO if is_closed-==true, shall we add en extra step to see if we can remove output.front() and output[output.size()-2] (initial endpoints)
+      //TODO if is_closed-==true, shall we add en extra step to see if we can remove output.front() and output[output.size()-2] (inital endpoints)
     }
   }
+}
+
+
+template <typename PointRangeIn, typename PointRangeOut>
+void simplify_polyline(const PointRangeIn& input,
+                             PointRangeOut& output,
+                       const double max_squared_frechet_distance)
+{
+  simplify_polyline(input, output, max_squared_frechet_distance,
+                    parameters::all_default(), parameters::all_default());
+}
+
+template <typename PointRangeIn, typename PointRangeOut, typename NamedParametersIn>
+void simplify_polyline(const PointRangeIn& input,
+                             PointRangeOut& output,
+                       const double max_squared_frechet_distance,
+                       const NamedParametersIn& np_in)
+{
+  simplify_polyline(input, output, max_squared_frechet_distance, np_in, parameters::all_default());
 }
 
 } } } // end of CGAL::Polygon_mesh_processing::experimental namespace

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/split_long_edges.h $
-// $Id: split_long_edges.h 05b446e 2022-12-05T12:38:31+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/split_long_edges.h $
+// $Id: split_long_edges.h 7a0cb92 2022-10-28T12:50:23+02:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -18,12 +18,11 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/set_of.hpp>
 #include <boost/bimap/multiset_of.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/container/small_vector.hpp>
-#include <boost/functional/hash.hpp>
 
 #include <CGAL/Tetrahedral_remeshing/internal/tetrahedral_remeshing_helpers.h>
 
-#include <unordered_map>
 #include <functional>
 #include <utility>
 
@@ -78,8 +77,8 @@ typename C3t3::Vertex_handle split_edge(const typename C3t3::Edge& e,
     Vertex_handle opp_vertex_;
     Surface_patch_index patch_index_;
   };
-  boost::unordered_map<Facet, Cell_info, boost::hash<Facet>> cells_info;
-  boost::unordered_map<Facet, Facet_info, boost::hash<Facet>> facets_info;
+  boost::unordered_map<Facet, Cell_info> cells_info;
+  boost::unordered_map<Facet, Facet_info> facets_info;
 
   // check orientation and collect incident cells to avoid circulating twice
   boost::container::small_vector<Cell_handle, 30> inc_cells;
@@ -244,6 +243,7 @@ void split_long_edges(C3T3& c3t3,
   typedef typename C3T3::Triangulation       T3;
   typedef typename T3::Cell_handle           Cell_handle;
   typedef typename T3::Edge                  Edge;
+  typedef typename T3::Finite_edges_iterator Finite_edges_iterator;
   typedef typename T3::Vertex_handle         Vertex_handle;
   typedef typename std::pair<Vertex_handle, Vertex_handle> Edge_vv;
 
@@ -264,8 +264,10 @@ void split_long_edges(C3T3& c3t3,
   //collect long edges
   T3& tr = c3t3.triangulation();
   Boost_bimap long_edges;
-  for (Edge e : tr.finite_edges())
+  for (Finite_edges_iterator eit = tr.finite_edges_begin();
+       eit != tr.finite_edges_end(); ++eit)
   {
+    Edge e = *eit;
     if (!can_be_split(e, c3t3, protect_boundaries, cell_selector))
       continue;
 

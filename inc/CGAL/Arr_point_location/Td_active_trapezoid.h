@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arr_point_location/Td_active_trapezoid.h $
-// $Id: Td_active_trapezoid.h 9c2f8ff 2023-01-13T18:51:28+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arr_point_location/Td_active_trapezoid.h $
+// $Id: Td_active_trapezoid.h 97cac65 2021-07-23T10:59:49+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)         : Oren Nechushtan <theoren@math.tau.ac.il>
@@ -17,7 +17,7 @@
 
 
 /*! \file
- * Definition of the Td_active_trapezoid<Td_traits> class.
+ * Defintion of the Td_active_trapezoid<Td_traits> class.
  */
 
 #include <CGAL/Arr_point_location/Trapezoidal_decomposition_2.h>
@@ -44,7 +44,7 @@ namespace CGAL {
  * bound the trapezoid from above and below.
  * There exist degenerate trapezoids called infinite trapezoid; this happens
  * when one of the four sides is on the parameter space boundary.
- * Each trapezoid has at most four neighboring trapezoids.
+ * Each trapezoid has at most four neighbouring trapezoids.
  */
 template <class Td_traits_>
 class Td_active_trapezoid : public Handle
@@ -162,20 +162,15 @@ private:
 
   //Dag_node* m_dag_node; //pointer to the search structure (DAG) node
 
-  /*! Initialize the trapezoid's neighbors. */
-   inline void init_neighbors(boost::optional<Td_map_item&> lb, boost::optional<Td_map_item&> lt,
-                              boost::optional<Td_map_item&> rb, boost::optional<Td_map_item&> rt)
+  /*! Initialize the trapezoid's neighbours. */
+   inline void init_neighbours(boost::optional<Td_map_item&> lb, boost::optional<Td_map_item&> lt,
+                               boost::optional<Td_map_item&> rb, boost::optional<Td_map_item&> rt)
   {
     set_lb((lb) ? *lb : Td_map_item(0));
     set_lt((lt) ? *lt : Td_map_item(0));
     set_rb((rb) ? *rb : Td_map_item(0));
     set_rt((rt) ? *rt : Td_map_item(0));
   }
-  /*! \copydoc init_neighbors
-   *  \deprecated please use #init_neighbors */
-   CGAL_DEPRECATED inline void init_neighbours(boost::optional<Td_map_item&> lb, boost::optional<Td_map_item&> lt,
-                                               boost::optional<Td_map_item&> rb, boost::optional<Td_map_item&> rt)
-  { init_neighbors(lb, lt, rb, rt); }
 
   /*! Set the DAG node. */
   inline void set_dag_node(Dag_node* p)
@@ -232,16 +227,16 @@ private:
   }
 
 
-  /*! Set left bottom neighbor. */
+  /*! Set left bottom neighbour. */
   inline void set_lb(const Td_map_item& lb) { ptr()->lb = lb; }
 
-  /*! Set left top neighbor. */
+  /*! Set left top neighbour. */
   inline void set_lt(const Td_map_item& lt) { ptr()->lt = lt; }
 
-  /*! Set right bottom neighbor. */
+  /*! Set right bottom neighbour. */
   inline void set_rb(const Td_map_item& rb) { ptr()->rb = rb; }
 
-  /*! Set right top neighbor. */
+  /*! Set right top neighbour. */
   inline void set_rt(const Td_map_item& rt) { ptr()->rt = rt; }
 
  public:
@@ -253,7 +248,7 @@ private:
   Td_active_trapezoid()
   {
     //define the initial trapezoid: left, right, btm, top are at infinity.
-    // has no neighbors
+    // has no neighbours
     PTR = new Data
       (Traits::empty_vtx_handle(),
        Traits::empty_vtx_handle(),
@@ -397,16 +392,16 @@ private:
             is_on_bottom_boundary() || is_on_top_boundary() );
   }
 
-  /*! Access left bottom neighbor. */
+  /*! Access left bottom neighbour. */
   Td_map_item& lb() const    { return ptr()->lb; }
 
-  /*! Access left top neighbor. */
+  /*! Access left top neighbour. */
   Td_map_item& lt() const    { return ptr()->lt; }
 
-  /*! Access right bottom neighbor. */
+  /*! Access right bottom neighbour. */
   Td_map_item& rb() const    { return ptr()->rb; }
 
-  /*! Access right top neighbor. */
+  /*! Access right top neighbour. */
   Td_map_item& rt() const    { return ptr()->rt; }
 
   /*! Access DAG node. */

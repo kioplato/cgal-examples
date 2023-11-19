@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_sweep_2/include/CGAL/Surface_sweep_2.h $
-// $Id: Surface_sweep_2.h ccdb5a0 2023-02-15T14:36:44+02:00 Efi Fogel
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_sweep_2/include/CGAL/Surface_sweep_2.h $
+// $Id: Surface_sweep_2.h 6b64dc8 2020-11-11T09:38:55+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Baruch Zukerman <baruchzu@post.tau.ac.il>
@@ -122,12 +122,12 @@ protected:
   // Data members:
   Subcurve_container m_overlap_subCurves;
                                      // Contains all of the new sub-curves
-                                     // created by an overlap.
+                                     // creaed by an overlap.
 
   Intersection_vector m_x_objects;   // Auxiliary vector for storing the
                                      // intersection objects.
 
-  X_monotone_curve_2 m_sub_cv1;      // Auxiliary variables
+  X_monotone_curve_2 m_sub_cv1;      // Auxiliary varibales
   X_monotone_curve_2 m_sub_cv2;      // (for splitting curves).
 
 public:
@@ -145,7 +145,7 @@ public:
     Base(traits, visitor)
   {}
 
-  /*! Destruct. */
+  /*! Destrcut. */
   virtual ~Surface_sweep_2() {}
 
 protected:
@@ -184,10 +184,10 @@ protected:
    * \param overlap_cv the overlapping curve.
    * \param c1 first subcurve contributing to the overlap.
    * \param c2 second subcurve contributing to the overlap.
-   * \param all_leaves_diff not empty in case c1 and c2 have common ancestors.
+   * \param all_leaves_diff not empty in case c1 and c2 have common ancesters.
    *                        It contains the set of curves  not contained in first_parent
    *                        that are in the other subcurve
-   * \param first_parent only used when c1 and c2 have common ancestors.
+   * \param first_parent only used when c1 and c2 have common ancesters.
    *                     It is either c1 or c2 (the one having the more leaves)
    *
    */
@@ -222,7 +222,7 @@ protected:
    * \param c2 The second curve.
    */
   void _create_intersection_point(const Point_2& xp,
-                                  Multiplicity mult,
+                                  unsigned int mult,
                                   Subcurve*& c1,
                                   Subcurve*& c2);
 };

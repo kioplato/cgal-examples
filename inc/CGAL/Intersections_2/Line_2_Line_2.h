@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_2/include/CGAL/Intersections_2/Line_2_Line_2.h $
-// $Id: Line_2_Line_2.h 8ba0b41 2022-11-22T12:35:10+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_2/include/CGAL/Intersections_2/Line_2_Line_2.h $
+// $Id: Line_2_Line_2.h 9b19c5f 2021-09-23T15:11:18+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -52,18 +52,17 @@ protected:
     mutable typename K::Point_2         _intersection_point;
 };
 
-
 template <class K>
-inline
-typename K::Boolean
-do_intersect(const typename K::Line_2& l1,
-             const typename K::Line_2& l2,
-             const K&)
+inline bool do_intersect(
+    const typename K::Line_2 &p1,
+    const typename K::Line_2 &p2,
+    const K&)
 {
-  typedef Line_2_Line_2_pair<K> pair_t;
-  pair_t pair(&l1, &l2);
-  return pair.intersection_type() != pair_t::NO_INTERSECTION;
+    typedef Line_2_Line_2_pair<K> pair_t;
+    pair_t pair(&p1, &p2);
+    return pair.intersection_type() != pair_t::NO_INTERSECTION;
 }
+
 
 
 template <class K>
@@ -201,6 +200,7 @@ Line_2_Line_2_pair<K>::intersection_line() const
 CGAL_INTERSECTION_FUNCTION_SELF(Line_2, 2)
 CGAL_DO_INTERSECT_FUNCTION_SELF(Line_2, 2)
 
-} // namespace CGAL
 
-#endif // CGAL_INTERSECTIONS_2_LINE_2_LINE_2_H
+} //namespace CGAL
+
+#endif

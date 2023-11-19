@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Nef_3/include/CGAL/draw_nef_3.h $
-// $Id: draw_nef_3.h afb4ac6 2023-04-14T09:52:28+02:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Nef_3/include/CGAL/draw_nef_3.h $
+// $Id: draw_nef_3.h 2bbcabe 2021-11-11T17:23:37+01:00 Guillaume Damiand
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -22,8 +22,6 @@
 #include <CGAL/Nef_3/SNC_iteration.h>
 #include <CGAL/circulator.h>
 #include <CGAL/Random.h>
-#include <CGAL/assertions.h>
-
 #include <unordered_map>
 
 namespace CGAL {
@@ -103,10 +101,9 @@ protected:
         return;
       }
 
-
-
       SHalfedge_const_handle se;
-      Halffacet_cycle_const_iterator fc=f->facet_cycles_begin();
+      Halffacet_cycle_const_iterator fc;
+      fc = f->facet_cycles_begin();
 
       se = SHalfedge_const_handle(fc); // non-zero if shalfedge is returned
       if(se == 0)
@@ -119,37 +116,13 @@ protected:
 
       SHalfedge_around_facet_const_circulator hc_start(se);
       SHalfedge_around_facet_const_circulator hc_end(hc_start);
-      Vertex_const_handle lastvh;
       CGAL_For_all(hc_start, hc_end) {
-        Vertex_const_handle vh=hc_start->source()->center_vertex();
-        lastvh=vh;
+        Vertex_const_handle vh = hc_start->source()->center_vertex();
         viewer.add_point_in_face(vh->point(),
                                  viewer.get_vertex_normal(vh));
       }
-
-      // Now iterate through holes of the face
-      ++fc;
-      while(fc!=f->facet_cycles_end())
-      {
-        if(fc.is_shalfedge())
-        {
-          se = SHalfedge_const_handle(fc);
-          hc_start=se;
-          hc_end=hc_start;
-          CGAL_For_all(hc_start, hc_end) {
-            Vertex_const_handle vh=hc_start->source()->center_vertex();
-            viewer.add_point_in_face(vh->point(),
-                                     viewer.get_vertex_normal(vh));
-          }
-          viewer.add_point_in_face(hc_start->source()->center_vertex()->point(),
-                                   viewer.get_vertex_normal(hc_start->source()->center_vertex()));
-          viewer.add_point_in_face(lastvh->point(),
-                                   viewer.get_vertex_normal(lastvh));
-        }
-        ++fc;
-      }
       viewer.face_end();
-      facets_done[f]=true;
+      facets_done[f] = true;
       n_faces++;
     }
 
@@ -236,7 +209,7 @@ protected:
       ++nb;
     }
 
-    CGAL_assertion(nb > 0);
+    assert(nb > 0);
     return (typename Local_kernel::Construct_scaled_vector_3()(normal, 1.0 / nb));
   }
 

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h $
-// $Id: polygon_mesh_to_polygon_soup.h 0ff7882 2022-12-06T22:21:06+01:00 Mael
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/polygon_mesh_to_polygon_soup.h $
+// $Id: polygon_mesh_to_polygon_soup.h 1d98f0f 2020-12-09T14:40:02+01:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -13,12 +13,11 @@
 #ifndef CGAL_POLYGON_MESH_PROCESSING_POLYGON_MESH_TO_POLYGON_SOUP_H
 #define CGAL_POLYGON_MESH_PROCESSING_POLYGON_MESH_TO_POLYGON_SOUP_H
 
-#include <CGAL/license/Polygon_mesh_processing/combinatorial_repair.h>
+#include <CGAL/license/Polygon_mesh_processing/repair.h>
 
 #include <CGAL/algorithm.h>
-#include <CGAL/assertions.h>
 #include <CGAL/boost/graph/iterator.h>
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 #include <CGAL/Container_helper.h>
 #include <CGAL/Dynamic_property_map.h>
@@ -27,35 +26,10 @@
 #include <boost/range/value_type.hpp>
 #include <boost/range/reference.hpp>
 
-#include <array>
-#include <type_traits>
-
 namespace CGAL {
 namespace Polygon_mesh_processing {
-namespace internal {
 
-template <typename PM_Point, typename PS_Point>
-struct PM_to_PS_point_converter
-{
-  PS_Point operator()(const PM_Point& p) const
-  {
-    CGAL_static_assertion((std::is_convertible<PM_Point, PS_Point>::value));
-    return PS_Point(p);
-  }
-};
-
-template <typename PM_Point, typename PS_FT>
-struct PM_to_PS_point_converter<PM_Point, std::array<PS_FT, 3> >
-{
-  std::array<PS_FT, 3> operator()(const PM_Point& p) const
-  {
-    return { p[0], p[1], p[2] };
-  }
-};
-
-} // namespace internal
-
-/// \ingroup PMP_combinatorial_repair_grp
+/// \ingroup PMP_repairing_grp
 ///
 /// adds the vertices and faces of a mesh into a (possibly non-empty) polygon soup.
 ///
@@ -84,7 +58,7 @@ struct PM_to_PS_point_converter<PM_Point, std::array<PS_FT, 3> >
 ///
 /// \cgalAdvancedBegin
 /// `PolygonRange` can also be a model of the concepts `RandomAccessContainer` and `BackInsertionSequence`
-/// whose value type is an array, but it is the user's responsibility to ensure that
+/// whose value type is an array, but it is the user's responsability to ensure that
 /// all faces have the same number of vertices, and that this number is equal to the size of the array.
 /// \cgalAdvancedEnd
 ///
@@ -94,11 +68,11 @@ struct PM_to_PS_point_converter<PM_Point, std::array<PS_FT, 3> >
 ///
 template<typename PolygonMesh,
          typename PointRange, typename PolygonRange,
-         typename NamedParameters = parameters::Default_named_parameters>
+         typename NamedParameters>
 void polygon_mesh_to_polygon_soup(const PolygonMesh& mesh,
                                   PointRange& points,
                                   PolygonRange& polygons,
-                                  const NamedParameters& np = parameters::default_values())
+                                  const NamedParameters& np)
 {
   typedef typename boost::graph_traits<PolygonMesh>::vertex_descriptor              vertex_descriptor;
   typedef typename boost::graph_traits<PolygonMesh>::halfedge_descriptor            halfedge_descriptor;
@@ -110,16 +84,12 @@ void polygon_mesh_to_polygon_soup(const PolygonMesh& mesh,
   typedef typename GetVertexPointMap<PolygonMesh, NamedParameters>::const_type      VPM;
   VPM vpm = choose_parameter(get_parameter(np, internal_np::vertex_point),
                              get_const_property_map(vertex_point, mesh));
-  typedef typename boost::property_traits<VPM>::value_type                          PM_Point;
 
   typedef CGAL::dynamic_vertex_property_t<std::size_t>                              Vertex_index;
   typedef typename boost::property_map<PolygonMesh, Vertex_index>::const_type       VIM;
   VIM vim = get(Vertex_index(), mesh);
 
-  typedef typename boost::range_value<PointRange>::type                             PS_Point;
   typedef typename boost::range_value<PolygonRange>::type                           Polygon;
-
-  internal::PM_to_PS_point_converter<PM_Point, PS_Point> converter;
 
   std::size_t index = points.size(); // so that multiple meshes can be put into the same soup
   CGAL::internal::reserve(points, points.size() + vertices(mesh).size());
@@ -127,7 +97,7 @@ void polygon_mesh_to_polygon_soup(const PolygonMesh& mesh,
 
   for(const vertex_descriptor v : vertices(mesh))
   {
-    points.push_back(converter(get(vpm, v)));
+    points.emplace_back(get(vpm, v));
     put(vim, v, index++);
   }
 
@@ -146,6 +116,18 @@ void polygon_mesh_to_polygon_soup(const PolygonMesh& mesh,
     polygons.push_back(polygon);
   }
 }
+
+/// \cond SKIP_IN_MANUAL
+
+template<typename PolygonMesh, typename PointRange, typename PolygonRange>
+void polygon_mesh_to_polygon_soup(const PolygonMesh& mesh,
+                                  PointRange& points,
+                                  PolygonRange& polygons)
+{
+  return polygon_mesh_to_polygon_soup(mesh, points, polygons, CGAL::parameters::all_default());
+}
+
+/// \endcond
 
 } // namespace Polygon_mesh_processing
 } // namespace CGAL

@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/BGL/include/CGAL/boost/graph/IO/WRL.h $
-// $Id: WRL.h 10b0af3 2022-01-13T14:43:34+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/BGL/include/CGAL/boost/graph/IO/WRL.h $
+// $Id: WRL.h a34debc 2021-06-23T22:56:35+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Andreas Fabri
@@ -16,11 +16,17 @@
 
 #include <CGAL/boost/graph/IO/Generic_facegraph_printer.h>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <fstream>
 #include <string>
+
+#ifdef DOXYGEN_RUNNING
+#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
+#define CGAL_BGL_NP_CLASS NamedParameters
+#define CGAL_DEPRECATED
+#endif
 
 namespace CGAL {
 
@@ -61,10 +67,10 @@ namespace IO {
 
   \returns `true` if writing was successful, `false` otherwise.
 */
-template <typename Graph, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename Graph, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_WRL(std::ostream& os,
                const Graph& g,
-               const CGAL_NP_CLASS& np = parameters::default_values())
+               const CGAL_BGL_NP_CLASS& np)
 {
   CGAL::VRML_2_ostream vos(os);
   internal::Generic_facegraph_printer<CGAL::VRML_2_ostream, Graph, CGAL::File_writer_VRML_2> printer(vos);
@@ -102,12 +108,17 @@ bool write_WRL(std::ostream& os,
 
   \returns `true` if writing was successful, `false` otherwise.
 */
-template <typename Graph, typename CGAL_NP_TEMPLATE_PARAMETERS>
-bool write_WRL(const std::string& fname, const Graph& g, const CGAL_NP_CLASS& np = parameters::default_values())
+template <typename Graph, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+bool write_WRL(const std::string& fname, const Graph& g, const CGAL_BGL_NP_CLASS& np)
 {
   std::ofstream os(fname);
   return write_WRL(os, g, np);
 }
+
+template <typename Graph>
+bool write_WRL(std::ostream& os, const Graph& g) { return write_WRL(os, g, parameters::all_default()); }
+template <typename Graph>
+bool write_WRL(const std::string& fname, const Graph& g) { return write_WRL(fname, g, parameters::all_default()); }
 
 } // namespace IO
 
@@ -118,10 +129,16 @@ bool write_WRL(const std::string& fname, const Graph& g, const CGAL_NP_CLASS& np
 
  \deprecated This function is deprecated since \cgal 5.3, `CGAL::IO::write_WRL()` should be used instead.
 */
-template <typename Graph, typename CGAL_NP_TEMPLATE_PARAMETERS>
-CGAL_DEPRECATED bool write_wrl(std::ostream& os, const Graph& g, const CGAL_NP_CLASS& np = parameters::default_values())
+template <typename Graph, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+CGAL_DEPRECATED bool write_wrl(std::ostream& os, const Graph& g, const CGAL_BGL_NP_CLASS& np)
 {
   return IO::write_WRL(os, g, np);
+}
+
+template <typename Graph>
+CGAL_DEPRECATED bool write_wrl(std::ostream& os, const Graph& g)
+{
+  return write_wrl(os, g, parameters::all_default());
 }
 
 #endif // CGAL_NO_DEPRECATED_CODE

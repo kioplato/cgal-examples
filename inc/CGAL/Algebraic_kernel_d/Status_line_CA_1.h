@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/Status_line_CA_1.h $
-// $Id: Status_line_CA_1.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/Status_line_CA_1.h $
+// $Id: Status_line_CA_1.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -323,7 +323,7 @@ public:
     }
 
     /*!\brief
-     * constructs from a given representation
+     * constructs from a given represenation
      */
     Status_line_CA_1(Rep rep) :
         Base(rep) {

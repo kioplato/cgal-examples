@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Gps_bfs_xor_visitor.h $
-// $Id: Gps_bfs_xor_visitor.h 62a31ba 2022-11-14T17:44:33+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Boolean_set_operations_2/include/CGAL/Boolean_set_operations_2/Gps_bfs_xor_visitor.h $
+// $Id: Gps_bfs_xor_visitor.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -56,7 +56,7 @@ public:
 /*! The function fixes some of the curves, to be in the same direction as the
     half-edges.
 
-  \param arr The given arrangement.
+  \param arr The given arrangment.
 */
   void after_scan(Arrangement& arr)
   {

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_2/include/CGAL/Delaunay_mesher_2.h $
-// $Id: Delaunay_mesher_2.h 4382398 2022-10-04T19:31:50+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_2/include/CGAL/Delaunay_mesher_2.h $
+// $Id: Delaunay_mesher_2.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -20,8 +20,6 @@
 #include <CGAL/Mesh_2/Refine_edges_with_clusters.h>
 #include <CGAL/Mesh_2/Refine_edges_visitor.h>
 #include <CGAL/Mesh_2/Refine_faces.h>
-#include <CGAL/Delaunay_mesh_size_criteria_2.h>
-#include <CGAL/Named_function_parameters.h>
 
 namespace CGAL {
 
@@ -29,14 +27,14 @@ template <typename Tr, typename Crit>
 class Delaunay_mesher_2
 {
 
-  /** \name `Tr` types */
+  /** \name \c Tr types */
   typedef typename Tr::Vertex_handle Vertex_handle;
   typedef typename Tr::Face_handle Face_handle;
   typedef typename Tr::Edge Edge;
 
   typedef typename Tr::Point Point;
 
-  /** \name Types needed for private member data */
+  /** \name Types needed for private member datas */
   typedef Mesh_2::Refine_edges_with_clusters<Tr,
     Mesh_2::Is_locally_conforming_Gabriel<Tr> > Edges_level;
 
@@ -55,7 +53,7 @@ public:
   typedef Seeds_iterator Seeds_const_iterator;
 
 private:
-  // --- PRIVATE MEMBER DATA ---
+  // --- PRIVATE MEMBER DATAS ---
   Tr& tr;
   Criteria criteria;
   Null_mesher_level null_level;
@@ -118,10 +116,10 @@ private:
 public:
   /** \name MARKING FUNCTIONS */
 
-  /** The value type of \a InputIterator should be `Point`, and represents
+  /** The value type of \a InputIterator should be \c Point, and represents
       seeds. Connected components of seeds are marked with the value of
-      \a mark. Other components are marked with `!mark`. The connected
-      component of infinite faces is always marked with `false`.
+      \a mark. Other components are marked with \c !mark. The connected
+      component of infinite faces is always marked with \c false.
   */
   template <class InputIterator>
   void set_seeds(InputIterator b, InputIterator e,
@@ -190,7 +188,7 @@ public:
     propagate_marks(tr.infinite_face(), false);
   }
 
-  /** Propagates the mark `mark` recursively. */
+  /** Propagates the mark \c mark recursivly. */
   static void propagate_marks(const Face_handle fh, bool mark)
   {
     // std::queue only works with std::list on VC++6, and not with
@@ -342,71 +340,30 @@ public:
 
 // --- GLOBAL FUNCTIONS ---
 
-#if !defined(CGAL_NO_DEPRECATED_CODE)
 template <typename Tr, typename Criteria>
-CGAL_DEPRECATED
 void
 refine_Delaunay_mesh_2(Tr& t,
                        const Criteria& criteria = Criteria(), bool domain_specified=false)
 {
-  Delaunay_mesher_2<Tr, Criteria> mesher(t, criteria);
+  typedef Delaunay_mesher_2<Tr, Criteria> Mesher;
+
+  Mesher mesher(t, criteria);
   mesher.init(domain_specified);
   mesher.refine_mesh();
 }
 
+
 template <typename Tr, typename Criteria, typename InputIterator>
-CGAL_DEPRECATED
 void
 refine_Delaunay_mesh_2(Tr& t,
                        InputIterator b, InputIterator e,
                        const Criteria& criteria = Criteria(),
                        bool mark = false)
 {
-  Delaunay_mesher_2<Tr, Criteria> mesher(t, criteria);
+  typedef Delaunay_mesher_2<Tr, Criteria> Mesher;
+
+  Mesher mesher(t, criteria);
   mesher.set_seeds(b, e, mark);
-  mesher.refine_mesh();
-}
-#endif
-
-template<typename Tr, typename CGAL_NP_TEMPLATE_PARAMETERS>
-void
-refine_Delaunay_mesh_2(Tr& t, const CGAL_NP_CLASS& np)
-{
-  typedef Delaunay_mesh_size_criteria_2<Tr> Default_criteria;
-  typedef typename internal_np::Lookup_named_param_def<internal_np::criteria_t,
-                                                       CGAL_NP_CLASS,
-                                                       Default_criteria>::type Criteria;
-
-  using parameters::choose_parameter;
-  using parameters::get_parameter;
-  using parameters::get_parameter_reference;
-  using parameters::is_default_parameter;
-
-  Delaunay_mesher_2<Tr, Criteria> mesher(
-      t, choose_parameter<Default_criteria>(
-             get_parameter_reference(np, internal_np::criteria)));
-
-  if (!choose_parameter(get_parameter(np, internal_np::domain_is_initialized), false))
-  {
-    if (is_default_parameter<CGAL_NP_CLASS, internal_np::seeds_t>::value) // no seeds provided
-    {
-      mesher.init(false);
-    }
-    else
-    {
-      typedef std::vector<typename Tr::Point_2> Default_seeds;
-      typedef typename internal_np::Lookup_named_param_def<internal_np::seeds_t,
-                                                           CGAL_NP_CLASS,
-                                                           Default_seeds>::reference Seeds;
-      Default_seeds ds;
-      Seeds seeds = choose_parameter(get_parameter_reference(np, internal_np::seeds), ds);
-      mesher.set_seeds(seeds.begin(), seeds.end(),
-                       choose_parameter(get_parameter(np, internal_np::seeds_are_in_domain), false));
-    }
-  }
-  else
-    mesher.init(true);
-
   mesher.refine_mesh();
 }
 

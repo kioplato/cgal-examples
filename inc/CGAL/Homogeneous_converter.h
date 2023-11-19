@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Homogeneous_kernel/include/CGAL/Homogeneous_converter.h $
-// $Id: Homogeneous_converter.h 4f5f834 2022-06-10T07:37:53+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Homogeneous_kernel/include/CGAL/Homogeneous_converter.h $
+// $Id: Homogeneous_converter.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -28,9 +28,6 @@
 #include <CGAL/Enum_converter.h>
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Bbox_3.h>
-#include <CGAL/Origin.h>
-
-#include <type_traits>
 
 namespace CGAL {
 
@@ -50,25 +47,13 @@ public:
 
     using Base::operator();
 
-    Origin
-    operator()(Origin o) const
-    {
-        return o;
-    }
-
-    Null_vector
-    operator()(Null_vector n) const
-    {
-        return n;
-    }
-
-    const Bbox_2&
+    Bbox_2
     operator()(const Bbox_2& b)
     {
         return b;
     }
 
-    const Bbox_3&
+    Bbox_3
     operator()(const Bbox_3& b)
     {
         return b;
@@ -77,21 +62,13 @@ public:
     typename K2::RT
     operator()(const typename K1::RT &a) const
     {
-        return rc(a);
+        return c(a);
     }
 
     typename K2::FT
     operator()(const typename K1::FT &a) const
     {
-        return fc(a);
-    }
-
-    template <typename T>
-    T
-    operator()(const T t,
-               std::enable_if_t<std::is_fundamental<T>::value>* = nullptr) const
-    {
-        return t;
+        return c(a);
     }
 
     typename K2::Point_2

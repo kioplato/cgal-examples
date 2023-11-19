@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Interpolation/include/CGAL/natural_neighbor_coordinates_2.h $
-// $Id: natural_neighbor_coordinates_2.h 70a06b4 2022-06-27T08:58:17+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Interpolation/include/CGAL/natural_neighbor_coordinates_2.h $
+// $Id: natural_neighbor_coordinates_2.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Frank Da, Julia Floetotto
@@ -17,11 +17,13 @@
 #include <CGAL/Interpolation/internal/helpers.h>
 
 #include <CGAL/function_objects.h>
-#include <CGAL/type_traits/is_iterator.h>
+#include <CGAL/is_iterator.h>
 #include <CGAL/Iterator_project.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/number_utils_classes.h>
 #include <CGAL/utility.h>
+
+#include <boost/utility/enable_if.hpp>
 
 #include <iterator>
 #include <list>
@@ -253,9 +255,9 @@ natural_neighbor_coordinates_2(const Dt& dt,
                                OutputIterator out,
                                OutputFunctor fct,
                                typename Dt::Face_handle start = CGAL_TYPENAME_DEFAULT_ARG Dt::Face_handle(),
-                               std::enable_if_t<
-                               !is_iterator<OutputFunctor>::value
-                                        >* = 0)
+                               typename boost::disable_if_c<
+                                          is_iterator<OutputFunctor>::value
+                                        >::type* = 0)
 {
   CGAL_precondition(dt.dimension() == 2);
 

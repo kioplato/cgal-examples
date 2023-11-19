@@ -4,8 +4,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/CGAL_ImageIO/include/CGAL/Image_3.h $
-// $Id: Image_3.h 939002b 2023-05-02T13:09:47+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/CGAL_ImageIO/include/CGAL/Image_3.h $
+// $Id: Image_3.h ca89949 2021-10-29T17:01:33+02:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <boost/format.hpp>
+#include <boost/unordered_set.hpp>
 #include <CGAL/ImageIO.h>
 #include <CGAL/function_objects.h>
 
@@ -87,7 +88,7 @@ public:
 protected:
   Image_shared_ptr image_ptr;
 
-   // implementation in Image_3_impl.h
+   // implementation in src/CGAL_ImageIO/Image_3.cpp
   bool private_read(_image* im, Own own_the_data = OWN_THE_DATA);
 
 public:
@@ -149,10 +150,6 @@ public:
   float tx() const { return image_ptr->tx; }
   float ty() const { return image_ptr->ty; }
   float tz() const { return image_ptr->tz; }
-
-  float& tx(){ return image_ptr->tx; }
-  float& ty(){ return image_ptr->ty; }
-  float& tz(){ return image_ptr->tz; }
 
   float value(const std::size_t i,
               const std::size_t j,

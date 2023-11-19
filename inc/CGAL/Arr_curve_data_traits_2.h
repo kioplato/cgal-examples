@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arr_curve_data_traits_2.h $
-// $Id: Arr_curve_data_traits_2.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arr_curve_data_traits_2.h $
+// $Id: Arr_curve_data_traits_2.h 372e838 2020-07-06T11:32:32+03:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s): Ron Wein          <wein@post.tau.ac.il>
@@ -24,14 +24,13 @@
 #include <list>
 
 #include <boost/variant.hpp>
+#include <boost/utility/enable_if.hpp>
 #include <boost/mpl/has_xxx.hpp>
 
 #include <CGAL/tags.h>
 #include <CGAL/assertions.h>
 #include <CGAL/Arr_tags.h>
 #include <CGAL/Arr_geometry_traits/Curve_data_aux.h>
-
-#include <type_traits>
 
 namespace CGAL {
 
@@ -79,10 +78,10 @@ public:
   typedef typename internal::Arr_complete_right_side_category<Base_traits_2>::
   Category                                           Right_side_category;
 
-  // Representation of a curve with an additonal data field:
+  // Representation of a curve with an addtional data field:
   typedef _Curve_data_ex<Base_curve_2, Curve_data>   Curve_2;
 
-  // Representation of an x-monotone curve with an additonal data field:
+  // Representation of an x-monotone curve with an addtional data field:
   typedef _Curve_data_ex<Base_x_monotone_curve_2, X_monotone_curve_data>
                                                      X_monotone_curve_2;
 
@@ -99,7 +98,7 @@ public:
   Arr_curve_data_traits_2(const Base_traits_2& traits) : Base_traits_2(traits) {}
   //@}
 
-  /// \name Overridden functors.
+  /// \name Overriden functors.
   //@{
 
   //! \name Intersections & subdivisions
@@ -259,7 +258,8 @@ public:
      * has a nested type named Are_mergeable_2.
      */
     template <typename GeomeTraits_2>
-    std::enable_if_t<has_are_mergeable_2<GeomeTraits_2>::value,bool>
+    typename boost::enable_if_c<has_are_mergeable_2<GeomeTraits_2>::value,
+                                bool>::type
     are_mergeable(const X_monotone_curve_2& cv1,
                   const X_monotone_curve_2& cv2) const
     {
@@ -277,7 +277,8 @@ public:
      * This function should never be called!
      */
     template <typename GeomeTraits_2>
-    std::enable_if_t<!has_are_mergeable_2<GeomeTraits_2>::value,bool>
+    typename boost::enable_if_c<!has_are_mergeable_2<GeomeTraits_2>::value,
+                                bool>::type
     are_mergeable(const X_monotone_curve_2& /* cv1 */,
                   const X_monotone_curve_2& /* cv2 */) const
     {
@@ -319,7 +320,7 @@ public:
      * has a nested type named Merge_2.
      */
     template <typename GeomeTraits_2>
-    std::enable_if_t<has_merge_2<GeomeTraits_2>::value, void>
+    typename boost::enable_if_c<has_merge_2<GeomeTraits_2>::value, void>::type
     merge(const X_monotone_curve_2& cv1, const X_monotone_curve_2& cv2,
           X_monotone_curve_2& c) const
     {
@@ -339,7 +340,7 @@ public:
      * This function should never be called!
      */
     template <typename GeomeTraits_2>
-    std::enable_if_t<!has_merge_2<GeomeTraits_2>::value, void>
+    typename boost::enable_if_c<!has_merge_2<GeomeTraits_2>::value, void>::type
     merge(const X_monotone_curve_2& /* cv1 */,
           const X_monotone_curve_2& /* cv2 */,
           X_monotone_curve_2& /* c */) const
@@ -406,8 +407,8 @@ public:
      * has a nested type named Construct_opposite_2.
      */
     template <typename GeomeTraits_2>
-    std::enable_if_t<has_construct_opposite_2<GeomeTraits_2>::value,
-                     X_monotone_curve_2>
+    typename boost::enable_if_c<has_construct_opposite_2<GeomeTraits_2>::value,
+                                X_monotone_curve_2>::type
     construct_opposite(const X_monotone_curve_2& cv) const
     {
       X_monotone_curve_2 new_cv(m_base.construct_opposite_2_object()(cv),
@@ -420,8 +421,8 @@ public:
      * This function should never be called!
      */
     template <typename GeomeTraits_2>
-    std::enable_if_t<!has_construct_opposite_2<GeomeTraits_2>::value,
-                      X_monotone_curve_2>
+    typename boost::enable_if_c<!has_construct_opposite_2<GeomeTraits_2>::value,
+                                X_monotone_curve_2>::type
     construct_opposite(const X_monotone_curve_2&) const
     {
       CGAL_error_msg("Construct opposite curve is not supported!");

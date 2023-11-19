@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/GraphicsView/include/CGAL/Qt/Basic_viewer_qt.h $
-// $Id: Basic_viewer_qt.h 3e07f88 2023-04-24T12:01:17+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/GraphicsView/include/CGAL/Qt/Basic_viewer_qt.h $
+// $Id: Basic_viewer_qt.h 3640099 2021-09-28T15:36:51+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -52,14 +52,9 @@
 #include <CGAL/Qt/CreateOpenGLContext.h>
 #include <CGAL/Qt/constraint.h>
 #include <CGAL/Random.h>
-#include <CGAL/assertions.h>
-
-#define CGAL_BASIC_VIEWER_INIT_SIZE_X 500
-#define CGAL_BASIC_VIEWER_INIT_SIZE_Y 450
 
 namespace CGAL
 {
-
 //------------------------------------------------------------------------------
 inline CGAL::IO::Color get_random_color(CGAL::Random& random)
 {
@@ -206,7 +201,7 @@ public:
     else
       setWindowTitle(title);
 
-    resize(CGAL_BASIC_VIEWER_INIT_SIZE_X, CGAL_BASIC_VIEWER_INIT_SIZE_Y);
+    resize(500, 450);
 
     if (inverse_normal)
     { negate_all_normals(); }
@@ -609,7 +604,6 @@ protected:
 
   void initialize_buffers()
   {
-    set_camera_mode();
     rendering_program_p_l.bind();
 
     // 1) POINT SHADER
@@ -618,7 +612,7 @@ protected:
     vao[VAO_MONO_POINTS].bind();
 
     unsigned int bufn = 0;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_MONO_POINTS].data(),
                            static_cast<int>(arrays[POS_MONO_POINTS].size()*sizeof(float)));
@@ -635,7 +629,7 @@ protected:
     vao[VAO_COLORED_POINTS].bind();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_COLORED_POINTS].data(),
                            static_cast<int>(arrays[POS_COLORED_POINTS].size()*sizeof(float)));
@@ -644,7 +638,7 @@ protected:
     buffers[bufn].release();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[COLOR_POINTS].data(),
                            static_cast<int>(arrays[COLOR_POINTS].size()*sizeof(float)));
@@ -660,7 +654,7 @@ protected:
     vao[VAO_MONO_SEGMENTS].bind();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_MONO_SEGMENTS].data(),
                            static_cast<int>(arrays[POS_MONO_SEGMENTS].size()*sizeof(float)));
@@ -677,7 +671,7 @@ protected:
     vao[VAO_COLORED_SEGMENTS].bind();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_COLORED_SEGMENTS].data(),
                            static_cast<int>(arrays[POS_COLORED_SEGMENTS].size()*sizeof(float)));
@@ -687,7 +681,7 @@ protected:
     buffers[bufn].release();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[COLOR_SEGMENTS].data(),
                            static_cast<int>(arrays[COLOR_SEGMENTS].size()*sizeof(float)));
@@ -705,7 +699,7 @@ protected:
     vao[VAO_MONO_RAYS].bind();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_MONO_RAYS].data(),
                            static_cast<int>(arrays[POS_MONO_RAYS].size()*sizeof(float)));
@@ -723,7 +717,7 @@ protected:
     vao[VAO_COLORED_RAYS].bind();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_COLORED_RAYS].data(),
                            static_cast<int>(arrays[POS_COLORED_RAYS].size()*sizeof(float)));
@@ -733,7 +727,7 @@ protected:
     buffers[bufn].release();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[COLOR_RAYS].data(),
                            static_cast<int>(arrays[COLOR_RAYS].size()*sizeof(float)));
@@ -750,7 +744,7 @@ protected:
     vao[VAO_MONO_LINES].bind();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_MONO_LINES].data(),
                            static_cast<int>(arrays[POS_MONO_LINES].size()*sizeof(float)));
@@ -768,7 +762,7 @@ protected:
     vao[VAO_COLORED_LINES].bind();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_COLORED_LINES].data(),
                            static_cast<int>(arrays[POS_COLORED_LINES].size()*sizeof(float)));
@@ -778,7 +772,7 @@ protected:
     buffers[bufn].release();
 
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[COLOR_LINES].data(),
                            static_cast<int>(arrays[COLOR_LINES].size()*sizeof(float)));
@@ -798,7 +792,7 @@ protected:
 
     // 5.1.1) points of the mono faces
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_MONO_FACES].data(),
                            static_cast<int>(arrays[POS_MONO_FACES].size()*sizeof(float)));
@@ -809,7 +803,7 @@ protected:
 
     // 5.1.2) normals of the mono faces
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     if (m_flatShading)
     {
@@ -837,7 +831,7 @@ protected:
 
     // 5.2.1) points of the color faces
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[POS_COLORED_FACES].data(),
                            static_cast<int>(arrays[POS_COLORED_FACES].size()*sizeof(float)));
@@ -848,7 +842,7 @@ protected:
 
     // 5.2.2) normals of the color faces
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     if (m_flatShading)
     {
@@ -869,7 +863,7 @@ protected:
 
     // 5.2.3) colors of the faces
     ++bufn;
-    CGAL_assertion(bufn<NB_VBO_BUFFERS);
+    assert(bufn<NB_VBO_BUFFERS);
     buffers[bufn].bind();
     buffers[bufn].allocate(arrays[COLOR_FACES].data(),
                            static_cast<int>(arrays[COLOR_FACES].size()*sizeof(float)));
@@ -892,7 +886,7 @@ protected:
 
       vao[VAO_CLIPPING_PLANE].bind();
       ++bufn;
-      CGAL_assertion(bufn < NB_VBO_BUFFERS);
+      assert(bufn < NB_VBO_BUFFERS);
       buffers[bufn].bind();
       buffers[bufn].allocate(arrays[POS_CLIPPING_PLANE].data(),
                             static_cast<int>(arrays[POS_CLIPPING_PLANE].size() * sizeof(float)));
@@ -994,8 +988,19 @@ protected:
             (has_zero_x() || has_zero_y() || has_zero_z()));
   }
 
-  void set_camera_mode()
+  virtual void draw()
   {
+    glEnable(GL_DEPTH_TEST);
+
+    QMatrix4x4 clipping_mMatrix;
+    clipping_mMatrix.setToIdentity();
+    for(int i=0; i< 16 ; i++)
+    { clipping_mMatrix.data()[i] =  m_frame_plane->matrix()[i]; }
+    QVector4D clipPlane = clipping_mMatrix * QVector4D(0.0, 0.0, 1.0, 0.0);
+    QVector4D plane_point = clipping_mMatrix * QVector4D(0,0,0,1);
+    if(!m_are_buffers_initialized)
+    { initialize_buffers(); }
+
     if (is_two_dimensional())
     {
       camera()->setType(CGAL::qglviewer::Camera::ORTHOGRAPHIC);
@@ -1017,20 +1022,6 @@ protected:
       camera()->setType(CGAL::qglviewer::Camera::PERSPECTIVE);
       camera()->frame()->setConstraint(nullptr);
     }
-  }
-
-  virtual void draw()
-  {
-    glEnable(GL_DEPTH_TEST);
-
-    QMatrix4x4 clipping_mMatrix;
-    clipping_mMatrix.setToIdentity();
-    for(int i=0; i< 16 ; i++)
-    { clipping_mMatrix.data()[i] =  m_frame_plane->matrix()[i]; }
-    QVector4D clipPlane = clipping_mMatrix * QVector4D(0.0, 0.0, 1.0, 0.0);
-    QVector4D plane_point = clipping_mMatrix * QVector4D(0,0,0,1);
-    if(!m_are_buffers_initialized)
-    { initialize_buffers(); }
 
     QColor color;
     attrib_buffers(this);
@@ -1364,7 +1355,6 @@ protected:
 
   virtual void init()
   {
-    set_camera_mode();
     initializeOpenGLFunctions();
 
     // Light default parameters
@@ -1781,7 +1771,7 @@ protected:
 
   QGLBuffer buffers[NB_VBO_BUFFERS];
 
-  // The following enum gives the indices of the different vao.
+  // The following enum gives the indices of the differents vao.
   enum
     { VAO_MONO_POINTS=0,
       VAO_COLORED_POINTS,
@@ -1816,8 +1806,8 @@ protected:
 namespace CGAL
 {
 
-  template<class ... T>
-  void draw(T...)
+  template<class T>
+  void draw(const T&, const char* ="", bool=false)
   {
     std::cerr<<"Impossible to draw, CGAL_USE_BASIC_VIEWER is not defined."<<std::endl;
   }

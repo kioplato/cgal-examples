@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_3/include/CGAL/Mesh_3/Sliver_perturber.h $
-// $Id: Sliver_perturber.h 3674c93 2022-11-15T15:21:01+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_3/include/CGAL/Mesh_3/Sliver_perturber.h $
+// $Id: Sliver_perturber.h 590ddf8 2021-10-08T15:38:47+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -57,7 +57,14 @@
 #endif
 
 #include <boost/format.hpp>
+#ifdef CGAL_MESH_3_USE_RELAXED_HEAP
+#  error This option CGAL_MESH_3_USE_RELAXED_HEAP is no longer supported
+// The reason is that the Boost relaxed heap does not ensure a strict order
+// of the priority queue.
+#include <boost/pending/relaxed_heap.hpp>
+#else
 #include <CGAL/Modifiable_priority_queue.h>
+#endif //CGAL_MESH_3_USE_RELAXED_HEAP
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 
@@ -71,7 +78,7 @@ namespace Mesh_3 {
 
 /**
 * @class PVertex
-* Vertex with associated perturbation data
+* Vertex with associated perturbation datas
 */
 // Sequential
 template< typename FT
@@ -171,7 +178,7 @@ void update_saved_erase_counter() {}
 bool is_zombie() { return false; }
 
 private:
-/// Private data
+/// Private datas
 Vertex_handle vertex_handle_;
 unsigned int incident_sliver_nb_;
 FT min_value_;
@@ -294,7 +301,7 @@ bool operator<(const Self& pv) const
 }
 
 private:
-/// Private data
+/// Private datas
 Vertex_handle vertex_handle_;
 unsigned int vh_erase_counter_when_added_;
 int in_dimension_;
@@ -500,8 +507,11 @@ private:
   };
 
   typedef std::less<PVertex> less_PVertex;
-  typedef Modifiable_priority_queue<PVertex, less_PVertex, PVertex_id> PQueue;
-
+  #ifdef CGAL_MESH_3_USE_RELAXED_HEAP
+  typedef boost::relaxed_heap<PVertex, less_PVertex, PVertex_id> PQueue;
+  #else
+  typedef ::CGAL::internal::mutable_queue_with_remove<PVertex,std::vector<PVertex>, less_PVertex, PVertex_id> PQueue;
+  #endif //CGAL_MESH_3_USE_RELAXED_HEAP
 
 public:
   /**
@@ -553,7 +563,7 @@ private:
   int build_priority_queue(const FT& sliver_bound, PQueue& pqueue) const;
 
   /**
-   * Updates priority queue for all vertices of `vertices`.
+   * Updates priority queue for all vertices of \c vertices
    */
   // Sequential
   int update_priority_queue(const Vertex_vector& vertices,
@@ -568,7 +578,7 @@ private:
 #endif
 
   /**
-   * Updates `pv` in priority queue.
+   * Updates \c pv in priority queue
    */
   int update_priority_queue(const PVertex& pv, PQueue& pqueue) const;
 
@@ -582,7 +592,7 @@ private:
                 ) const;
 
   /**
-   * Returns a pvertex from a vertex handle `vh`, using the id `pv_id`.
+   * Returns a pvertex from a vertex handle \c vh, using id \c pv_id
    */
   PVertex
   make_pvertex(const Vertex_handle& vh,
@@ -595,13 +605,13 @@ private:
                const typename PVertex::id_type& pv_id) const;
 
   /**
-   * Updates a pvertex `pv`.
+   * Updates a pvertex \c pv
    */
   void update_pvertex(PVertex& pv, const FT& sliver_bound) const;
   void update_pvertex__concurrent(PVertex& pv, const FT& sliver_bound) const;
 
   /**
-   * Returns `vh` pvertex id.
+   * Returns \c vh pvertex id
    */
   typename PVertex::id_type get_pvertex_id(const Vertex_handle& vh) const
   {
@@ -609,7 +619,7 @@ private:
   }
 
   /**
-   * Updates bad vertices vector, wrt. `sliver_bound`.
+   * Update bad vertices vector, wrt \c sliver_bound
    */
   // Sequential
   void update_bad_vertices(std::vector<Vertex_handle> &bad_vertices,
@@ -932,9 +942,10 @@ perturb(const FT& sliver_bound, PQueue& pqueue, Visitor& visitor) const
   {
     this->create_task_group();
 
-    while (!pqueue.empty())
+    while (pqueue.size() > 0)
     {
-      PVertex pv = pqueue.top_and_pop();
+      PVertex pv = pqueue.top();
+      pqueue.pop();
       enqueue_task(pv, sliver_bound,
                    visitor, bad_vertices);
     }
@@ -966,7 +977,8 @@ perturb(const FT& sliver_bound, PQueue& pqueue, Visitor& visitor) const
     while ( !is_time_limit_reached() && !pqueue.empty() )
     {
       // Get pqueue head
-      PVertex pv = pqueue.top_and_pop();
+      PVertex pv = pqueue.top();
+      pqueue.pop();
       --pqueue_size;
 
       CGAL_assertion(pv.is_perturbable());
@@ -1032,7 +1044,7 @@ perturb(const FT& sliver_bound, PQueue& pqueue, Visitor& visitor) const
         }
       }
 
-      // Update pqueue in every cases, because pv was popped
+      // Update pqueue in every cases, because pv was poped
       pqueue_size += update_priority_queue(pv, pqueue);
       visitor.end_of_perturbation_iteration(pqueue_size);
 
@@ -1233,7 +1245,7 @@ update_priority_queue(const PVertex& pv, PQueue& pqueue) const
     }
     else
     {
-      pqueue.erase(pv);
+      pqueue.remove(pv);
       return -1;
     }
   }
@@ -1378,7 +1390,7 @@ perturb_vertex( PVertex pv
       ++bcounter;
 #endif
 
-      // Update pqueue in every cases, because pv was popped
+      // Update pqueue in every cases, because pv was poped
       if (pv.is_perturbable())
       {
         enqueue_task(pv, sliver_bound, visitor, bad_vertices);

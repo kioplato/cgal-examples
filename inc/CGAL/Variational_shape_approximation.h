@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_mesh_approximation/include/CGAL/Variational_shape_approximation.h $
-// $Id: Variational_shape_approximation.h 389ef8e 2022-05-17T10:51:32+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_mesh_approximation/include/CGAL/Variational_shape_approximation.h $
+// $Id: Variational_shape_approximation.h 6911f0c 2022-01-07T15:42:50+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -31,11 +31,11 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <CGAL/boost/graph/dijkstra_shortest_paths.h>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/subgraph.hpp>
 #include <boost/optional.hpp>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <vector>
@@ -1209,8 +1209,7 @@ private:
    * @param t concurrency tag
    */
   template<typename ProxyWrapperIterator>
-  void fit(const ProxyWrapperIterator beg, const ProxyWrapperIterator end, const CGAL::Sequential_tag & t) {
-    CGAL_USE(t);
+  void fit(const ProxyWrapperIterator beg, const ProxyWrapperIterator end, const CGAL::Sequential_tag &) {
     std::vector<std::list<face_descriptor> > px_faces(m_proxies.size());
     for(face_descriptor f : faces(*m_ptm))
       px_faces[get(m_fproxy_map, f)].push_back(f);
@@ -1231,8 +1230,7 @@ private:
    * @param t concurrency tag
    */
   template<typename ProxyWrapperIterator>
-  void fit(const ProxyWrapperIterator beg, const ProxyWrapperIterator end, const CGAL::Parallel_tag & t) {
-    CGAL_USE(t);
+  void fit(const ProxyWrapperIterator beg, const ProxyWrapperIterator end, const CGAL::Parallel_tag &) {
     std::vector<std::list<face_descriptor> > px_faces(m_proxies.size());
     for(face_descriptor f : faces(*m_ptm))
       px_faces[get(m_fproxy_map, f)].push_back(f);
@@ -1336,7 +1334,7 @@ private:
    * 3. Update the proxy error.
    * 4. Update proxy map.
    * @pre current face proxy map is valid
-   * @param f face
+   * @param face_descriptor face
    * @param px_idx proxy index
    * @return fitted wrapped proxy
    */
@@ -1654,7 +1652,7 @@ private:
     typedef typename SubGraph::vertex_descriptor sg_vertex_descriptor;
     typedef std::vector<sg_vertex_descriptor> VertexVector;
 
-    typedef std::unordered_map<vertex_descriptor, sg_vertex_descriptor> VertexMap;
+    typedef boost::unordered_map<vertex_descriptor, sg_vertex_descriptor> VertexMap;
     typedef boost::associative_property_map<VertexMap> ToSGVertexMap;
     VertexMap vmap;
     ToSGVertexMap to_sgv_map(vmap);
@@ -1792,7 +1790,7 @@ private:
   /*!
    * @brief walks along the region boundary cycle to the first halfedge
    * pointing to a vertex associated with an anchor.
-   * @param[in,out] he_start region boundary halfedge
+   * @param[in/out] he_start region boundary halfedge
    */
   void walk_to_first_anchor(halfedge_descriptor &he_start) {
     const halfedge_descriptor start_mark = he_start;
@@ -1807,7 +1805,7 @@ private:
   /*!
    * @brief walks along the region boundary cycle to the next anchor
    * and records the path as a `Boundary_chord`.
-   * @param[in,out] he_start starting region boundary halfedge
+   * @param[in/out] he_start starting region boundary halfedge
    * pointing to a vertex associated with an anchor
    * @param[out] chord recorded path chord
    */
@@ -1820,7 +1818,7 @@ private:
 
   /*!
    * @brief walks to the next boundary cycle halfedge.
-   * @param[in,out] he_start region boundary halfedge
+   * @param[in/out] he_start region boundary halfedge
    */
   void walk_to_next_border_halfedge(halfedge_descriptor &he_start) const {
     const std::size_t px_idx = get(m_fproxy_map, face(he_start, *m_ptm));

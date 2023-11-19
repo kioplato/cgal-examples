@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_3/include/CGAL/Mesh_cell_criteria_3.h $
-// $Id: Mesh_cell_criteria_3.h cc05187 2022-12-15T15:57:10+01:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_3/include/CGAL/Mesh_cell_criteria_3.h $
+// $Id: Mesh_cell_criteria_3.h 393ae7d 2021-05-12T15:03:53+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -28,7 +28,7 @@
 namespace CGAL {
 
 template <typename Tr,
-          typename Visitor_ = Mesh_3::Cell_criterion_visitor_with_radius_lower_bound<Tr> >
+          typename Visitor_ = Mesh_3::Cell_criteria_visitor_with_features<Tr> >
 class Mesh_cell_criteria_3
 {
 public:
@@ -53,12 +53,8 @@ public:
    * @param radius_bound the radius bound (tet sizing)
    */
   Mesh_cell_criteria_3(const FT& radius_edge_bound,
-                       const FT& radius_bound,
-                       const FT& min_radius_bound = 0.)
+                       const FT& radius_bound)
   {
-    if (FT(0) != min_radius_bound)
-      init_min_radius(min_radius_bound);
-
     if ( FT(0) != radius_bound )
       init_radius(radius_bound);
 
@@ -71,15 +67,11 @@ public:
   template <typename Sizing_field>
   Mesh_cell_criteria_3(const FT& radius_edge_bound,
                        const Sizing_field& radius_bound,
-                       const FT& min_radius_bound = 0.,
-                       std::enable_if_t<
+                       typename std::enable_if<
                          Mesh_3::Is_mesh_domain_field_3<Tr,Sizing_field>::value
-                       >* = 0
+                       >::type* = 0
                        )
   {
-    if (FT(0) != min_radius_bound)
-      init_min_radius(min_radius_bound);
-
     init_radius(radius_bound);
 
     if ( FT(0) != radius_edge_bound )
@@ -90,8 +82,8 @@ public:
   ~Mesh_cell_criteria_3() { }
 
   /**
-   * @brief returns whether the cell `cell` is bad or not.
-   * @param tr the triangulation within which `cell` lives
+   * @brief returns whether the cell \c cell is bad or not.
+   * @param tr the triangulation within which \c cell lives
    * @param cell the cell
    */
   Is_cell_bad operator()(const Tr& tr, const Cell_handle& cell) const
@@ -125,13 +117,6 @@ private:
 
     criteria_.add(new Radius_criterion(radius_bound));
   }
-
-  void init_min_radius(const FT& min_radius_bound)
-  {
-    typedef Mesh_3::Cell_uniform_size_criterion<Tr, Visitor> Radius_criterion;
-    criteria_.add(new Radius_criterion(min_radius_bound, true/*lower bound*/));
-  }
-
 
 private:
   Criteria criteria_;

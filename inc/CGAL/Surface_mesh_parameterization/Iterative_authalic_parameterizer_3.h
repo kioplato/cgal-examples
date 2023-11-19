@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Iterative_authalic_parameterizer_3.h $
-// $Id: Iterative_authalic_parameterizer_3.h 9e137bc 2023-01-31T12:26:55+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Iterative_authalic_parameterizer_3.h $
+// $Id: Iterative_authalic_parameterizer_3.h dfe3ff5 2022-10-20T17:31:22+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -50,7 +50,7 @@
 #include <iomanip>
 #include <unordered_set>
 
-#define CGAL_SMP_IA_DEBUG_L0 0
+#define DEBUG_L0 1 // @fixme
 
 /// \file Iterative_authalic_parameterizer_3.h
 
@@ -69,7 +69,7 @@ namespace Surface_mesh_parameterization {
 /// the \f$ L_2\f$ stretch - as defined by Sander et al. \cgalCite{cgal:ssgh-tmpm-01} - over the mesh.
 ///
 /// \tparam TriangleMesh_ must be a model of `FaceGraph`.
-/// \tparam BorderParameterizer_ is a strategy to parameterize the surface border
+/// \tparam BorderParameterizer_ is a Strategy to parameterize the surface border
 ///         and must be a model of `Parameterizer_3`.<br>
 ///         <b>%Default:</b>
 /// \code
@@ -304,6 +304,30 @@ public:
   }
 
   // Computation helpers
+protected:
+  // `operator=(onst Matrix& other)` isn't part of the concept...
+  template <typename VertexIndexMap>
+  void copy_sparse_matrix(const Matrix& src,
+                          Matrix& dest,
+                          const Triangle_mesh& tmesh,
+                          const Vertex_set& vertices,
+                          const VertexIndexMap vimap)
+  {
+    CGAL_precondition(src.row_dimension() == dest.row_dimension());
+    CGAL_precondition(src.column_dimension() == dest.column_dimension());
+
+    for(vertex_descriptor vertex : vertices)
+    {
+      const int i = get(vimap, vertex);
+      vertex_around_target_circulator v_j(halfedge(vertex, tmesh), tmesh), end = v_j;
+      CGAL_For_all(v_j, end)
+      {
+        const int j = get(vimap, *v_j);
+        dest.set_coef(i, j, src.get_coef(i, j), false);
+      }
+    }
+  }
+
 private:
   double compute_vertex_L2(const Triangle_mesh& tmesh,
                            const vertex_descriptor v) const
@@ -547,9 +571,9 @@ private:
 
       for(int j=0; j<neighborsCounter; ++j)
       {
-        // Given the j-th neighbor of node i, find the two neighbors by intersecting the
-        // line through nodes i and j with all segments of the polygon made by the neighbors.
-        // Take the two neighbors on either side. Only one segment intersects this line.
+        // Given the j-th neighbour of node i, find the two neighbours by intersecting the
+        // line through nodes i and j with all segments of the polygon made by the neighbours.
+        // Take the two neighbours on either side. Only one segment intersects this line.
         for(int k=0; k<neighborsCounter; ++k)
         {
           int kk = (k == neighborsCounter-1 ? 0 : k+1);
@@ -799,8 +823,8 @@ public:
   /// \param Bv the right hand side vector in the linear system of y coordinates
   /// \param tmesh a triangulated surface
   /// \param bhd a halfedge descriptor on the boundary of `mesh`
-  /// \param uvmap an instantiation of the class `VertexUVmap`
-  /// \param vimap an instantiation of the class `VertexIndexMap`
+  /// \param uvmap an instanciation of the class `VertexUVmap`
+  /// \param vimap an instanciation of the class `VertexIndexMap`
   ///
   /// \pre Vertices must be indexed (`vimap` must be initialized).
   /// \pre `A`, `Bu`, and `Bv` must be allocated.
@@ -883,7 +907,7 @@ public:
 
     NT area_3D = initialize_faces_areas(cc_faces, tmesh);
 
-    if(CGAL_SMP_IA_DEBUG_L0)
+    if(DEBUG_L0)
       std::cout << std::endl;
 
     unsigned int last_best_i = 0;
@@ -894,7 +918,7 @@ public:
     unsigned int i = 0;
     while(i < iterations)
     {
-      if(CGAL_SMP_IA_DEBUG_L0)
+      if(DEBUG_L0)
         std::cout << "Iteration " << i << ", gamma = " << gamma << std::flush;
 
       // update weights for inner vertices
@@ -929,11 +953,11 @@ public:
       // solve linear equations
       // Solve "A*Xu = Bu". On success, solution is (1/Du) * Xu.
       // Solve "A*Xv = Bv". On success, solution is (1/Dv) * Xv.
-      double Du = 0, Dv = 0;
+      NT Du = 0, Dv = 0;
       if(!get_linear_algebra_traits().linear_solver(A, Bu, Xu, Du) ||
          !get_linear_algebra_traits().linear_solver(A, Bv, Xv, Dv))
       {
-        if(CGAL_SMP_IA_DEBUG_L0)
+        if(DEBUG_L0)
           std::cout << " Linear solver failure #" << m_linear_solver_failures << std::endl;
 
         status = ERROR_CANNOT_SOLVE_LINEAR_SYSTEM;
@@ -966,8 +990,8 @@ public:
 //      for(std::size_t i=0; i<nv; ++i)
 //        std::cout << "Sol[" << i << "] = " << Xu[i] << " " << Xv[i] << std::endl;
 
-      // Copy A to A_prev
-      A_prev = A;
+      // Copy A to A_prev, it is a computationally inefficient task but neccesary
+      copy_sparse_matrix(A, A_prev, tmesh, cc_vertices, vimap);
 
       // Copy Xu and Xv coordinates into the (u,v) pair of each vertex
       for(vertex_descriptor v : cc_vertices)
@@ -981,7 +1005,7 @@ public:
         }
       }
 
-      if(CGAL_SMP_IA_DEBUG_L0)
+      if(DEBUG_L0)
       {
         std::ofstream out("last_solve.off");
         out.precision(17);
@@ -994,7 +1018,7 @@ public:
 
       err[i] = compute_area_distortion(cc_faces, area_3D, tmesh, uvmap);
 
-      if(CGAL_SMP_IA_DEBUG_L0)
+      if(DEBUG_L0)
         std::cout << " err " << err[i] << std::flush;
 
       if(err[i] <= err[last_best_i])
@@ -1004,10 +1028,10 @@ public:
         last_best_i = i;
         is_changed = false;
 
-        if(CGAL_SMP_IA_DEBUG_L0)
+        if(DEBUG_L0)
           std::cout << " *****" << std::flush;
       }
-      else if(err[i] > 100) // @fixme is that reasonable
+      else if(err[i] > 100) // @fixme is that reasonnable
       {
         break;
       }
@@ -1075,9 +1099,9 @@ public:
   ///
   /// \param tmesh a triangulated surface
   /// \param bhd a halfedge descriptor on the boundary of `mesh`
-  /// \param uvmap an instantiation of the class `VertexUVmap`
-  /// \param vimap an instantiation of the class `VertexIndexMap`
-  /// \param vpmap an instantiation of the class `VertexParameterizedMap`
+  /// \param uvmap an instanciation of the class `VertexUVmap`
+  /// \param vimap an instanciation of the class `VertexIndexMap`
+  /// \param vpmap an instanciation of the class `VertexParameterizedMap`
   /// \param iterations an integer number of iterations to run the parameterization
   ///
   /// \pre `tmesh` must be a triangular mesh.

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Triangulation_2/include/CGAL/Constrained_triangulation_2.h $
-// $Id: Constrained_triangulation_2.h 1a5826f 2023-04-17T12:48:30+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Triangulation_2/include/CGAL/Constrained_triangulation_2.h $
+// $Id: Constrained_triangulation_2.h a7288b1 2023-01-09T17:48:53+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -20,45 +20,21 @@
 
 #include <set>
 #include <exception>
-#include <type_traits>
 
-#include <CGAL/assertions.h>
+#include <CGAL/triangulation_assertions.h>
 #include <CGAL/Triangulation_2.h>
 #include <CGAL/Constrained_triangulation_face_base_2.h>
 #include <CGAL/iterator.h>
 #include <CGAL/Default.h>
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
-#include <CGAL/tags.h>
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/Exact_rational.h>
-#include <CGAL/Kernel_23/internal/Has_boolean_tags.h>
 
 #include <boost/mpl/if.hpp>
-#include <boost/mpl/has_xxx.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 
-#ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
-#  include <CGAL/IO/io.h>
-#  include <CGAL/Compact_container.h>
-#  include <iostream>
-namespace CGAL {
-
-struct With_point_tag {};
-
-template <class DSC, bool Const>
-struct Output_rep<CGAL::internal::CC_iterator<DSC, Const>, With_point_tag>
-  : public Output_rep<CGAL::internal::CC_iterator<DSC, Const>>
-{
-  using Base = Output_rep<CGAL::internal::CC_iterator<DSC, Const>>;
-  using Base::Base;
-
-  std::ostream& operator()(std::ostream& out) const {
-    return Base::operator()(out) << "= " << this->it->point();
-  }
-};
-} // namespace CGAL
-#endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
+#include <boost/utility/result_of.hpp>
+#include <boost/type_traits/is_floating_point.hpp>
+#include <boost/type_traits/is_same.hpp>
 
 namespace CGAL {
 
@@ -68,7 +44,7 @@ struct Exact_intersections_tag{}; // to be used with an exact number type
 struct Exact_predicates_tag{}; // to be used with filtered exact number
 
 // This was deprecated and replaced by ` No_constraint_intersection_tag` and `No_constraint_intersection_requiring_constructions_tag`
-// due to an inconsistency between the code and the documentation.
+// due to an inconsistency between the code and the documenation.
 struct CGAL_DEPRECATED No_intersection_tag :
   public No_constraint_intersection_requiring_constructions_tag
 { };
@@ -226,7 +202,7 @@ public:
     for( ;lcit != lc.end(); lcit++) {
       insert( (*lcit).first, (*lcit).second);
     }
-     CGAL_postcondition( is_valid() );
+     CGAL_triangulation_postcondition( is_valid() );
   }
 
   template<class InputIterator>
@@ -238,7 +214,7 @@ public:
     for ( ; it != last; it++) {
               insert_constraint((*it).first, (*it).second);
       }
-      CGAL_postcondition( is_valid() );
+      CGAL_triangulation_postcondition( is_valid() );
   }
 
   //TODO Is that destructor correct ?
@@ -352,12 +328,12 @@ public:
 template <class OutputIterator>
 void
 insert_constraint(Vertex_handle  vaa, Vertex_handle vbb, OutputIterator out)
-// forces the constrained [vaa,vbb]
-// [vaa,vbb] will potentially be split into several edges
+// forces the constrained [va,vb]
+// [va,vb] will eventually be split into several edges
 // if a vertex vc of t lies on segment ab
 // of if ab intersect some constrained edges
 {
-  CGAL_precondition( vaa != vbb);
+  CGAL_triangulation_precondition( vaa != vbb);
   Vertex_handle vi;
 
   Face_handle fr;
@@ -367,7 +343,7 @@ insert_constraint(Vertex_handle  vaa, Vertex_handle vbb, OutputIterator out)
     // if the segment (or a subpart of the segment) that we are trying to constraint is already
     // present in the triangulation and is already marked as constrained,
     // then this is an intersection
-    if(std::is_same<Itag, No_constraint_intersection_tag>::value) {
+    if(boost::is_same<Itag, No_constraint_intersection_tag>::value) {
       if(dimension() == 1) {
         if(fr->is_constrained(2))
           throw Intersection_of_constraints_exception();
@@ -450,14 +426,12 @@ insert_constraint(Vertex_handle  vaa, Vertex_handle vbb, OutputIterator out)
     const Point& p0 = *first;
     Point p = p0;
     Vertex_handle v0 = insert(p0), v(v0), w(v0);
-    Face_handle hint = v0->face();
     ++first;
     for(; first!=last; ++first){
       const Point& q = *first;
       if(p != q){
-        w = insert(q,hint);
+        w = insert(q);
         insert_constraint(v,w);
-        hint = w->face();
         v = w;
         p = q;
       }
@@ -530,17 +504,6 @@ protected:
                           Vertex_handle vaa,
                           Vertex_handle vbb,
                           Exact_predicates_tag);
-
-  Vertex_handle insert_intersection(Face_handle f, int i,
-                                    Vertex_handle vaa,
-                                    Vertex_handle vbb,
-                                    Vertex_handle vcc,
-                                    Vertex_handle vdd,
-                                    const Point& pa,
-                                    const Point& pb,
-                                    const Point& pc,
-                                    const Point& pd,
-                                    Exact_predicates_tag);
 private:
   //made private to avoid using the Triangulation_2 version
   Vertex_handle move(Vertex_handle v, const Point &)
@@ -619,13 +582,6 @@ public:
       return are_there;
     }
 
-#ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
-  auto display_vertex(Vertex_handle v) const {
-    With_point_tag point_tag;
-    using CGAL::IO::oformat;
-    return oformat(v, point_tag);
-  }
-#endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
 
  template<class OutputItEdges>
  OutputItEdges  incident_constraints(Vertex_handle v,
@@ -639,7 +595,7 @@ public:
    return out;
  }
 
-  // the following functions are overloaded
+  // the following fonctions are overloaded
   // to take care of constraint marks
   template<class EdgeIt>
   Vertex_handle star_hole( const Point& p,
@@ -749,7 +705,7 @@ insert(const Point& a, Locate_type lt, Face_handle loc, int li)
   }
   if ( lt == Triangulation::EDGE && loc->is_constrained(li) )
   {
-    if(std::is_same<Itag, No_constraint_intersection_tag>::value)
+    if(boost::is_same<Itag, No_constraint_intersection_tag>::value)
       throw Intersection_of_constraints_exception();
 
     insert_in_constrained_edge = true;
@@ -828,27 +784,24 @@ insert_constraint(Vertex_handle  vaa, Vertex_handle vbb)
 // if a vertex vc of t lies on segment ab
 // or if ab intersect some constrained edges
 {
-  if(vaa == vbb){
-    return;
-  }
   std::stack<std::pair<Vertex_handle, Vertex_handle> > stack;
   stack.push(std::make_pair(vaa,vbb));
 
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
   std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::insert_constraint( " << display_vertex(vaa)
-            << " , " << display_vertex(vbb)
+            << "CT_2::insert_constraint( #" << vaa->time_stamp() << "= " << vaa->point()
+            << " , #" << vbb->time_stamp() << "= " << vbb->point()
             << " )\n";
   internal::Indentation_level::Exit_guard exit_guard = CGAL::internal::cdt_2_indent_level.open_new_scope();
 #endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
   while(! stack.empty()){
     boost::tie(vaa,vbb) = stack.top();
     stack.pop();
-    CGAL_precondition( vaa != vbb);
+    CGAL_triangulation_precondition( vaa != vbb);
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
     std::cerr << CGAL::internal::cdt_2_indent_level
-              << "CT_2::insert_constraint, stack pop=( " << display_vertex(vaa)
-              << " , " << display_vertex(vbb)
+              << "CT_2::insert_constraint, stack pop=( #" << vaa->time_stamp() << "= " << vaa->point()
+              << " , #" << vbb->time_stamp() << "= " << vbb->point()
               << " ) remaining stack size: "
               << stack.size() << '\n';
     CGAL_assertion(this->is_valid());
@@ -862,7 +815,7 @@ insert_constraint(Vertex_handle  vaa, Vertex_handle vbb)
       // if the segment (or a subpart of the segment) that we are trying to constraint is already
       // present in the triangulation and is already marked as constrained,
       // then this is an intersection
-      if(std::is_same<Itag, No_constraint_intersection_tag>::value) {
+      if(boost::is_same<Itag, No_constraint_intersection_tag>::value) {
         if(dimension() == 1) {
           if(fr->is_constrained(2))
             throw Intersection_of_constraints_exception();
@@ -890,12 +843,12 @@ insert_constraint(Vertex_handle  vaa, Vertex_handle vbb)
       if (vi != vaa && vi != vbb) {
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
   std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::insert_constraint stack push [vaa, vi] ( " << display_vertex(vaa)
-            << " , " << display_vertex(vi)
+            << "CT_2::insert_constraint stack push [vaa, vi] ( #" << vaa->time_stamp() << "= " << vaa->point()
+            << " , #" << vi->time_stamp() << "= " << vi->point()
             << " )\n";
   std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::insert_constraint stack push [vi, vbb] ( " << display_vertex(vi)
-            << " , " << display_vertex(vbb)
+            << "CT_2::insert_constraint stack push [vi, vbb] ( #" << vi->time_stamp() << "= " << vi->point()
+            << " , #" << vbb->time_stamp() << "= " << vbb->point()
             << " )\n";
 #endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
         stack.push(std::make_pair(vaa,vi));
@@ -904,8 +857,8 @@ insert_constraint(Vertex_handle  vaa, Vertex_handle vbb)
       else{
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
   std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::insert_constraint stack push [vaa, vbb]( " << display_vertex(vaa)
-            << " , " << display_vertex(vbb)
+            << "CT_2::insert_constraint stack push [vaa, vbb]( #" << vaa->time_stamp() << "= " << vaa->point()
+            << " , #" << vbb->time_stamp() << "= " << vbb->point()
             << " )\n";
 #endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
         stack.push(std::make_pair(vaa,vbb));
@@ -953,8 +906,8 @@ find_intersected_faces(Vertex_handle vaa,
   // is constrained
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
   std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::find_intersected_faces ( " << display_vertex(vaa)
-            << " , " << display_vertex(vbb)
+            << "CT_2::find_intersected_faces ( #" << vaa->time_stamp() << "= " << vaa->point()
+            << " , #" << vbb->time_stamp() << "= " << vbb->point()
             << " )\n"
             << CGAL::internal::cdt_2_indent_level
             << "> current constrained edges are:\n";
@@ -1086,7 +1039,7 @@ Constrained_triangulation_2<Gt,Tds,Itag>::
 intersect(Face_handle f, int i,
           Vertex_handle vaa,
           Vertex_handle vbb,
-          Exact_intersections_tag itag)
+          Exact_intersections_tag)
 // compute the intersection of the constraint edge (f,i)
 // with the subconstraint (vaa,vbb) being inserted
 // insert the intersection point
@@ -1107,154 +1060,11 @@ intersect(Face_handle f, int i,
   const Point& pc = f->vertex(cw(i))->point();
   const Point& pd = f->vertex(ccw(i))->point();
   Point pi;
-  CGAL_assertion_code( bool ok = )
+  Itag itag = Itag();
+  CGAL_triangulation_assertion_code( bool ok = )
   intersection(geom_traits(), pa, pb, pc, pd, pi, itag );
-  CGAL_assertion(ok);
+  CGAL_triangulation_assertion(ok);
   Vertex_handle vi = virtual_insert(pi, Triangulation::EDGE, f, i);
-  return vi;
-}
-
-
-namespace internal {
-
-  template <typename Type>
-  class Has_barycenter_2
-  {
-    typedef char Yes;
-    typedef struct { char a[2]; } No;
-
-    template <typename U>
-    static auto check(int)
-        -> decltype(std::declval<typename U::Point_2>() =
-                        std::declval<U>().construct_barycenter_2_object()(
-                            std::declval<typename U::Point_2>(),
-                            std::declval<typename U::FT>(),
-                            std::declval<typename U::Point_2>()),
-                    Yes());
-
-    template <typename U>
-    static No check(...);
-
-  public:
-    static const bool value = (sizeof(Yes) == sizeof(check<Type>(0)));
-  };
-
-  template <typename Type>
-  class Has_exact_kernel
-  {
-    typedef char Yes;
-    typedef struct { char a[2]; } No;
-
-    template <typename U>
-    static auto check(int)
-        -> decltype(std::declval<typename U::Exact_kernel>() =
-                        std::declval<U>().exact_kernel(),
-                    Yes());
-
-    template <typename U>
-    static No check(...);
-
-  public:
-    static const bool value = (sizeof(Yes) == sizeof(check<Type>(0)));
-  };
-
-  template <typename Gt, bool = Has_exact_kernel<Gt>::value >
-  struct Can_construct_almost_exact_intersection {
-    enum { value =
-      internal::Has_barycenter_2<typename Gt::Exact_kernel>::value &&
-      internal::Has_filtered_predicates<Gt>::value };
-  };
-
-  template <typename Gt>
-  struct Can_construct_almost_exact_intersection<Gt, false>
-      : public CGAL::Tag_false {};
-
-  template <typename Gt>
-  static constexpr bool can_construct_almost_exact_intersection_v =
-      Can_construct_almost_exact_intersection<Gt>::value;
-
-  template <typename Gt>
-  constexpr bool can_construct_almost_exact_intersection(const Gt&) {
-    return can_construct_almost_exact_intersection_v<Gt>;
-  }
-} // namespace internal
-
-
-template <class Gt, class Tds, class Itag >
-typename Constrained_triangulation_2<Gt,Tds,Itag>::Vertex_handle
-Constrained_triangulation_2<Gt,Tds,Itag>::
-insert_intersection(Face_handle f, int i,
-                    Vertex_handle vaa,
-                    Vertex_handle vbb,
-                    Vertex_handle vcc,
-                    Vertex_handle vdd,
-                    const Point& pa,
-                    const Point& pb,
-                    const Point& pc,
-                    const Point& pd,
-                    Exact_predicates_tag itag)
-{
-  Point pi; //creator for point is required here
-  bool ok = intersection(geom_traits(), pa, pb, pc, pd, pi, itag);
-
-  auto intersection_not_in_the_two_triangles = [&](const Point& pi) {
-    if(orientation(pc,pd,pi) == RIGHT_TURN) {
-      // check if `pi` is in the triangle (pc, pd, p0)
-      const Point& p0 = f->vertex(i)->point();
-      if(orientation(p0, pc, pi) == LEFT_TURN || orientation(pd, p0, pi) == LEFT_TURN) {
-        return true;
-      }
-    } else {
-      // orientation(pd, pc, pi) != LEFT_TURN
-      const auto edge = mirror_edge({f, i});
-      // check if `pi` is in the triangle (pd, pc, p1)
-      const Point& p1 = edge.first->vertex(edge.second)->point();
-      if(orientation(pc, p1, pi) == LEFT_TURN || orientation(p1, pd, pi) == LEFT_TURN) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  Vertex_handle vi;
-  if ( !ok ) {  //intersection detected but not computed
-    int int_index = limit_intersection(geom_traits(), pa, pb, pc, pd, itag);
-    switch(int_index){
-    case 0 : vi = vaa; break;
-    case 1 : vi = vbb; break;
-    case 2 : vi = vcc; break;
-    case 3 : vi = vdd; break;
-    }
-    if(vi == vaa || vi == vbb) {
-      remove_constrained_edge(f, i);
-    }
-  }
-  else{ //intersection computed
-    if(internal::can_construct_almost_exact_intersection(geom_traits()) &&
-       intersection_not_in_the_two_triangles(pi))
-    {
-      // now compute the exact intersection point
-      pi = almost_exact_intersection(geom_traits(), pa, pb, pc, pd);
-      if (intersection_not_in_the_two_triangles(pi)) {
-        // If the most-exact intersection point is not in the union of the two
-        // triangles, then snap to `pc` or `pd`...
-        if(compare_distance(pi, pc, pd) == SMALLER) {
-          vi = vcc;
-        } else {
-          vi = vdd;
-        }
-      }
-    }
-    if(vi != vcc && vi != vdd) {
-      remove_constrained_edge(f, i);
-      vi = virtual_insert(pi, f);
-    }
-  }
-#ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
-  std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::insert_intersection, `vi` is ( " << display_vertex(vi)
-            << " )\n";
-#endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
   return vi;
 }
 
@@ -1264,7 +1074,7 @@ Constrained_triangulation_2<Gt,Tds,Itag>::
 intersect(Face_handle f, int i,
           Vertex_handle vaa,
           Vertex_handle vbb,
-          Exact_predicates_tag itag)
+          Exact_predicates_tag)
 {
   Vertex_handle  vcc, vdd;
   vcc = f->vertex(cw(i));
@@ -1277,16 +1087,36 @@ intersect(Face_handle f, int i,
 
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
   std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::intersect segment ( " << display_vertex(vaa)
-            << " , " << display_vertex(vbb)
-            << " ) with edge ( " << display_vertex(vcc)
-            << " , " << display_vertex(vdd)
+            << "CT_2::intersect segment ( #" << vaa->time_stamp() << "= " << vaa->point()
+            << " , #" << vbb->time_stamp() << "= " << vbb->point()
+            << " ) with edge ( #"<< vcc->time_stamp() << "= " << vcc->point()
+            << " , #" << vdd->time_stamp() << "= " << vdd->point()
             << " )\n";
 #endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
-  Vertex_handle vi = insert_intersection(f, i, vaa, vbb, vcc, vdd, pa, pb, pc, pd, itag);
+  Point pi; //creator for point is required here
+  Itag itag = Itag();
+  bool ok  = intersection(geom_traits(), pa, pb, pc, pd, pi, itag );
+
+  Vertex_handle vi;
+  if ( !ok) {  //intersection detected but not computed
+    int int_index = limit_intersection(geom_traits(), pa, pb, pc, pd, itag);
+    switch(int_index){
+    case 0 : vi = vaa; break;
+    case 1 : vi = vbb; break;
+    case 2 : vi = vcc; break;
+    case 3 : vi = vdd; break;
+    }
+    if(vi == vaa || vi == vbb) {
+      remove_constrained_edge(f, i);
+    }
+  }
+  else{ //intersection computed
+    remove_constrained_edge(f, i);
+    vi = virtual_insert(pi, f);
+  }
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
   std::cerr << CGAL::internal::cdt_2_indent_level
-            << "CT_2::intersect, `vi` is ( " << display_vertex(vi)
+            << "CT_2::intersect, `vi` is ( #" << vi->time_stamp() << "= " << vi->point()
             << " )\n";
 #endif // CGAL_CDT_2_DEBUG_INTERSECTIONS
 
@@ -1342,7 +1172,7 @@ update_constraints_incident(Vertex_handle va,
     //dimension() ==2
     int cwi, ccwi, indf;
     Face_circulator fc=incident_faces(va), done(fc);
-    CGAL_assertion(fc != nullptr);
+    CGAL_triangulation_assertion(fc != nullptr);
     do {
       indf = fc->index(va);
       cwi=cw(indf);
@@ -1390,7 +1220,7 @@ update_constraints_opposite(Vertex_handle va)
   // update status of edges opposite to a
   // after insertion of a
 {
-  CGAL_assertion(dimension()==2);
+  CGAL_triangulation_assertion(dimension()==2);
   Face_handle f=va->face(), start=f;
   int indf;
   do {
@@ -1497,9 +1327,9 @@ remove(Vertex_handle  v)
   // remove a vertex and updates the constrained edges of the new faces
   // precondition : there is no incident constraints
 {
-  CGAL_precondition( v != Vertex_handle() );
-  CGAL_precondition( ! is_infinite(v));
-  CGAL_precondition( ! are_there_incident_constraints(v));
+  CGAL_triangulation_precondition( v != Vertex_handle() );
+  CGAL_triangulation_precondition( ! is_infinite(v));
+  CGAL_triangulation_precondition( ! are_there_incident_constraints(v));
 
   if  (number_of_vertices() == 1)     remove_first(v);
   else if (number_of_vertices() == 2) remove_second(v);
@@ -1838,7 +1668,7 @@ intersection(const Gt& gt,
 #endif
   typedef typename Gt::Construct_bbox_2 Construct_bbox_2;
   Construct_bbox_2 bbox = gt.construct_bbox_2_object();
-  auto bb(bbox(pi));
+  typename boost::result_of<const Construct_bbox_2(const typename Gt::Point_2&)>::type bb(bbox(pi));
   bb.dilate(dist);
   if(do_overlap(bb, bbox(pa))) pi = pa;
   if(do_overlap(bb, bbox(pb))) pi = pb;
@@ -1867,7 +1697,7 @@ intersection(const Gt& gt,
   typedef typename Gt::FT FT;
   return intersection(gt,pa,pb,pc,pd,pi,
                       exact_predicates_tag,
-                      Boolean_tag<std::is_floating_point<FT>::value>());
+                      Boolean_tag<boost::is_floating_point<FT>::value>());
 }
 
 
@@ -1885,8 +1715,10 @@ compute_intersection(const Gt& gt,
   typename Gt::Intersect_2 compute_intersec = gt.intersect_2_object();
   typename Gt::Construct_segment_2 construct_segment = gt.construct_segment_2_object();
 
-  auto result =
-      compute_intersec(construct_segment(pa, pb), construct_segment(pc, pd));
+  auto // CGAL::cpp11::result_of<typename Gt::Intersect_2(Segment_2, Segment_2)>::type
+    result = compute_intersec(construct_segment(pa,pb),
+                              construct_segment(pc,pd));
+
 
 #ifdef CGAL_CDT_2_DEBUG_INTERSECTIONS
   typedef typename Gt::Segment_2 Segment_2;
@@ -1908,14 +1740,51 @@ compute_intersection(const Gt& gt,
   return false;
 }
 
+
+template<class Gt>
+int
+limit_intersection(const Gt& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   No_constraint_intersection_tag)
+{
+  return 0;
+}
+
+template<class Gt>
+int
+limit_intersection(const Gt& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   No_constraint_intersection_requiring_constructions_tag)
+{
+  return 0;
+}
+
+template<class Gt>
+int
+limit_intersection(const Gt& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   const typename Gt::Point_2& ,
+                   Exact_intersections_tag)
+{
+  return 0;
+}
+
 template<class Gt>
 int
 limit_intersection(const Gt& gt,
-                   const typename Gt::Point_2& pa,
-                   const typename Gt::Point_2& pb,
-                   const typename Gt::Point_2& pc,
-                   const typename Gt::Point_2& pd,
-                   Exact_predicates_tag)
+             const typename Gt::Point_2& pa,
+             const typename Gt::Point_2& pb,
+             const typename Gt::Point_2& pc,
+             const typename Gt::Point_2& pd,
+             Exact_predicates_tag)
 {
   typename Gt::Construct_line_2 line = gt.construct_line_2_object();
   typename Gt::Compute_squared_distance_2
@@ -1931,85 +1800,6 @@ limit_intersection(const Gt& gt,
   if ( dc < dx  ) { dx = dc; i = 2;}
   if ( dd < dx  ) { i = 3;}
   return i;
-}
-
-template <typename Gt>
-typename Gt::Point_2
-almost_exact_intersection(const Gt& gt,
-                          const typename Gt::Point_2& pa,
-                          const typename Gt::Point_2& pb,
-                          const typename Gt::Point_2& pc,
-                          const typename Gt::Point_2& pd)
-{
-  Boolean_tag<internal::can_construct_almost_exact_intersection_v<Gt>> tag;
-  return almost_exact_intersection(gt, pa, pb, pc, pd, tag);
-}
-
-template <typename Gt>
-typename Gt::Point_2
-almost_exact_intersection(const Gt&,
-                          const typename Gt::Point_2&,
-                          const typename Gt::Point_2&,
-                          const typename Gt::Point_2&,
-                          const typename Gt::Point_2&,
-                          Tag_false)
-{
-  CGAL_error_msg("this function should be call only with Exact_predicates_tag"
-                 " and with an appropriate traits class");
-}
-
-template <typename K2_Point_2, typename K1>
-auto convert_point_type(const CGAL::Point_2<K1> &p) {
-  NT_converter<typename K1::FT, typename Kernel_traits<K2_Point_2>::Kernel::FT> c;
-  return K2_Point_2(c(p.x()), c(p.y()));
-}
-
-template <typename K2_Point_3, typename K1>
-auto convert_point_type(const CGAL::Point_3<K1> &p) {
-  NT_converter<typename K1::FT, typename Kernel_traits<K2_Point_3>::Kernel::FT> c;
-  return K2_Point_3(c(p.x()), c(p.y()), c(p.z()));
-}
-
-template <class Gt>
-typename Gt::Point_2
-exact_intersection_point_for_cdt_2(const typename Gt::Point_2& pa,
-                                   const typename Gt::Point_2& pb,
-                                   const typename Gt::Point_2& pc,
-                                   const typename Gt::Point_2& pd,
-                                   const Gt& gt)
-{
-  using Exact_kernel = typename Gt::Exact_kernel;
-  using Exact_point = typename Exact_kernel::Point_2;
-  using Exact_FT = typename Exact_kernel::FT;
-  using Point = typename Gt::Point_2;
-
-  const auto ea = convert_point_type<Exact_point>(pa);
-  const auto eb = convert_point_type<Exact_point>(pb);
-  const auto ec = convert_point_type<Exact_point>(pc);
-  const auto ed = convert_point_type<Exact_point>(pd);
-
-  auto det = [](const auto& v1, const auto& v2) -> Exact_FT {
-    return v1.x() * v2.y() - v1.y() * v2.x();
-  };
-
-  const Exact_FT det_bd_cd = det(ed - eb, ed - ec);
-  const Exact_FT det_ba_cd = det(ea - eb, ec - ed);
-  const Exact_FT alpha = det_bd_cd / det_ba_cd;
-
-  return convert_point_type<Point>(
-      gt.exact_kernel().construct_barycenter_2_object()(ea, alpha, eb));
-}
-
-template <typename Gt>
-typename Gt::Point_2
-almost_exact_intersection(const Gt& gt,
-                          const typename Gt::Point_2& pa,
-                          const typename Gt::Point_2& pb,
-                          const typename Gt::Point_2& pc,
-                          const typename Gt::Point_2& pd,
-                          Tag_true /* gt has Construct_exact_intersection_point_2 */)
-{
-  return exact_intersection_point_for_cdt_2(pa, pb, pc, pd, gt);
 }
 
 } //namespace CGAL

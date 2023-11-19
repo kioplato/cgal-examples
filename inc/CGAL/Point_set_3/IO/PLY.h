@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_3/include/CGAL/Point_set_3/IO/PLY.h $
-// $Id: PLY.h 1e6519e 2023-05-11T17:28:21+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_3/include/CGAL/Point_set_3/IO/PLY.h $
+// $Id: PLY.h ad79d37 2021-09-29T11:46:30+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Simon Giraudot
@@ -13,7 +13,7 @@
 
 #include <CGAL/license/Point_set_3.h>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 #include <CGAL/IO/PLY.h>
 #include <CGAL/IO/io.h>
@@ -21,6 +21,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
+#ifdef DOXYGEN_RUNNING
+#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
+#define CGAL_BGL_NP_CLASS NamedParameters
+#define CGAL_DEPRECATED
+#endif
 
 namespace CGAL {
 
@@ -333,11 +339,11 @@ bool read_PLY(std::istream& is, CGAL::Point_set_3<Point, Vector>& point_set)
 
   \return `true` if the reading was successful, `false` otherwise.
 */
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool read_PLY(const std::string& fname,
               CGAL::Point_set_3<Point, Vector>& point_set,
               std::string& comments,
-              const CGAL_NP_CLASS& np = parameters::default_values())
+              const CGAL_BGL_NP_CLASS& np)
 {
   const bool binary = CGAL::parameters::choose_parameter(CGAL::parameters::get_parameter(np, internal_np::use_binary_mode), true);
   if(binary)
@@ -355,12 +361,27 @@ bool read_PLY(const std::string& fname,
 }
 
 /// \cond SKIP_IN_MANUAL
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
-bool read_PLY(const std::string& fname, CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_NP_CLASS& np = parameters::default_values())
+
+template <typename Point, typename Vector>
+bool read_PLY(const std::string& fname, CGAL::Point_set_3<Point, Vector>& point_set, std::string& comments)
+{
+  return read_PLY(fname, point_set, comments, parameters::all_default());
+}
+
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+bool read_PLY(const std::string& fname, CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_BGL_NP_CLASS& np)
 {
   std::string unused_comments;
   return read_PLY(fname, point_set, unused_comments, np);
 }
+
+template <typename Point, typename Vector>
+bool read_PLY(const std::string& fname, CGAL::Point_set_3<Point, Vector>& point_set)
+{
+  std::string unused_comments;
+  return read_PLY(fname, point_set, unused_comments, parameters::all_default());
+}
+
 /// \endcond
 
 } // namespace IO
@@ -446,11 +467,11 @@ namespace IO {
 
   \return `true` if the reading was successful, `false` otherwise.
 */
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_PLY(std::ostream& os,
                const CGAL::Point_set_3<Point, Vector>& point_set,
                const std::string& comments,
-               const CGAL_NP_CLASS& np = parameters::default_values())
+               const CGAL_BGL_NP_CLASS& np)
 {
   typedef CGAL::Point_set_3<Point, Vector> Point_set;
   typedef typename Point_set::Index Index;
@@ -505,7 +526,7 @@ bool write_PLY(std::ostream& os,
 
     if(prop[i] == "point")
     {
-      if(std::is_same<typename Get_FT_from_map<typename Point_set::Point_map>::type, float>::value)
+      if(boost::is_same<typename Get_FT_from_map<typename Point_set::Point_map>::type, float>::value)
       {
         os << "property float x" << std::endl
            << "property float y" << std::endl
@@ -522,7 +543,7 @@ bool write_PLY(std::ostream& os,
     }
     if(prop[i] == "normal")
     {
-      if(std::is_same<typename Get_FT_from_map<typename Point_set::Vector_map>::type, float>::value)
+      if(boost::is_same<typename Get_FT_from_map<typename Point_set::Vector_map>::type, float>::value)
       {
         os << "property float nx" << std::endl
            << "property float ny" << std::endl
@@ -545,7 +566,7 @@ bool write_PLY(std::ostream& os,
       if(okay)
       {
         os << "property char " << prop[i] << std::endl;
-        printers.push_back(new internal::Simple_property_printer<Index,Int8_map>(pmap));
+        printers.push_back(new internal::Char_property_printer<Index,Int8_map>(pmap));
         continue;
       }
     }
@@ -555,7 +576,7 @@ bool write_PLY(std::ostream& os,
       if(okay)
       {
         os << "property uchar " << prop[i] << std::endl;
-        printers.push_back(new internal::Simple_property_printer<Index,Uint8_map>(pmap));
+        printers.push_back(new internal::Char_property_printer<Index,Uint8_map>(pmap));
         continue;
       }
     }
@@ -663,10 +684,22 @@ bool write_PLY(std::ostream& os,
 
 /// \cond SKIP_IN_MANUAL
 
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
-bool write_PLY(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_NP_CLASS& np = parameters::default_values())
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+bool write_PLY(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_BGL_NP_CLASS& np)
 {
   return write_PLY(os, point_set, std::string(), np);
+}
+
+template <typename Point, typename Vector>
+bool write_PLY(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_set, const std::string& comments)
+{
+  return write_PLY(os, point_set, comments, parameters::all_default());
+}
+
+template <typename Point, typename Vector>
+bool write_PLY(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_set)
+{
+  return write_PLY(os, point_set, std::string(), parameters::all_default());
 }
 
 /// \endcond
@@ -709,11 +742,11 @@ bool write_PLY(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_s
 
   \return `true` if the reading was successful, `false` otherwise.
 */
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_PLY(const std::string& fname,
                const CGAL::Point_set_3<Point, Vector>& point_set,
                const std::string& comments,
-               const CGAL_NP_CLASS& np)
+               const CGAL_BGL_NP_CLASS& np)
 {
   const bool binary = CGAL::parameters::choose_parameter(CGAL::parameters::get_parameter(np, internal_np::use_binary_mode), true);
   if(binary)
@@ -732,10 +765,23 @@ bool write_PLY(const std::string& fname,
 
 /// \cond SKIP_IN_MANUAL
 
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
-bool write_PLY(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_NP_CLASS& np = parameters::default_values())
+template <typename Point, typename Vector>
+bool write_PLY(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set,
+               const std::string& comments)
+{
+  return write_PLY(fname, point_set, comments, parameters::all_default());
+}
+
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+bool write_PLY(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_BGL_NP_CLASS& np)
 {
   return write_PLY(fname, point_set, std::string(), np);
+}
+
+template <typename Point, typename Vector>
+bool write_PLY(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set)
+{
+  return write_PLY(fname, point_set, std::string(), parameters::all_default());
 }
 
 /// \endcond

@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/BGL/include/CGAL/boost/graph/internal/OM_iterator_from_circulator.h $
-// $Id: OM_iterator_from_circulator.h 4f5f834 2022-06-10T07:37:53+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/BGL/include/CGAL/boost/graph/internal/OM_iterator_from_circulator.h $
+// $Id: OM_iterator_from_circulator.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -21,6 +21,7 @@
 #include <boost/concept_check.hpp>
 
 #include <boost/mpl/if.hpp>
+#include <boost/utility/enable_if.hpp>
 
 namespace CGAL {
 
@@ -91,12 +92,12 @@ public:
 // templates as a work-around.
 private:
   template <bool Prevent_deref_>
-  std::enable_if_t<Prevent_deref_, reference>
+  typename boost::enable_if_c<Prevent_deref_, reference>::type
   indirection() const {
     return const_cast<Self*>(this)->current;
   }
   template <bool Prevent_deref_>
-  std::enable_if_t<!Prevent_deref_, reference>
+  typename boost::disable_if_c<Prevent_deref_, reference>::type
   indirection() const {
     return *current;
   }
@@ -107,12 +108,12 @@ public:
 
 private:
   template <bool Prevent_deref_>
-  std::enable_if_t<!Prevent_deref_, pointer>
+  typename boost::disable_if_c<Prevent_deref_, pointer>::type
   structure_dereference() {
     return &(*current);
   }
   template <bool Prevent_deref_>
-  std::enable_if_t<Prevent_deref_, pointer>
+  typename boost::enable_if_c<Prevent_deref_, pointer>::type
   structure_dereference() {
     return &current;
   }

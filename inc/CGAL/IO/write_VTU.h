@@ -5,8 +5,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_2/include/CGAL/IO/write_VTU.h $
-// $Id: write_VTU.h 11de1f4 2022-06-17T10:39:35+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_2/include/CGAL/IO/write_VTU.h $
+// $Id: write_VTU.h e0a4dd0 2021-05-18T17:31:40+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -20,7 +20,6 @@
 #include <CGAL/assertions.h>
 #include <CGAL/IO/io.h>
 #include <CGAL/IO/VTK/VTK_writer.h>
-#include <CGAL/Triangulation_2/internal/In_domain.h>
 
 #include <iostream>
 #include <vector>
@@ -36,11 +35,10 @@ namespace internal {
 
 // writes the cells tags before binary data is appended
 
-  template <class CDT, class InDomainPmap>
+template <class CDT>
 void
 write_cells_tag_2(std::ostream& os,
                   const CDT & tr,
-                  InDomainPmap in_domain,
                   std::size_t number_of_triangles,
                   std::map<typename CDT::Vertex_handle, std::size_t> & V,
                   bool binary,
@@ -75,8 +73,8 @@ write_cells_tag_2(std::ostream& os,
             fit = tr.finite_faces_begin(),
             end = tr.finite_faces_end();
           fit != end; ++fit)
-    {
-      if(get(in_domain, fit))
+      {
+      if(fit->is_in_domain())
       {
         os << V[fit->vertex(0)] << " ";
         os << V[fit->vertex(2)] << " ";
@@ -116,7 +114,7 @@ write_cells_tag_2(std::ostream& os,
         fit != tr.finite_faces_end() ;
         ++fit )
     {
-      if(get(in_domain, fit))
+      if(fit->is_in_domain())
       {
         cells_offset += 3;
         os << cells_offset << " ";
@@ -151,7 +149,7 @@ write_cells_tag_2(std::ostream& os,
         fit != tr.finite_faces_end() ;
         ++fit )
     {
-      if(get(in_domain, fit))
+      if(fit->is_in_domain())
       {
         os << "5 ";
       }
@@ -168,11 +166,10 @@ write_cells_tag_2(std::ostream& os,
 }
 
 // writes the cells appended data at the end of the .vtu file
-  template <class CDT, class InDomainPmap>
+template <class CDT>
 void
 write_cells_2(std::ostream& os,
               const CDT & tr,
-              InDomainPmap in_domain,
               std::size_t number_of_triangles,
               std::map<typename CDT::Vertex_handle, std::size_t> & V)
 {
@@ -188,7 +185,7 @@ write_cells_2(std::ostream& os,
       end = tr.finite_faces_end();
       fit != end; ++fit)
   {
-    if(get(in_domain, fit))
+    if(fit->is_in_domain())
     {
       off += 3;
       offsets.push_back(off);
@@ -327,12 +324,11 @@ write_attributes_2(std::ostream& os,
   write_vector(os,att);
 }
 
-template <class CDT, class InDomainPmap>
+template <class CDT>
 void write_VTU_with_attributes(std::ostream& os,
-                               const CDT& tr,
-                               InDomainPmap in_domain,
-                               std::vector<std::pair<const char*, const std::vector<double>*> >& attributes,
-                               Mode mode = BINARY)
+               const CDT& tr,
+               std::vector<std::pair<const char*, const std::vector<double>*> >& attributes,
+               Mode mode = BINARY)
 {
   typedef typename CDT::Vertex_handle Vertex_handle;
   std::map<Vertex_handle, std::size_t> V;
@@ -359,14 +355,14 @@ void write_VTU_with_attributes(std::ostream& os,
       end = tr.finite_faces_end();
       fit != end; ++fit)
   {
-    if(get(in_domain, fit)) ++number_of_triangles;
+    if(fit->is_in_domain()) ++number_of_triangles;
   }
   os << "  <Piece NumberOfPoints=\"" << tr.number_of_vertices()
      << "\" NumberOfCells=\"" << number_of_triangles + std::distance(tr.constrained_edges_begin(), tr.constrained_edges_end()) << "\">\n";
   std::size_t offset = 0;
   const bool binary = (mode == BINARY);
   write_cdt_points_tag(os,tr,V,binary,offset);
-  write_cells_tag_2(os,tr, in_domain, number_of_triangles, V,binary,offset);
+  write_cells_tag_2(os,tr,number_of_triangles, V,binary,offset);
   if(attributes.empty())
       os << "    <CellData >\n";
   else
@@ -381,7 +377,7 @@ void write_VTU_with_attributes(std::ostream& os,
   if (binary) {
     os << "<AppendedData encoding=\"raw\">\n_";
     write_cdt_points(os,tr,V);  // write points before cells to fill the std::map V
-    write_cells_2(os, tr, in_domain, number_of_triangles, V);
+    write_cells_2(os,tr, number_of_triangles, V);
     for(std::size_t i = 0; i< attributes.size(); ++i)
       write_attributes_2(os, *attributes[i].second);
   }
@@ -390,25 +386,14 @@ void write_VTU_with_attributes(std::ostream& os,
 
 } // namespace internal
 
-template <class CDT, class InDomainPmap>
-void write_VTU(std::ostream& os,
-               const CDT& tr,
-               InDomainPmap ipm,
-               Mode mode = BINARY)
-{
-  std::vector<std::pair<const char*, const std::vector<double>*> > dummy_atts;
-  internal::write_VTU_with_attributes(os, tr, ipm, dummy_atts, mode);
-}
-
 template <class CDT>
 void write_VTU(std::ostream& os,
                const CDT& tr,
                Mode mode = BINARY)
 {
-  CGAL::internal::In_domain<CDT> in_domain;
-  write_VTU(os, tr, in_domain, mode);
+  std::vector<std::pair<const char*, const std::vector<double>*> > dummy_atts;
+  internal::write_VTU_with_attributes(os, tr, dummy_atts, mode);
 }
-
 
 } // namespace IO
 

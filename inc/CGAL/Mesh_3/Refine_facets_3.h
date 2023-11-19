@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_3/include/CGAL/Mesh_3/Refine_facets_3.h $
-// $Id: Refine_facets_3.h 8f703b5 2023-01-27T21:48:32+01:00 Mael
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_3/include/CGAL/Mesh_3/Refine_facets_3.h $
+// $Id: Refine_facets_3.h f8a2878 2021-07-13T11:38:43+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -38,7 +38,7 @@
 #ifdef CGAL_MESH_3_PROFILING
   #include <CGAL/Mesh_3/Profiling_tools.h>
 #endif
-#include <CGAL/SMDS_3/Dump_c3t3.h>
+#include <CGAL/Mesh_3/Dump_c3t3.h>
 
 #include <CGAL/Object.h>
 
@@ -348,7 +348,6 @@ public:
   std::string debug_info_element_impl(const Facet &facet) const
   {
     std::stringstream sstr;
-    sstr.precision(17);
     sstr << "Facet { " << std::endl
     << "  " << *facet.first->vertex((facet.second+1)%4) << std::endl
     << "  " << *facet.first->vertex((facet.second+2)%4) << std::endl
@@ -410,19 +409,19 @@ protected:
     return ( (facet < mirror)?facet:mirror );
   }
 
-  /// Returns true if `f` has already been visited.
+  /// Returns true if \c f has already been visited
   bool is_facet_visited(const Facet& f) const
   {
     return f.first->is_facet_visited(f.second);
   }
 
-  /// Sets facet `f` to visited.
+  /// Sets facet \c f to visited
   void set_facet_visited(Facet& f) const
   {
     f.first->set_facet_visited(f.second);
   }
 
-  /// Sets the facet `f` and its mirrored facet's surface centers to `p`.
+  /// Sets the facet \c f and its mirrored facet's surface centers to \c p
   void set_facet_surface_center(const Facet& f,
                                 const Bare_point& p,
                                 const Index& index) const
@@ -436,32 +435,32 @@ protected:
     mirror.first->set_facet_surface_center_index(mirror.second,index);
   }
 
-  /// Returns facet surface center of `f`.
+  /// Returns facet surface center of \c f
   Bare_point get_facet_surface_center(const Facet& f) const
   {
     return f.first->get_facet_surface_center(f.second);
   }
 
-  /// Returns index of surface center of facet `f`.
+  /// Returns index of surface center of facet \c f
   Index get_facet_surface_center_index(const Facet& f) const
   {
     return f.first->get_facet_surface_center_index(f.second);
   }
 
-  /// Sets `f` to surface facets, with index `index`.
+  /// Sets \c f to surface facets, with index \c index
   void set_facet_on_surface(const Facet& f,
                             const Surface_patch_index& index)
   {
     r_c3t3_.add_to_complex(f, index);
   }
 
-  /// Returns index of facet `f`.
+  /// Returns index of facet \c f
   Surface_patch_index get_facet_surface_index(const Facet& f) const
   {
     return r_c3t3_.surface_patch_index(f.first, f.second);
   }
 
-  /// Sets index and dimension of vertex `v`.
+  /// Sets index and dimension of vertex \c v
   void set_vertex_properties(Vertex_handle& v, const Index& index)
   {
     r_c3t3_.set_index(v, index);
@@ -478,7 +477,7 @@ protected:
   /// Insert facet into refinement queue
   void insert_bad_facet(Facet facet, const Quality& quality)
   {
-#ifdef CGAL_MESH_3_VERY_VERBOSE
+#if CGAL_MESH_3_VERY_VERBOSE
     std::stringstream s;
     s << "insert_bad_facet(" << debug_info_element_impl(facet) << ", ...) by thread "
       << std::this_thread::get_id() << '\n';
@@ -555,13 +554,13 @@ protected:
     return stream.str();
   }
 
-  /// Returns to if `f` is on surface
+  /// Returns to if \c f is on surface
   bool is_facet_on_surface(const Facet& f) const
   {
     return r_c3t3_.is_in_complex(f) ;
   }
 
-  /// Removes `f` from surface facets.
+  /// Removes \c f from surface facets
   void remove_facet_from_surface(const Facet& f)
   {
     r_c3t3_.remove_from_complex(f);
@@ -596,9 +595,9 @@ protected:
   void treat_new_facet(Facet& facet);
 
   /**
-   * Computes simultaneously `is_facet_on_surface` and `facet_surface_center`.
+   * Computes at once is_facet_on_surface and facet_surface_center.
    * @param facet The input facet
-   * @return `true` if `facet` is on surface, `false` otherwise
+   * @return \c true if \c facet is on surface, \c false otherwise
    */
   void compute_facet_properties(const Facet& facet, Facet_properties& fp,
                                 bool force_exact = false ) const;
@@ -836,12 +835,12 @@ public:
       Container_::get_next_local_element_impl());
   }
 
-  /// Tests if `p` encroaches facet from `zone`.
+  /// Tests if \c p encroaches facet from zone
   // For sequential
   Mesher_level_conflict_status
   test_point_conflict_from_superior_impl(const Weighted_point& p, Zone& zone);
 
-  /// Tests if `p` encroaches facet from `zone`.
+  /// Tests if \c p encroaches facet from zone
   // For parallel
   template <typename Mesh_visitor>
   Mesher_level_conflict_status
@@ -876,7 +875,7 @@ public:
                            , bool &facet_is_in_its_cz
                            , bool &could_lock_zone);
 
-  /// Inserts `p` into the triangulation.
+  /// Insert \c p into the triangulation
   Vertex_handle insert_impl(const Weighted_point& p, const Zone& zone);
 
   bool try_lock_element(const Facet &f, int lock_radius = 0) const
@@ -1052,8 +1051,7 @@ int
 Refine_facets_3<Tr,Cr,MD,C3T3_,P_,Ct,B_,C_>::
 number_of_bad_elements_impl()
 {
-  typedef typename MD::Subdomain_index        Subdomain_index;
-  typedef boost::optional<Subdomain_index>    Subdomain;
+  typedef typename MD::Subdomain Subdomain;
   typedef typename Tr::Finite_facets_iterator Finite_facet_iterator;
 
   int count = 0, count_num_bad_surface_facets = 0;
@@ -1473,7 +1471,7 @@ before_insertion_impl(const Facet& facet,
     error_msg <<
       boost::format("Mesh_3 ERROR: "
                     "A facet is not in conflict with its refinement point!\n"
-                    "Debugging information:\n"
+                    "Debugging informations:\n"
                     "  Facet: (%1%, %2%) = (%6%, %7%, %8%)\n"
                     "  Dual: %3%\n"
                     "  Refinement point: %5%\n"
@@ -1734,9 +1732,6 @@ Refine_facets_3_base<Tr,Cr,MD,C3T3_,Ct,C_>::
 is_facet_encroached(const Facet& facet,
                     const Weighted_point& point) const
 {
-  typedef typename MD::Subdomain_index        Subdomain_index;
-  typedef boost::optional<Subdomain_index>    Subdomain;
-
   if ( r_tr_.is_infinite(facet) || ! this->is_facet_on_surface(facet) )
     return false;
 
@@ -1746,40 +1741,9 @@ is_facet_encroached(const Facet& facet,
   const Bare_point& center = get_facet_surface_center(facet);
   const Weighted_point& reference_point = r_tr_.point(cell, (facet_index+1)&3);
 
-#ifdef CGAL_MESHES_DEBUG_REFINEMENT_POINTS
-  std::cout << "---------------------------------------------------" << std::endl;
-  std::cout << "Facet " << r_tr_.point(cell, (facet_index+1)%4) << " "
-                        << r_tr_.point(cell, (facet_index+2)%4) << " "
-                        << r_tr_.point(cell, (facet_index+3)%4) << std::endl;
-  std::cout << "center: " << center << std::endl;
-  std::cout << "cell point: " << reference_point << std::endl;
-  std::cout << "refinement point: " << point << std::endl;
-  std::cout << "greater or equal? " << r_tr_.greater_or_equal_power_distance(center, reference_point, point) << std::endl;
-  std::cout << "greater or equal (other way)? " << r_tr_.greater_or_equal_power_distance(center, point, reference_point) << std::endl;
-  std::cout << "index of cell " << r_c3t3_.subdomain_index(cell) << std::endl;
-#endif
-
   // the facet is encroached if the new point is closer to the center than
   // any vertex of the facet
-  if(r_tr_.greater_or_equal_power_distance(center, reference_point, point))
-    return true;
-
-  // In an ideal (exact) world, when the predicate above returns true then the insertion
-  // of the refinement point will shorten the dual of the facet but that dual will
-  // still intersects the surface (domain), otherwise the power distance to the surface
-  // center would be shorter.
-  //
-  // In the real world, we can make an error both when we switch back to the inexact kernel
-  // and when we evaluate the domain (e.g. trigonometry-based implicit functions).
-  //
-  // An issue can then arise when we update the restricted Delaunay due to the insertion
-  // of another point, and we do not notice that a facet should in fact have been encroached
-  // by a previous insertion.
-  Bare_point cc;
-  r_tr_.dual_exact(facet, point, cc);
-
-  const Subdomain subdomain = r_oracle_.is_in_domain_object()(cc);
-  return (!subdomain || *subdomain != r_c3t3_.subdomain_index(cell));
+  return r_tr_.greater_or_equal_power_distance(center, reference_point, point);
 }
 
 template<class Tr, class Cr, class MD, class C3T3_, class Ct, class C_>
@@ -1872,8 +1836,8 @@ is_encroached_facet_refinable(Facet& facet) const
 }
 
 /**
-  * `facet` is an internal facet we are going to remove
-  * `source_facet` is the facet we want to refine by inserting a new point
+  * \c facet is an internal facet we are going to remove
+  * \c source_facet is the facet we want to refine by inserting a new point
   */
 template<class Tr, class Cr, class MD, class C3T3_, class Ct, class C_>
 bool

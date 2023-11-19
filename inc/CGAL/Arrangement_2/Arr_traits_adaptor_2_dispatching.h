@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arrangement_2/Arr_traits_adaptor_2_dispatching.h $
-// $Id: Arr_traits_adaptor_2_dispatching.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arrangement_2/Arr_traits_adaptor_2_dispatching.h $
+// $Id: Arr_traits_adaptor_2_dispatching.h 2a3fbc0 2019-11-19T09:47:44+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -63,11 +63,11 @@ private:
   typedef boost::mpl::bool_< false > false_;
 
   typedef boost::mpl::if_<
-       std::is_same< Arr_smaller_implementation_tag, Arr_use_traits_tag >,
+       boost::is_same< Arr_smaller_implementation_tag, Arr_use_traits_tag >,
        true_, false_ > Smaller_traits;
 
   typedef boost::mpl::if_<
-       std::is_same< Arr_larger_implementation_tag, Arr_use_traits_tag >,
+       boost::is_same< Arr_larger_implementation_tag, Arr_use_traits_tag >,
        true_, false_ > Larger_traits;
 
 public:
@@ -258,7 +258,7 @@ namespace Is_on_y_identification_2 {
 
 namespace Compare_y_on_boundary_2 {
 
- // Points
+ // Poitns
  template < class ArrSideTag >
   struct Points {
     typedef Arr_use_dummy_tag type;

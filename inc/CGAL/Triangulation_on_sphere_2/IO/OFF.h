@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Triangulation_on_sphere_2/include/CGAL/Triangulation_on_sphere_2/IO/OFF.h $
-// $Id: OFF.h d3fca65 2022-09-23T12:49:40+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Triangulation_on_sphere_2/include/CGAL/Triangulation_on_sphere_2/IO/OFF.h $
+// $Id: OFF.h fb6f703 2021-05-04T14:07:49+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -14,15 +14,21 @@
 
 #include <CGAL/license/Triangulation_on_sphere_2.h>
 
-#include <CGAL/assertions.h>
+#include <CGAL/triangulation_assertions.h>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 #include <CGAL/IO/helpers.h>
 
 #include <fstream>
 #include <string>
 #include <unordered_map>
+
+#ifdef DOXYGEN_RUNNING
+#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
+#define CGAL_BGL_NP_CLASS NamedParameters
+#define CGAL_DEPRECATED
+#endif
 
 namespace CGAL {
 
@@ -62,10 +68,10 @@ namespace IO {
 
   \return `true` if the writing was successful, `false` otherwise.
  */
-template <typename Gt, typename Tds, typename NamedParameters = parameters::Default_named_parameters>
+template <typename Gt, typename Tds, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_OFF(std::ostream& os,
                const CGAL::Triangulation_on_sphere_2<Gt, Tds>& dt,
-               const NamedParameters& np = parameters::default_values())
+               const CGAL_BGL_NP_CLASS& np)
 {
   typedef Triangulation_on_sphere_2<Gt,Tds>             Tr;
   typedef typename Tr::Vertex_handle                    Vertex_handle;
@@ -94,7 +100,7 @@ bool write_OFF(std::ostream& os,
     index_of_vertex[vh] = i;
   }
 
-  CGAL_assertion(i == n);
+  CGAL_triangulation_assertion(i == n);
 
   size_type number_of_triangles = 0;
   for(Face_iterator fit = dt.all_faces_begin() ; fit != dt.all_faces_end() ; ++fit)
@@ -130,6 +136,16 @@ bool write_OFF(std::ostream& os,
   return !os.fail();
 }
 
+/// \cond SKIP_IN_MANUAL
+
+template <typename Gt, typename Tds>
+bool write_OFF(std::ostream& os, const CGAL::Triangulation_on_sphere_2<Gt, Tds>& dt)
+{
+  return write_OFF(os, dt, parameters::all_default());
+}
+
+/// \endcond
+
 /*!
   \ingroup PkgPointSet3IOOFF
 
@@ -153,14 +169,25 @@ bool write_OFF(std::ostream& os,
 
   \return `true` if the writing was successful, `false` otherwise.
 */
-template <typename Gt, typename Tds, typename NamedParameters = parameters::Default_named_parameters>
+template <typename Gt, typename Tds, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_OFF(const std::string& fname,
                const CGAL::Triangulation_on_sphere_2<Gt, Tds>& dt,
-               const NamedParameters& np = parameters::default_values())
+               const CGAL_BGL_NP_CLASS& np)
 {
   std::ofstream os(fname); // stream precision will be set in the ostream overload
   return write_OFF(os, dt, np);
 }
+
+/// \cond SKIP_IN_MANUAL
+
+template <typename Gt, typename Tds>
+bool write_OFF(const std::string& fname, const CGAL::Triangulation_on_sphere_2<Gt, Tds>& dt)
+{
+  std::ofstream os(fname);
+  return write_OFF(os, dt, parameters::all_default());
+}
+
+/// \endcond
 
 } } // namespace CGAL::IO
 

@@ -3,14 +3,14 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Number_types/include/CGAL/Sqrt_extension/convert_to_bfi.h $
-// $Id: convert_to_bfi.h 153c603 2023-01-27T22:09:02+01:00 Mael
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Number_types/include/CGAL/Sqrt_extension/convert_to_bfi.h $
+// $Id: convert_to_bfi.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
 // Author(s)     : Michael Hemmer   <hemmer@mpi-inf.mpg.de>
 
-// This file adds an optional static cache to convert_to_bfi for Sqrt_extension
+// This files adds an optional static cache to convert_to_bfi for Sqrt_extension
 
 #ifndef CGAL_SQRT_EXTENSION_CONVERT_TO_BFI_H
 #define CGAL_SQRT_EXTENSION_CONVERT_TO_BFI_H
@@ -23,7 +23,7 @@
 #include <CGAL/tss.h>
 
 
-// Disable SQRT_EXTENSION_TO_BFI_CACHE by default
+// Disbale SQRT_EXTENSION_TO_BFI_CACHE by default
 #ifndef CGAL_USE_SQRT_EXTENSION_TO_BFI_CACHE
 #define CGAL_USE_SQRT_EXTENSION_TO_BFI_CACHE 0
 #endif

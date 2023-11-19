@@ -6,8 +6,8 @@
  This file is part of a fork of the QGLViewer library version 2.7.0.
 
 *****************************************************************************/
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/GraphicsView/include/CGAL/Qt/qglviewer.h $
-// $Id: qglviewer.h 4547818 2022-11-15T13:39:40+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/GraphicsView/include/CGAL/Qt/qglviewer.h $
+// $Id: qglviewer.h 3640099 2021-09-28T15:36:51+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef QGLVIEWER_QGLVIEWER_H
@@ -138,8 +138,8 @@ public Q_SLOTS:
   void setGridIsDrawn(bool draw = true) {
     if(!draw)
     {
-      grid_size = 0;
-      grid_axis_size = 0;
+      grid_size=0;
+      g_axis_size=0;
     }
     gridIsDrawn_ = draw;
     Q_EMIT gridIsDrawnChanged(draw);
@@ -385,7 +385,7 @@ public:
    * of the world and the origin of the scene. It is relevant when the whole scene is translated
    * of a big number, because there is a useless loss of precision when drawing.
    *
-   * The offset must be added to the drawn coordinates, and subtracted from the computation
+   * The offset must be added to the drawn coordinates, and substracted from the computation
    * \attention  the result of pointUnderPixel is the real item translated by the offset.
    *
    */
@@ -395,7 +395,7 @@ public:
    * returns the offset of the scene.
    * \see `setOffset()`
    */
-  const qglviewer::Vec& offset() const;
+  qglviewer::Vec offset()const;
 
 public Q_SLOTS:
   void setFullScreen(bool fullScreen = true);
@@ -411,8 +411,7 @@ protected:
   //@{
 public:
   void drawArrow(double r, double R, int prec,
-                 const qglviewer::Vec& from, const qglviewer::Vec& to,
-                 std::vector<float> &data);
+                        qglviewer::Vec from, qglviewer::Vec to, qglviewer::Vec color, std::vector<float> &data);
   void drawAxis(qreal l = 1.0);
   void drawGrid(qreal size= 1.0, int nbSubdivisions = 10);
 
@@ -563,21 +562,6 @@ public:
    * Prompt a configuration dialog and takes a snapshot.
    */
   void saveSnapshot();
-
-  /*!
-   * Takes a snapshot without any dialog
-   */
-  void saveSnapshot(const QString& fileName,
-                    const qreal finalWidth,
-                    const qreal finalHeight,
-                    const bool expand = false,
-                    const double oversampling = 1.,
-                    qglviewer::SnapShotBackground background_color = qglviewer::CURRENT_BACKGROUND);
-
-  void saveSnapshot(const QString& fileName)
-  {
-    return saveSnapshot(fileName, this->width(), this->height());
-  }
 
 public:
 Q_SIGNALS:
@@ -1181,31 +1165,27 @@ protected:
   enum VBO
   {
     Grid = 0,
-    Grid_axis_x, Grid_axis_y,
-    Axis_x, Axis_y, Axis_z,
+    Grid_axis,
+    Axis,
     Pivot_point,
     VBO_size
   };
-
   enum VAO
   {
     GRID = 0,
-    GRID_AXIS_X, GRID_AXIS_Y,
-    AXIS_X, AXIS_Y, AXIS_Z,
+    GRID_AXIS,
+    AXIS,
     PIVOT_POINT,
     VAO_size
   };
-
   QOpenGLShaderProgram rendering_program;
+  QOpenGLShaderProgram rendering_program_light;
   QOpenGLVertexArrayObject vaos[VAO_size];
   QVector<QOpenGLBuffer> vbos;
-
   std::size_t grid_size;
-  std::size_t grid_axis_size;
+  std::size_t g_axis_size;
   std::size_t axis_size;
-
   QOpenGLFramebufferObject* stored_fbo;
-
   //S n a p s h o t
   QImage* takeSnapshot(qglviewer::SnapShotBackground  background_color,
                        QSize finalSize, double oversampling, bool expand);

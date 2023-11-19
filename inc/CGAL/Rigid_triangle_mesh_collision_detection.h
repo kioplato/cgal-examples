@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Rigid_triangle_mesh_collision_detection.h $
-// $Id: Rigid_triangle_mesh_collision_detection.h 9242a81 2023-02-07T11:31:55+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Rigid_triangle_mesh_collision_detection.h $
+// $Id: Rigid_triangle_mesh_collision_detection.h 495f2e3 2022-09-21T18:59:18+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -37,7 +37,7 @@
 namespace CGAL {
 
 /*!
- * \ingroup PkgPolygonMeshProcessingRef
+ * \ingroup PkgPolygonMeshProcessing
  * This class provides methods to perform some intersection tests between triangle meshes
  * that undergo affine transformations (rotation, translation, and scaling).
  * Meshes are added to an internal set and are referenced using an id assigned when added to the set.
@@ -244,13 +244,13 @@ public:
   *   \cgalParamNEnd
   * \cgalNamedParamsEnd
   */
-  template <class NamedParameters = parameters::Default_named_parameters>
+  template <class NamedParameters>
   std::size_t add_mesh(const TriangleMesh& tm,
-                       const NamedParameters& np = parameters::default_values())
+                       const NamedParameters& np)
   {
     // handle vpm
     typedef typename CGAL::GetVertexPointMap<TriangleMesh, NamedParameters>::const_type Local_vpm;
-    CGAL_static_assertion( (std::is_same<Local_vpm,Vpm>::value) );
+    CGAL_static_assertion( (boost::is_same<Local_vpm,Vpm>::value) );
 
     Vpm vpm =
       parameters::choose_parameter(parameters::get_parameter(np, internal_np::vertex_point),
@@ -303,8 +303,8 @@ public:
   *   \cgalParamNEnd
   * \cgalNamedParamsEnd
   */
-  template <class NamedParameters = parameters::Default_named_parameters>
-  std::size_t add_mesh(const AABB_tree& tree, const TriangleMesh& tm, const NamedParameters& np = parameters::default_values())
+  template <class NamedParameters>
+  std::size_t add_mesh(const AABB_tree& tree, const TriangleMesh& tm, const NamedParameters& np)
   {
     std::size_t id = get_id_for_new_mesh();
     CGAL_assertion( m_aabb_trees[id] == nullptr );
@@ -550,19 +550,19 @@ public:
   *   \cgalParamNEnd
   * \cgalNamedParamsEnd
   */
-  template <class NamedParameters = parameters::Default_named_parameters>
+  template <class NamedParameters>
   static
   void collect_one_point_per_connected_component(
     const TriangleMesh& tm,
           std::vector<Point_3>& points,
-    const NamedParameters& np = parameters::default_values())
+    const NamedParameters& np)
   {
     const bool maybe_several_cc =
       parameters::choose_parameter(
         parameters::get_parameter(np, internal_np::apply_per_connected_component), true);
 
     typedef typename CGAL::GetVertexPointMap<TriangleMesh, NamedParameters>::const_type Local_vpm;
-    CGAL_static_assertion((std::is_same<Local_vpm,Vpm>::value));
+    CGAL_static_assertion((boost::is_same<Local_vpm,Vpm>::value));
 
     Vpm vpm =
       parameters::choose_parameter(parameters::get_parameter(np, internal_np::vertex_point),
@@ -579,7 +579,7 @@ public:
 
       std::size_t nb_cc =
         Polygon_mesh_processing::connected_components(
-          tm, make_compose_property_map(fid_map, make_property_map(cc_ids)),
+          tm, bind_property_maps(fid_map, make_property_map(cc_ids)),
           parameters::face_index_map(fid_map));
       if (nb_cc != 1)
       {
@@ -628,6 +628,25 @@ public:
     m_points_per_cc[id] = points_per_cc;
 
     return id;
+  }
+
+  // versions without NP
+  static
+  void collect_one_point_per_connected_component(
+    const TriangleMesh& tm,
+          std::vector<typename K::Point_3>& points)
+  {
+    collect_one_point_per_connected_component(tm, points, parameters::all_default());
+  }
+
+  std::size_t add_mesh(const TriangleMesh& tm)
+  {
+    return add_mesh(tm, parameters::all_default());
+  }
+
+  std::size_t add_mesh(const AABB_tree& tree, const TriangleMesh& tm)
+  {
+    return add_mesh(tree, tm, parameters::all_default());
   }
 #endif
 };

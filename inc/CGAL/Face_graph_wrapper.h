@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_mesh_topology/include/CGAL/Face_graph_wrapper.h $
-// $Id: Face_graph_wrapper.h 999a813 2022-05-05T13:34:19+02:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_mesh_topology/include/CGAL/Face_graph_wrapper.h $
+// $Id: Face_graph_wrapper.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -13,7 +13,6 @@
 #define CGAL_FACE_GRAPH_WRAPPER_H 1
 
 #include <CGAL/license/Surface_mesh_topology.h>
-#include <CGAL/assertions.h>
 
 #include <CGAL/Surface_mesh_topology/internal/Functors_for_face_graph_wrapper.h>
 #include <CGAL/Surface_mesh_topology/internal/Iterators_for_face_graph_wrapper.h>
@@ -24,7 +23,6 @@
 #include <CGAL/Generalized_map_fwd.h>
 #include <CGAL/Linear_cell_complex_fwd.h>
 #include <CGAL/Polygonal_schema_fwd.h>
-
 #include <bitset>
 
 namespace CGAL
@@ -51,13 +49,13 @@ public:
     // typedef My_halfedge_iterator<HEG> const_iterator; // TODO ?
   };
 
-  typedef typename boost::graph_traits<HEG>::halfedge_descriptor Dart_descriptor;
-  typedef typename boost::graph_traits<HEG>::halfedge_descriptor Dart_const_descriptor;
+  typedef typename boost::graph_traits<HEG>::halfedge_descriptor Dart_handle;
+  typedef typename boost::graph_traits<HEG>::halfedge_descriptor Dart_const_handle;
 
-   typedef Dart_descriptor Null_descriptor_type;
-  // typedef CGAL::Void* Null_descriptor_type;
-   static const Null_descriptor_type null_descriptor; //=Dart_descriptor();
-   static const Null_descriptor_type null_dart_descriptor; //=Dart_descriptor();
+   typedef Dart_handle Null_handle_type;
+  // typedef CGAL::Void* Null_handle_type;
+   static const Null_handle_type null_handle; //=Dart_handle();
+   static const Null_handle_type null_dart_handle; //=Dart_handle();
 
   /// Number of marks
   static const size_type NB_MARKS = 32;
@@ -117,15 +115,15 @@ public:
   { return m_fg; }
 
   template<unsigned int i>
-  bool is_free(Dart_const_descriptor /* dh */) const
+  bool is_free(Dart_const_handle /* dh */) const
   { return false; } // Not possible to have a free dart with an HEG.
-  bool is_free(Dart_const_descriptor /*dh*/, unsigned int /*i*/) const
+  bool is_free(Dart_const_handle /*dh*/, unsigned int /*i*/) const
   { return false; } // Not possible to have a free dart with an HEG.
 
-  bool is_perforated(Dart_const_descriptor dh) const
+  bool is_perforated(Dart_const_handle dh) const
   { return is_border(dh, m_fg); }
 
-  Dart_const_descriptor get_beta(Dart_const_descriptor ADart, int B1) const
+  Dart_const_handle get_beta(Dart_const_handle ADart, int B1) const
   {
     CGAL_assertion(B1>=0 && B1<=static_cast<int>(dimension));
     if (B1==1) return internal::Get_beta<HEG, 1>::value(m_fg, ADart);
@@ -133,7 +131,7 @@ public:
     return internal::Get_beta<HEG, 0>::value(m_fg, ADart);
   }
   template<int B1>
-  Dart_const_descriptor get_beta(Dart_const_descriptor ADart) const
+  Dart_const_handle get_beta(Dart_const_handle ADart) const
   {
     CGAL_assertion(B1>=0 && B1<=static_cast<int>(dimension));
     return internal::Get_beta<HEG, B1>::value(m_fg, ADart);
@@ -142,52 +140,52 @@ public:
   bool is_empty() const
   { return number_of_darts()==0; }
 
-  /* ??  bool is_dart_used(Dart_const_descriptor dh) const
+  /* ??  bool is_dart_used(Dart_const_handle dh) const
       { return true; ?? } */
 
-  int highest_nonfree_dimension(Dart_const_descriptor /* dh */) const
+  int highest_nonfree_dimension(Dart_const_handle /* dh */) const
   { return 2; }
 
-  Dart_const_descriptor previous(Dart_const_descriptor ADart) const
+  Dart_const_handle previous(Dart_const_handle ADart) const
   { return get_beta<0>(ADart); }
-  Dart_const_descriptor next(Dart_const_descriptor ADart) const
+  Dart_const_handle next(Dart_const_handle ADart) const
   { return get_beta<1>(ADart); }
-  Dart_const_descriptor opposite(Dart_const_descriptor dh) const
+  Dart_const_handle opposite(Dart_const_handle dh) const
   { return get_beta<2>(dh); }
-  Dart_const_descriptor opposite2(Dart_const_descriptor dh) const
+  Dart_const_handle opposite2(Dart_const_handle dh) const
   { return get_beta<2>(dh); }
-  Dart_const_descriptor other_extremity(Dart_const_descriptor dh) const
+  Dart_const_handle other_extremity(Dart_const_handle dh) const
   { return get_beta<1>(dh); }
 
   template<unsigned int dim>
-  Dart_const_descriptor opposite(Dart_const_descriptor ADart) const
+  Dart_const_handle opposite(Dart_const_handle ADart) const
   { return this->template get_beta<dim>(ADart); }
-  Dart_const_descriptor other_orientation(Dart_const_descriptor ADart) const
+  Dart_const_handle other_orientation(Dart_const_handle ADart) const
   { return ADart; }
 
-  bool is_previous_exist(Dart_const_descriptor) const
+  bool is_previous_exist(Dart_const_handle) const
   { return true; }
-  bool is_next_exist(Dart_const_descriptor) const
+  bool is_next_exist(Dart_const_handle) const
   { return true; }
   template<unsigned int dim>
-  bool is_opposite_exist(Dart_const_descriptor /* ADart */) const
+  bool is_opposite_exist(Dart_const_handle /* ADart */) const
   { return true; }
 
   template<typename ...Betas>
-  Dart_descriptor beta(Dart_descriptor ADart, Betas... betas)
-  { return CGAL::internal::Beta_functor<Self, Dart_descriptor, Betas...>::
+  Dart_handle beta(Dart_handle ADart, Betas... betas)
+  { return CGAL::internal::Beta_functor<Self, Dart_handle, Betas...>::
       run(*this, ADart, betas...); }
   template<typename ...Betas>
-  Dart_const_descriptor beta(Dart_const_descriptor ADart, Betas... betas) const
-  { return CGAL::internal::Beta_functor<const Self, Dart_const_descriptor, Betas...>::
+  Dart_const_handle beta(Dart_const_handle ADart, Betas... betas) const
+  { return CGAL::internal::Beta_functor<const Self, Dart_const_handle, Betas...>::
       run(*this, ADart, betas...); }
   template<int... Betas>
-  Dart_descriptor beta(Dart_descriptor ADart)
-  { return CGAL::internal::Beta_functor_static<Self, Dart_descriptor, Betas...>::
+  Dart_handle beta(Dart_handle ADart)
+  { return CGAL::internal::Beta_functor_static<Self, Dart_handle, Betas...>::
       run(*this, ADart); }
   template<int... Betas>
-  Dart_const_descriptor beta(Dart_const_descriptor ADart) const
-  { return CGAL::internal::Beta_functor_static<const Self, Dart_const_descriptor, Betas...>::
+  Dart_const_handle beta(Dart_const_handle ADart) const
+  { return CGAL::internal::Beta_functor_static<const Self, Dart_const_handle, Betas...>::
       run(*this, ADart); }
 
   size_type number_of_darts() const
@@ -270,27 +268,27 @@ public:
   void mark_null_dart( size_type /*amark*/) const
   {}
 
-  bool get_dart_mark(Dart_const_descriptor ADart, size_type amark) const
+  bool get_dart_mark(Dart_const_handle ADart, size_type amark) const
   {
     CGAL_assertion(is_reserved(amark));
     return get(m_all_marks, ADart)[amark];
   }
-  void set_dart_mark(Dart_const_descriptor ADart, size_type amark, bool avalue) const
+  void set_dart_mark(Dart_const_handle ADart, size_type amark, bool avalue) const
   {
     CGAL_assertion(is_reserved(amark));
     const_cast<std::bitset<NB_MARKS>& >(get(m_all_marks, ADart)).set(amark, avalue);
   }
 
-  void flip_dart_mark(Dart_const_descriptor ADart, size_type amark) const
+  void flip_dart_mark(Dart_const_handle ADart, size_type amark) const
   { set_dart_mark(ADart, amark, !get_dart_mark(ADart, amark)); }
 
-  bool is_marked(Dart_const_descriptor adart, size_type amark) const
+  bool is_marked(Dart_const_handle adart, size_type amark) const
   {
     CGAL_assertion(is_reserved(amark));
     return get_dart_mark(adart, amark)!=mmask_marks[amark];
   }
 
-  void set_mark_to(Dart_const_descriptor adart, size_type amark,
+  void set_mark_to(Dart_const_handle adart, size_type amark,
                    bool astate) const
   {
     CGAL_assertion(is_reserved(amark));
@@ -304,7 +302,7 @@ public:
     }
   }
 
-  void mark(Dart_const_descriptor adart, size_type amark) const
+  void mark(Dart_const_handle adart, size_type amark) const
   {
     CGAL_assertion(is_reserved(amark));
 
@@ -314,9 +312,9 @@ public:
     flip_dart_mark(adart, amark);
   }
 
-  void unmark(Dart_const_descriptor adart, size_type amark) const
+  void unmark(Dart_const_handle adart, size_type amark) const
   {
-    CGAL_assertion( adart!=this->null_dart_descriptor );
+    CGAL_assertion( adart!=this->null_dart_handle );
     CGAL_assertion( is_reserved(amark) );
 
     if (!is_marked(adart, amark)) return;
@@ -389,12 +387,12 @@ public:
   {
     typedef CGAL::internal::FGW_cell_iterator<Self, i> iterator;
     typedef CGAL::internal::FGW_cell_iterator<Self, i> const_iterator;
-    Dart_of_cell_range(const Self &amap, Dart_descriptor adart) : mmap(amap),
+    Dart_of_cell_range(const Self &amap, Dart_handle adart) : mmap(amap),
                                                               m_initdart(adart),
                                                               msize(0)
     {}
     const_iterator begin() const { return const_iterator(mmap, m_initdart); }
-    const_iterator end() const   { return const_iterator(mmap, m_initdart, mmap.null_descriptor); }
+    const_iterator end() const   { return const_iterator(mmap, m_initdart, mmap.null_handle); }
     size_type size() const
     {
       if (msize==0)
@@ -409,7 +407,7 @@ public:
     { return mmap.is_empty(); }
   private:
     const Self & mmap;
-    Dart_descriptor m_initdart;
+    Dart_handle m_initdart;
     mutable typename Self::size_type msize;
   };
   //**************************************************************************
@@ -419,11 +417,11 @@ public:
   {}; */
   //--------------------------------------------------------------------------
   template<unsigned int i>
-  Dart_of_cell_range<i> darts_of_cell(Dart_descriptor adart)
+  Dart_of_cell_range<i> darts_of_cell(Dart_handle adart)
   { return Dart_of_cell_range<i>(*this,adart); }
   //--------------------------------------------------------------------------
   template<unsigned int i>
-  Dart_of_cell_range<i> darts_of_cell(Dart_const_descriptor adart) const
+  Dart_of_cell_range<i> darts_of_cell(Dart_const_handle adart) const
   { return Dart_of_cell_range<i>(*this,adart); } // Before it was Dart_of_cell_const_range<i>
   //**************************************************************************
   // Dart_range
@@ -433,9 +431,9 @@ public:
     Dart_range(const Self &amap) : mmap(amap), msize(0)
     {}
     iterator begin() { return iterator(mmap); }
-    iterator end()   { return iterator(mmap,mmap.null_descriptor); }
+    iterator end()   { return iterator(mmap,mmap.null_handle); }
     const_iterator begin() const { return const_iterator(mmap); }
-    const_iterator end() const   { return const_iterator(mmap,mmap.null_descriptor); }
+    const_iterator end() const   { return const_iterator(mmap,mmap.null_handle); }
     size_type size() const
     {
       if (msize==0)
@@ -457,7 +455,7 @@ public:
         run(mmap.get_fg(), *it);
     }
 
-    size_type index(Dart_const_descriptor it) const
+    size_type index(Dart_const_handle it) const
     {
       return internal::Index_from_halfedge_descriptor<HEG>::
         run(mmap.get_fg(), it);
@@ -474,7 +472,7 @@ public:
     Dart_const_range(const Self &amap) : mmap(amap), msize(0)
     {}
     const_iterator begin() const { return const_iterator(mmap); }
-    const_iterator end() const   { return const_iterator(mmap,mmap.null_descriptor); }
+    const_iterator end() const   { return const_iterator(mmap,mmap.null_handle); }
     size_type size() const
     {
       if (msize==0)
@@ -498,20 +496,20 @@ public:
   const Dart_range& darts() const
   { return mdarts; } // Before it was Dart_const_range(*this)
   //**************************************************************************
-  Dart_descriptor dart_descriptor(size_type i)
+  Dart_handle dart_handle(size_type i)
   {
     CGAL_assertion(darts().is_used(i));
     return internal::Halfedge_descriptor_from_index<HEG>::run(get_fg(), i);
   }
-  Dart_const_descriptor dart_descriptor(size_type i) const
+  Dart_const_handle dart_handle(size_type i) const
   {
     CGAL_assertion(darts().is_used(i));
     return internal::Halfedge_descriptor_from_index<HEG>::run(get_fg(), i);
   }
 
   template <unsigned int i>
-  bool belong_to_same_cell(Dart_const_descriptor adart1,
-                           Dart_const_descriptor adart2) const
+  bool belong_to_same_cell(Dart_const_handle adart1,
+                           Dart_const_handle adart2) const
   {
     for (typename Dart_of_cell_range<i>::iterator it=darts_of_cell<i>(adart1).begin(),
            itend=darts_of_cell<i>(adart1).end(); it!=itend; ++it)
@@ -520,7 +518,7 @@ public:
   }
 
   template <unsigned int i>
-  bool is_whole_cell_unmarked(Dart_const_descriptor adart, size_type amark) const
+  bool is_whole_cell_unmarked(Dart_const_handle adart, size_type amark) const
   {
     for (typename Dart_of_cell_range<i>::iterator it=darts_of_cell<i>(adart).begin(),
            itend=darts_of_cell<i>(adart).end(); it!=itend; ++it)
@@ -529,7 +527,7 @@ public:
   }
 
   template <unsigned int i>
-  bool is_whole_cell_marked(Dart_const_descriptor adart, size_type amark) const
+  bool is_whole_cell_marked(Dart_const_handle adart, size_type amark) const
   {
     for (typename Dart_of_cell_range<i>::iterator it=darts_of_cell<i>(adart).begin(),
            itend=darts_of_cell<i>(adart).end(); it!=itend; ++it)
@@ -538,7 +536,7 @@ public:
   }
 
   template <unsigned int i>
-  size_type mark_cell(Dart_const_descriptor adart, size_type amark) const
+  size_type mark_cell(Dart_const_handle adart, size_type amark) const
   {
     size_type res=0;
     for (typename Dart_of_cell_range<i>::iterator it=darts_of_cell<i>(adart).begin(),
@@ -547,7 +545,7 @@ public:
     return res;
 }
 
-  size_type mark_cell(Dart_const_descriptor adart, unsigned int i, size_type amark) const
+  size_type mark_cell(Dart_const_handle adart, unsigned int i, size_type amark) const
   {
     if (i==0) { return mark_cell<0>(adart, amark); }
     else if (i==1) { return mark_cell<1>(adart, amark); }
@@ -556,7 +554,7 @@ public:
   }
 
   template <unsigned int i>
-  size_type unmark_cell(Dart_const_descriptor adart, size_type amark) const
+  size_type unmark_cell(Dart_const_handle adart, size_type amark) const
   {
     size_type res=0;
     for (typename Dart_of_cell_range<i>::iterator it=darts_of_cell<i>(adart).begin(),
@@ -566,7 +564,7 @@ public:
   }
 
   template <unsigned int i>
-  size_type mark_oriented_cell(Dart_const_descriptor adart, size_type amark,
+  size_type mark_oriented_cell(Dart_const_handle adart, size_type amark,
                                size_type amark2=INVALID_MARK) const
   {
     size_type res=0;
@@ -580,7 +578,7 @@ public:
   }
 
   template <unsigned int i>
-  size_type unmark_oriented_cell(Dart_const_descriptor adart, size_type amark,
+  size_type unmark_oriented_cell(Dart_const_handle adart, size_type amark,
                                  size_type amark2=INVALID_MARK) const
   {
     size_type res=0;
@@ -616,7 +614,7 @@ public:
       if (marks[acells[i]]==INVALID_MARK )
       {
         marks[acells[i]]=get_new_mark();
-        CGAL_assertion(is_whole_map_unmarked(marks[acells[i]]));
+        assert(is_whole_map_unmarked(marks[acells[i]]));
       }
     }
 
@@ -740,21 +738,21 @@ protected:
   mutable MarkPMap m_all_marks;
 };
 
-  /// null_descriptor
+  /// null_handle
   // template <typename HEG>
-  // const typename Face_graph_wrapper<HEG>::Null_descriptor_type
-  // Face_graph_wrapper<HEG>::null_descriptor=nullptr;
+  // const typename Face_graph_wrapper<HEG>::Null_handle_type
+  // Face_graph_wrapper<HEG>::null_handle=nullptr;
   template <typename HEG>
-  const typename Face_graph_wrapper<HEG>::Null_descriptor_type
-  Face_graph_wrapper<HEG>::null_descriptor=typename Face_graph_wrapper<HEG>::Dart_descriptor();
+  const typename Face_graph_wrapper<HEG>::Null_handle_type
+  Face_graph_wrapper<HEG>::null_handle=typename Face_graph_wrapper<HEG>::Dart_handle();
 
-  /// null_dart_descriptor
+  /// null_dart_handle
   // template <typename HEG>
-  // const typename Face_graph_wrapper<HEG>::Null_descriptor_type
-  // Face_graph_wrapper<HEG>::null_dart_descriptor=nullptr;
+  // const typename Face_graph_wrapper<HEG>::Null_handle_type
+  // Face_graph_wrapper<HEG>::null_dart_handle=nullptr;
   template <typename HEG>
-  const typename Face_graph_wrapper<HEG>::Null_descriptor_type
-  Face_graph_wrapper<HEG>::null_dart_descriptor=typename Face_graph_wrapper<HEG>::Dart_descriptor();
+  const typename Face_graph_wrapper<HEG>::Null_handle_type
+  Face_graph_wrapper<HEG>::null_dart_handle=typename Face_graph_wrapper<HEG>::Dart_handle();
 
   template<class Base, class HEG>
   struct Get_map
@@ -893,8 +891,8 @@ protected:
     typedef typename Mesh::Point  Point;
     typedef typename Mesh::Vector Vector;
 
-    template<class Dart_descriptor>
-    static const Point& get_point(const Mesh& m, Dart_descriptor dh)
+    template<class Dart_handle>
+    static const Point& get_point(const Mesh& m, Dart_handle dh)
     { return m.point(dh); }
   };
 
@@ -906,8 +904,8 @@ protected:
     typedef typename Kernel::Point_3                Point;
     typedef typename Kernel::Vector_3               Vector;
 
-    template<class Dart_descriptor>
-    static const Point& get_point(const Mesh& m, Dart_descriptor dh)
+    template<class Dart_handle>
+    static const Point& get_point(const Mesh& m, Dart_handle dh)
     { return m.point(m.source(dh)); }
   };
 
@@ -924,8 +922,8 @@ protected:
     typedef typename Kernel::Point_3  Point;
     typedef typename Kernel::Vector_3 Vector;
 
-    template<class Dart_descriptor>
-    static const Point& get_point(const Mesh& /*m*/, Dart_descriptor dh)
+    template<class Dart_handle>
+    static const Point& get_point(const Mesh& /*m*/, Dart_handle dh)
     { return dh->opposite()->vertex()->point(); }
   };
 

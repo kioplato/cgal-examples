@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/measure_distortion.h $
-// $Id: measure_distortion.h c32b1f4 2022-11-16T13:22:39+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/measure_distortion.h $
+// $Id: measure_distortion.h 1bdcd6f 2020-07-28T16:25:09+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -16,7 +16,7 @@
 
 #include <CGAL/boost/graph/iterator.h>
 #include <CGAL/boost/graph/helpers.h>
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/circulator.h>
 #include <CGAL/Kernel/global_functions.h>
 #include <CGAL/Kernel_traits.h>
@@ -50,7 +50,7 @@ double compute_L2_stretch(const VertexRange& vertex_range,
   Face_double_map area_2D = get(Face_double_tag(), tmesh);
   Face_double_map area_3D = get(Face_double_tag(), tmesh);
 
-  // iterate for all inner vertices and for each vertex
+  // iterate fpr all inner vertices and for each vertex
   std::vector<double> area_dist;
 
   double A_3D = 0.;

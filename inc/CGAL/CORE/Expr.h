@@ -18,11 +18,11 @@
  *       Sylvain Pion <pion@cs.nyu.edu>
  *       Vikram Sharma<sharma@cs.nyu.edu>
  *
- * WWW URL: https://cs.nyu.edu/exact/
+ * WWW URL: http://cs.nyu.edu/exact/
  * Email: exact@cs.nyu.edu
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.6/CGAL_Core/include/CGAL/CORE/Expr.h $
- * $Id: Expr.h 0ff7882 2022-12-06T22:21:06+01:00 Mael
+ * $URL: https://github.com/CGAL/cgal/blob/v5.4.5/CGAL_Core/include/CGAL/CORE/Expr.h $
+ * $Id: Expr.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/
 
@@ -209,7 +209,7 @@ public:
     *this -= 1;
     return *this;
   }
-  /// right decrement operator (i--)
+  /// right deccrement operator (i--)
   Expr operator--(int) {
     Expr t(*this);
     *this -= 1;
@@ -365,7 +365,7 @@ CGAL_CORE_EXPORT Expr pow(const Expr&, unsigned long);
 inline Expr operator+(const Expr& e1, const Expr& e2) {
   return Expr(new AddRep(e1.Rep(), e2.Rep()));
 }
-/// subtraction
+/// substraction
 inline Expr operator-(const Expr& e1, const Expr& e2) {
   return Expr(new SubRep(e1.Rep(), e2.Rep()));
 }

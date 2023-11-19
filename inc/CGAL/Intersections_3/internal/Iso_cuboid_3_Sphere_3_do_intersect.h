@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_3/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Sphere_3_do_intersect.h $
-// $Id: Iso_cuboid_3_Sphere_3_do_intersect.h 3a4e230 2022-11-22T12:22:42+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_3/include/CGAL/Intersections_3/internal/Iso_cuboid_3_Sphere_3_do_intersect.h $
+// $Id: Iso_cuboid_3_Sphere_3_do_intersect.h 9c6456f 2021-07-29T14:23:40+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -22,14 +22,13 @@ namespace Intersections {
 namespace internal {
 
 template <class K, class BFT> // Iso_cuboid_3 or Bbox_3
-typename K::Boolean
-do_intersect_sphere_box_3(const typename K::Sphere_3& sphere,
-                          const BFT bxmin, const BFT bymin, const BFT bzmin,
-                          const BFT bxmax, const BFT bymax, const BFT bzmax,
-                          const K&)
+bool do_intersect_sphere_box_3(const typename K::Sphere_3& sphere,
+                               const BFT bxmin, const BFT bymin, const BFT bzmin,
+                               const BFT bxmax, const BFT bymax, const BFT bzmax,
+                               const K&)
 {
   typedef typename K::FT SFT;
-  typedef typename Coercion_traits<SFT, BFT>::Type FT;
+  typedef typename Coercion_traits<double, SFT>::Type FT;
   typedef typename K::Point_3 Point;
 
   typename Coercion_traits<SFT, BFT>::Cast to_FT;
@@ -95,10 +94,9 @@ do_intersect_sphere_box_3(const typename K::Sphere_3& sphere,
 }
 
 template <class K>
-typename K::Boolean
-do_intersect(const typename K::Sphere_3& sphere,
-             const typename K::Iso_cuboid_3& ic,
-             const K& k)
+bool do_intersect(const typename K::Sphere_3& sphere,
+                  const typename K::Iso_cuboid_3& ic,
+                  const K& k)
 {
   return do_intersect_sphere_box_3(sphere,
                                    (ic.min)().x(), (ic.min)().y(), (ic.min)().z(),
@@ -107,10 +105,9 @@ do_intersect(const typename K::Sphere_3& sphere,
 }
 
 template <class K>
-typename K::Boolean
-do_intersect(const typename K::Iso_cuboid_3& ic,
-             const typename K::Sphere_3& sphere,
-             const K& k)
+bool do_intersect(const typename K::Iso_cuboid_3& ic,
+                  const typename K::Sphere_3& sphere,
+                  const K& k)
 {
   return do_intersect(sphere, ic, k);
 }

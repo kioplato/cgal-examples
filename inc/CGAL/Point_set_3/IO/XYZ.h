@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_3/include/CGAL/Point_set_3/IO/XYZ.h $
-// $Id: XYZ.h eed54a0 2022-11-15T18:45:39+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_3/include/CGAL/Point_set_3/IO/XYZ.h $
+// $Id: XYZ.h a34debc 2021-06-23T22:56:35+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Simon Giraudot
@@ -13,13 +13,19 @@
 
 #include <CGAL/license/Point_set_3.h>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 #include <CGAL/IO/read_xyz_points.h>
 #include <CGAL/IO/write_xyz_points.h>
 
 #include <fstream>
 #include <string>
+
+#ifdef DOXYGEN_RUNNING
+#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
+#define CGAL_BGL_NP_CLASS NamedParameters
+#define CGAL_DEPRECATED
+#endif
 
 namespace CGAL {
 
@@ -35,7 +41,7 @@ namespace IO {
 /*!
   \ingroup PkgPointSet3IOXYZ
 
-  \brief reads the content of an input stream in the \ref IOStreamXYZ into a point set.
+  \brief reads the content of an intput stream in the \ref IOStreamXYZ into a point set.
 
   If normals are present in the input stream, a normal map will be created and filled.
 
@@ -138,10 +144,10 @@ namespace IO {
 
   \return `true` if the writing was successful, `false` otherwise.
  */
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_XYZ(std::ostream& os,
                const CGAL::Point_set_3<Point, Vector>& point_set,
-               const CGAL_NP_CLASS& np = parameters::default_values())
+               const CGAL_BGL_NP_CLASS& np)
 {
   if(point_set.has_normal_map())
     return Point_set_processing_3::internal::write_XYZ_PSP(os, point_set,
@@ -150,6 +156,16 @@ bool write_XYZ(std::ostream& os,
 
   return Point_set_processing_3::internal::write_XYZ_PSP(os, point_set, np.point_map(point_set.point_map()));
 }
+
+/// \cond SKIP_IN_MANUAL
+
+template <typename Point, typename Vector>
+bool write_XYZ(std::ostream& os, const CGAL::Point_set_3<Point, Vector>& point_set)
+{
+  return write_XYZ(os, point_set, parameters::all_default());
+}
+
+/// \endcond
 
 /*!
   \ingroup PkgPointSet3IOXYZ
@@ -176,12 +192,23 @@ bool write_XYZ(std::ostream& os,
 
   \return `true` if the writing was successful, `false` otherwise.
  */
-template <typename Point, typename Vector, typename CGAL_NP_TEMPLATE_PARAMETERS>
-bool write_XYZ(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_NP_CLASS& np = parameters::default_values())
+template <typename Point, typename Vector, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+bool write_XYZ(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set, const CGAL_BGL_NP_CLASS& np)
 {
   std::ofstream os(fname);
   return write_XYZ(os, point_set, np);
 }
+
+/// \cond SKIP_IN_MANUAL
+
+template <typename Point, typename Vector>
+bool write_XYZ(const std::string& fname, const CGAL::Point_set_3<Point, Vector>& point_set)
+{
+  std::ofstream os(fname);
+  return write_XYZ(os, point_set, parameters::all_default());
+}
+
+/// \endcond
 
 } // namespace IO
 

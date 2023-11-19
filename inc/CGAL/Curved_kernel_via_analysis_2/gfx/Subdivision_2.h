@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Curved_kernel_via_analysis_2/gfx/Subdivision_2.h $
-// $Id: Subdivision_2.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Curved_kernel_via_analysis_2/gfx/Subdivision_2.h $
+// $Id: Subdivision_2.h 26355e2 2020-06-25T12:31:21+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Pavel Emeliyanenko <asm@mpi-sb.mpg.de>
@@ -166,7 +166,7 @@ private:
         void precompute();
         //! \brief switches to another cache instance depending on the
         //! supporting curve of a segment
-                //! \brief evaluates the ith derivative at certain x
+                //! \brief evalutates the ith derivative at certain x
         //!
         //! \c cache_it - an intetator pointing to the end of an array of
         //! polynomial coefficients, \c der_it - an iterator for derivative
@@ -179,7 +179,7 @@ private:
                         val = val * x + (*cache_it--) * (*der_it);
                 return val;
         }
-        //! evaluates a function at a certain x
+        //! evalutates a function at a certain x
         NT evaluate(const Poly_1& poly, const NT& x)
         {
                 const_iterator_1 it = poly.end() - 1, begin = poly.begin();

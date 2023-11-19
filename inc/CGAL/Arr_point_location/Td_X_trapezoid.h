@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arr_point_location/Td_X_trapezoid.h $
-// $Id: Td_X_trapezoid.h 9c2f8ff 2023-01-13T18:51:28+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arr_point_location/Td_X_trapezoid.h $
+// $Id: Td_X_trapezoid.h 97cac65 2021-07-23T10:59:49+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -18,7 +18,7 @@
 
 
 /*! \file
- * Definition of the Td_X_trapezoid<Td_traits> class.
+ * Defintion of the Td_X_trapezoid<Td_traits> class.
  */
 
 #include <CGAL/Arr_point_location/Trapezoidal_decomposition_2.h>
@@ -45,7 +45,7 @@ namespace CGAL {
  * when one of the four sides is on the parameter space boundary.
  * Trapezoids are created as active and become inactive when Remove() member
  * function called.
- * Each trapezoid has at most four neighboring trapezoids.
+ * Each trapezoid has at most four neighbouring trapezoids.
  * X_trapezoid structure can represent a real trapezoid, a Td-edge or an
  * edge-end (end point).
  */
@@ -152,20 +152,15 @@ public:
 
   Dag_node* m_dag_node; //pointer to the search structure (DAG) node
 
-  /*! Initialize the trapezoid's neighbors. */
-  CGAL_TD_INLINE void init_neighbors(Self* lb_ = 0, Self* lt_ = 0,
-                                     Self* rb_ = 0, Self* rt_ = 0)
+  /*! Initialize the trapezoid's neighbours. */
+  CGAL_TD_INLINE void init_neighbours(Self* lb_ = 0, Self* lt_ = 0,
+                                      Self* rb_ = 0, Self* rt_ = 0)
   {
     set_lb(lb_);
     set_lt(lt_);
     set_rb(rb_);
     set_rt(rt_);
   }
-  /*! \copydoc init_neighbors
-   *  \deprecated please use #init_neighbors */
-  CGAL_DEPRECATED CGAL_TD_INLINE void init_neighbours(Self* lb_ = 0, Self* lt_ = 0,
-                                                      Self* rb_ = 0, Self* rt_ = 0)
-  { init_neighbors(lb_, lt_, rb_, rt_); }
 
   /*! Set the DAG node. */
   CGAL_TD_INLINE void set_dag_node(Dag_node* p)
@@ -244,7 +239,7 @@ public:
     ptr()->e1 = (v_ce.ce() == ARR_MIN_END ) ? CGAL_TD_CV_MIN_END : CGAL_TD_CV_MAX_END;
 
     if (!is_on_boundaries())
-    { //if the trapezoid represents an inner vertex
+    { //if the trapezoid respresents an inner vertex
       ptr()->e0 = left()->point();
     }
   }
@@ -301,16 +296,16 @@ public:
       ptr()->e4 &= ~CGAL_TD_ON_TOP_BOUNDARY;
   }
 
-  /*! Set left bottom neighbor. */
+  /*! Set left bottom neighbour. */
   CGAL_TD_INLINE void set_lb(Self* lb) { ptr()->e5 = lb; }
 
-  /*! Set left top neighbor. */
+  /*! Set left top neighbour. */
   CGAL_TD_INLINE void set_lt(Self* lt) { ptr()->e6 = lt; }
 
-  /*! Set right bottom neighbor. */
+  /*! Set right bottom neighbour. */
   CGAL_TD_INLINE void set_rb(Self* rb) { ptr()->e7 = rb; }
 
-  /*! Set right top neighbor. */
+  /*! Set right top neighbour. */
   CGAL_TD_INLINE void set_rt(Self* rt) { ptr()->e8 = rt; }
 
  public:
@@ -322,7 +317,7 @@ public:
   Td_X_trapezoid()
   {
     //define the initial trapezoid: left, right, btm, top are at infinity.
-    // its type is TD_TRAPEZOID ,it is on all boundaries, and has no neighbors
+    // its type is TD_TRAPEZOID ,it is on all boundaries, and has no neighbours
     PTR = new Trpz_parameter_space
       (Traits::vtx_at_left_infinity(),
        Traits::vtx_at_right_infinity(),
@@ -652,16 +647,16 @@ public:
     return (ptr()->e4 & CGAL_TD_ON_ALL_BOUNDARIES) != 0;
   }
 
-  /*! Access left bottom neighbor. */
+  /*! Access left bottom neighbour. */
   Self* lb() const    { return ptr()->e5; }
 
-  /*! Access left top neighbor. */
+  /*! Access left top neighbour. */
   Self* lt() const    { return ptr()->e6; }
 
-  /*! Access right bottom neighbor. */
+  /*! Access right bottom neighbour. */
   Self* rb() const    { return ptr()->e7; }
 
-  /*! Access right top neighbor. */
+  /*! Access right top neighbour. */
   Self* rt() const    { return ptr()->e8; }
 
   /*! Access DAG node. */

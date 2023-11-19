@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Shape_regularization/include/CGAL/Shape_regularization/QP_regularization.h $
-// $Id: QP_regularization.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Shape_regularization/include/CGAL/Shape_regularization/QP_regularization.h $
+// $Id: QP_regularization.h 9acece5 2021-08-12T17:11:09+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -139,13 +139,13 @@ namespace Shape_regularization {
 
       \pre input_range.size() >= 2
     */
-    template<typename NamedParameters = parameters::Default_named_parameters>
+    template<typename NamedParameters>
     QP_regularization(
       const InputRange& input_range,
       NeighQuery& neighbor_query,
       RegType& regularization_type,
       QPSolver& quadratic_program,
-      const NamedParameters& np = parameters::default_values()) :
+      const NamedParameters& np) :
     m_input_range(input_range),
     m_neighbor_query(neighbor_query),
     m_regularization_type(regularization_type),
@@ -156,6 +156,18 @@ namespace Shape_regularization {
 
       clear();
     }
+
+    /// \cond SKIP_IN_MANUAL
+    QP_regularization(
+      const InputRange& input_range,
+      NeighQuery& neighbor_query,
+      RegType& regularization_type,
+      QPSolver& quadratic_program) :
+    QP_regularization(
+      input_range, neighbor_query, regularization_type, quadratic_program,
+      CGAL::parameters::all_default())
+    { }
+    /// \endcond
 
     /// @}
 

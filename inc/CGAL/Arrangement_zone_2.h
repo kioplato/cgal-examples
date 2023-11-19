@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arrangement_zone_2.h $
-// $Id: Arrangement_zone_2.h ccdb5a0 2023-02-15T14:36:44+02:00 Efi Fogel
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arrangement_zone_2.h $
+// $Id: Arrangement_zone_2.h 6b64dc8 2020-11-11T09:38:55+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s): Ron Wein          <wein@post.tau.ac.il>
@@ -20,7 +20,7 @@
 
 
 /*! \file
- * Definition of the Arrangement_zone_2 class.
+ * Defintion of the Arrangement_zone_2 class.
  */
 
 #include <boost/mpl/assert.hpp>
@@ -40,7 +40,7 @@ namespace CGAL {
  * arrangement.
  * The arrangement parameter corresponds to the underlying arrangement, and
  * the zone-visitor parameter corresponds to a visitor class which is capable
- * of receiving notifications on the arrangement features the query curve
+ * of receiving notifications on the arrangment features the query curve
  * traverses. The visitor has to support the following functions:
  * - init(), for initializing the visitor with a given arrangement.
  * - found_subcurve(), called when a non-intersecting x-monotone curve is
@@ -67,10 +67,11 @@ protected:
   typedef typename Traits_adaptor_2::Top_side_category    Top_side_category;
   typedef typename Traits_adaptor_2::Right_side_category  Right_side_category;
 
-  CGAL_static_assertion((Arr_sane_identified_tagging<Left_side_category,
-                                                    Bottom_side_category,
-                                                    Top_side_category,
-                                                    Right_side_category>::value));
+  BOOST_MPL_ASSERT
+  ((typename Arr_sane_identified_tagging<Left_side_category,
+                                         Bottom_side_category,
+                                         Top_side_category,
+                                         Right_side_category>::result));
 
 public:
   typedef ZoneVisitor_                                   Visitor;
@@ -154,7 +155,7 @@ protected:
                                         // the right endpoint it its interior.
 
   Point_2 m_intersect_p;                // The next intersection point.
-  Multiplicity m_ip_multiplicity;       // Its multiplicity
+  unsigned int m_ip_multiplicity;       // Its multiplicity
                                         // (0 in case of an overlap).
   bool m_found_intersect;               // An intersection has been found.
                                         // (or an overlap).
@@ -248,7 +249,7 @@ public:
    */
   void init_with_hint(const X_monotone_curve_2& cv, Pl_result_type obj);
 
-  /*! Compute the zone of the given curve and issue the appropriate
+  /*! Compute the zone of the given curve and issue the apporpriate
    * notifications for the visitor.
    */
   void compute_zone();
@@ -346,7 +347,7 @@ private:
   void _remove_next_intersection(Halfedge_handle he);
 
   /*! Check whether the given point lies completely to the left of the given
-   * edge.
+   * egde.
    * \param p The point.
    * \param he The halfedge.
    * \pre he is not a fictitious edge.
@@ -370,7 +371,7 @@ private:
                         Arr_not_all_sides_oblivious_tag) const;
 
   /*! Check whether the given point lies completely to the right of the given
-   * edge.
+   * egde.
    * \param p The point.
    * \param he The halfedge.
    * \pre he is not a fictitious edge.

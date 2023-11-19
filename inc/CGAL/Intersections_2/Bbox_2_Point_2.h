@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Point_2.h $
-// $Id: Bbox_2_Point_2.h 3a4e230 2022-11-22T12:22:42+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Point_2.h $
+// $Id: Bbox_2_Point_2.h 52164b1 2019-10-19T15:34:59+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -24,11 +24,9 @@ namespace Intersections {
 namespace internal {
 
 template <class K>
-inline
-typename K::Boolean
-do_intersect(const Bbox_2 &bbox,
-             const Point_2<K> &pt,
-             const K& k)
+inline bool do_intersect(const Bbox_2 &bbox,
+                         const Point_2<K> &pt,
+                         const K& k)
 {
   Point_2<K> bl(bbox.xmin(), bbox.ymin()),
              tr(bbox.xmax(), bbox.ymax());
@@ -38,11 +36,9 @@ do_intersect(const Bbox_2 &bbox,
 }
 
 template <class K>
-inline
-typename K::Boolean
-do_intersect(const Point_2<K> &pt,
-             const Bbox_2& bbox,
-             const K& k)
+inline bool do_intersect(const Point_2<K> &pt,
+                         const Bbox_2& bbox,
+                         const K& k)
 {
   return do_intersect(bbox, pt, k);
 }
@@ -73,17 +69,15 @@ intersection(const CGAL::Bbox_2& b,
 } // namespace Intersections
 
 template<typename K>
-typename K::Boolean
-do_intersect(const CGAL::Bbox_2& a,
-             const Point_2<K>& b)
+bool do_intersect(const CGAL::Bbox_2& a,
+                  const Point_2<K>& b)
 {
   return Intersections::internal::do_intersect(a,b,K());
 }
 
 template<typename K>
-typename K::Boolean
-do_intersect(const Point_2<K>& a,
-             const CGAL::Bbox_2& b)
+bool do_intersect(const Point_2<K>& a,
+                  const CGAL::Bbox_2& b)
 {
   return Intersections::internal::do_intersect(b,a,K());
 }

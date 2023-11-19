@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Straight_skeleton_2/include/CGAL/Straight_skeleton_2.h $
-// $Id: Straight_skeleton_2.h fd770a9 2023-03-03T02:09:17+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Straight_skeleton_2/include/CGAL/Straight_skeleton_2.h $
+// $Id: Straight_skeleton_2.h 7513752 2020-10-05T18:35:08+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Fernando Cacciola <fernando_cacciola@ciudad.com.ar>
@@ -92,20 +92,20 @@ private :
 
 public :
 
-    static int id ( Vertex_const_handle v )
+    static int id ( Vertex_const_handle h )
     {
       Vertex_const_handle null ;
-      return v != null ? v->id() : -1 ;
+      return h != null ? h->id() : -1 ;
     }
     static int id ( Halfedge_const_handle h )
     {
       Halfedge_const_handle null ;
       return h != null ? h->id() : -1 ;
     }
-    static int id ( Face_const_handle f )
+    static int id ( Face_const_handle h )
     {
       Face_const_handle null ;
-      return f != null ? f->id() : -1 ;
+      return h != null ? 0 : -1 ;
     }
 
     // Partial skeletons are used when constructing offsets, to avoid building larger-than-needed skeletons.
@@ -213,7 +213,7 @@ public :
           if ( begin->is_border())
               ++nb;
       }
-      CGAL_STSKEL_VALIDITY_TRACE("sum of border halfedges (2*nb) = " << 2 * nb );
+      CGAL_STSKEL_VALIDITY_TRACE("summe border halfedges (2*nb) = " << 2 * nb );
 
       bool nvalid = ( n == this->size_of_halfedges());
 
@@ -272,9 +272,7 @@ public :
               Halfedge_const_handle g = h;
               do
               {
-                CGAL_STSKEL_VALIDITY_TRACE("  v->halfedge(): " << id(h)
-                                          << ", ->face(): " << id(h->face())
-                                          << ", ->next(): " << id(h->next())
+                CGAL_STSKEL_VALIDITY_TRACE("  v->halfedge(): " << id(h) << ", ->next(): " << id(h->next())
                                           << ", ->next()->opposite(): " << id(h->next()->opposite())
                                           );
                 ++n;
@@ -338,7 +336,7 @@ public :
             Halfedge_const_handle g = h;
             do
             {
-              CGAL_STSKEL_VALIDITY_TRACE("  f->halfedge(): " << id(h) << ", ->face(): " << id(h->face()) << ", ->next(): " << id(h->next()));
+              CGAL_STSKEL_VALIDITY_TRACE("  f->halfedge():" << id(h) << ", ->next(): " << id(h->next()));
               ++n;
               h = h->next();
               valid = valid && ( n <= this->size_of_halfedges() && n!=0);

@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Classification/include/CGAL/Classification/ETHZ/internal/random-forest/common-libraries.hpp $
-// $Id: common-libraries.hpp 4ffc949 2022-02-03T17:11:20+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Classification/include/CGAL/Classification/ETHZ/internal/random-forest/common-libraries.hpp $
+// $Id: common-libraries.hpp f62aaa7 2021-04-06T15:12:56+02:00 Laurent Rineau
 // SPDX-License-Identifier: LicenseRef-RFL
 // License notice in Installation/LICENSE.RFL
 //
@@ -47,7 +47,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <unordered_set>
+#include <boost/unordered_set.hpp>
 #include <iostream>
 #include <cstdio>
 
@@ -63,7 +63,7 @@ inline void init_feature_class_data(FeatureClassDataFloat& /*data*/, int /*n_cla
 {
 //    data.resize(n_samples);
 }
-typedef std::unordered_set<int> FeatureSet;
+typedef boost::unordered_set<int> FeatureSet;
 
 #if BOOST_VERSION >= 104700
 typedef boost::random::uniform_int_distribution<> UniformIntDist;

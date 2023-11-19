@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Path_generators.h $
-// $Id: Path_generators.h 999a813 2022-05-05T13:34:19+02:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_mesh_topology/include/CGAL/Surface_mesh_topology/internal/Path_generators.h $
+// $Id: Path_generators.h 8bb22d5 2020-03-26T14:23:37+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -13,7 +13,6 @@
 #define CGAL_PATH_GENERATORS_H 1
 
 #include <CGAL/license/Surface_mesh_topology.h>
-#include <CGAL/assertions.h>
 
 #include <CGAL/Random.h>
 #include <unordered_set>
@@ -81,17 +80,17 @@ void generate_random_positive_bracket(Path& path,
 }
 
 template<typename LCC>
-typename LCC::Dart_const_descriptor
+typename LCC::Dart_const_handle
 generate_random_connected_set_of_faces(const LCC& lcc, std::size_t nb,
                                        CGAL::Random& random,
                                        std::unordered_set
-                                       <typename LCC::Dart_const_descriptor>& set,
+                                       <typename LCC::Dart_const_handle>& set,
                                        typename LCC::size_type amark)
 {
   set.clear();
   if (lcc.is_empty()) { return NULL; }
 
-  std::unordered_map<std::size_t, typename LCC::Dart_const_descriptor> border_faces;
+  std::unordered_map<std::size_t, typename LCC::Dart_const_handle> border_faces;
 
   std::size_t index=static_cast<std::size_t>
     (random.get_int(0, static_cast<int>(lcc.darts().capacity())));
@@ -101,7 +100,7 @@ generate_random_connected_set_of_faces(const LCC& lcc, std::size_t nb,
     if (index==lcc.darts().capacity()) { index=0; }
   }
 
-  typename LCC::Dart_const_descriptor dh1=lcc.darts().iterator_to(lcc.darts()[index]);
+  typename LCC::Dart_const_handle dh1=lcc.darts().iterator_to(lcc.darts()[index]);
   border_faces[0]=dh1;
   set.insert(dh1);
   lcc.template mark_cell<2>(dh1, amark);
@@ -113,7 +112,7 @@ generate_random_connected_set_of_faces(const LCC& lcc, std::size_t nb,
                             (0, static_cast<int>(border_faces.size())));
     int nbborder=0;
 
-    typename LCC::Dart_const_descriptor dh1_init=border_faces[facenumber];
+    typename LCC::Dart_const_handle dh1_init=border_faces[facenumber];
     dh1=dh1_init;
     do
     {
@@ -149,10 +148,10 @@ generate_random_connected_set_of_faces(const LCC& lcc, std::size_t nb,
 
     // Then we update the list of border faces (because some of them could be
     // no more border due to the adding of the new face)
-    std::unordered_map<std::size_t, typename LCC::Dart_const_descriptor>
+    std::unordered_map<std::size_t, typename LCC::Dart_const_handle>
         border_faces_new;
     for (typename std::unordered_map<std::size_t,
-         typename LCC::Dart_const_descriptor>::iterator it=border_faces.begin(),
+         typename LCC::Dart_const_handle>::iterator it=border_faces.begin(),
          itend=border_faces.end(); it!=itend; ++it)
     {
       bool isborder=false;
@@ -175,8 +174,8 @@ generate_random_connected_set_of_faces(const LCC& lcc, std::size_t nb,
     { return NULL; }
   }
 
-  CGAL_assertion(border_faces.size()!=0);
-  typename LCC::Dart_const_descriptor dhres=border_faces[0];
+  assert (border_faces.size()!=0);
+  typename LCC::Dart_const_handle dhres=border_faces[0];
   while(lcc.template is_free<2>(dhres) ||
         lcc.is_marked(lcc.template beta<2>(dhres), amark))
   { dhres=lcc.template beta<1>(dhres); }
@@ -188,10 +187,10 @@ template<typename Path>
 void generate_random_closed_path(Path& p, std::size_t nb,
                                  CGAL::Random& random)
 {
-  std::unordered_set<typename Path::Map::Dart_const_descriptor> faces;
+  std::unordered_set<typename Path::Map::Dart_const_handle> faces;
   typename Path::Map::size_type amark=p.get_map().get_new_mark();
 
-  typename Path::Map::Dart_const_descriptor dhi=
+  typename Path::Map::Dart_const_handle dhi=
       generate_random_connected_set_of_faces(p.get_map(), nb, random,
                                              faces, amark);
 
@@ -201,7 +200,7 @@ void generate_random_closed_path(Path& p, std::size_t nb,
     return;  // We have selected all the faces.
   }
 
-  typename Path::Map::Dart_const_descriptor dh=dhi;
+  typename Path::Map::Dart_const_handle dh=dhi;
   do
   {
     CGAL_assertion(p.get_map().template is_free<2>(dh) ||
@@ -214,7 +213,7 @@ void generate_random_closed_path(Path& p, std::size_t nb,
   }
   while(dh!=dhi);
 
-  for (typename std::template unordered_set<typename Path::Map::Dart_const_descriptor>::iterator
+  for (typename std::template unordered_set<typename Path::Map::Dart_const_handle>::iterator
        it=faces.begin(), itend=faces.end(); it!=itend; ++it)
   { p.get_map().template unmark_cell<2>(*it, amark); }
 

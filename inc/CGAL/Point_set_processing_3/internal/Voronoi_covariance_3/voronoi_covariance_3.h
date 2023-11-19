@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_processing_3/include/CGAL/Point_set_processing_3/internal/Voronoi_covariance_3/voronoi_covariance_3.h $
-// $Id: voronoi_covariance_3.h 13882cc 2022-11-08T17:29:15+01:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_processing_3/include/CGAL/Point_set_processing_3/internal/Voronoi_covariance_3/voronoi_covariance_3.h $
+// $Id: voronoi_covariance_3.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Jocelyn Meyron and Quentin Mérigot
@@ -84,11 +84,10 @@ namespace CGAL {
                                                      const Point &b,
                                                      const Point &c)
                             {
-                                internal::covariance_matrix_tetrahedron(
-                                  FT(a[0]), FT(a[1]), FT(a[2]),
-                                  FT(b[0]), FT(b[1]), FT(b[2]),
-                                  FT(c[0]), FT(c[1]), FT(c[2]),
-                                  _result);
+                                internal::covariance_matrix_tetrahedron (a[0], a[1], a[2],
+                                                                         b[0], b[1], b[2],
+                                                                         c[0], c[1], c[2],
+                                                                         _result);
                             }
 
                         const Result_type &result() const
@@ -193,29 +192,31 @@ namespace CGAL {
                                   const Sphere &sphere,
                                   FT covariance[6])
             {
-                typename internal::Covariance_accumulator_3<double> ca;
+                typename internal::Covariance_accumulator_3<FT> ca;
                 internal::tessellate_and_intersect(dt, v, sphere, ca);
                 std::copy (ca.result().begin(), ca.result().end(), covariance);
             }
 
         template <class DT, class Sphere>
-            std::array<double, 6>
+            std::array<typename DT::Geom_traits::FT, 6>
             voronoi_covariance_3 (const DT &dt,
                                   typename DT::Vertex_handle v,
                                   const Sphere &sphere)
             {
-                typename internal::Covariance_accumulator_3<double> ca;
+                typedef typename DT::Geom_traits::FT FT;
+                typename internal::Covariance_accumulator_3<FT> ca;
 
                 return internal::tessellate_and_intersect(dt, v, sphere, ca).result();
             }
 
         template <class DT, class Sphere>
-            double
+            typename DT::Geom_traits::FT
             voronoi_volume_3 (const DT &dt,
                               typename DT::Vertex_handle v,
                               const Sphere &sphere)
             {
-                typename internal::Volume_accumulator_3<double> va;
+                typedef typename DT::Geom_traits::FT FT;
+                typename internal::Volume_accumulator_3<FT> va;
 
                 return internal::tessellate_and_intersect(dt, v, sphere, va).result();
             }

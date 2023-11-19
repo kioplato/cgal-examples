@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Barycentric_coordinates_2/include/CGAL/Barycentric_coordinates_2/Mean_value_2.h $
-// $Id: Mean_value_2.h be147c5 2022-04-28T07:58:57+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Barycentric_coordinates_2/include/CGAL/Barycentric_coordinates_2/Mean_value_2.h $
+// $Id: Mean_value_2.h 92434bf 2021-09-21T17:10:58+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -290,7 +290,6 @@ private:
 
         CGAL_precondition( r[n-1] != FT(0) );
         *output = (t[n-2] + t[n-1]) / r[n-1];
-        ++output;
 
         // Return weights.
         return boost::optional<OutputIterator>(output);
@@ -365,7 +364,6 @@ private:
             ++output;
         }
         *output = weight[n-1] * inverted_mv_denominator;
-        ++output;
 
         // Return coordinates.
         return boost::optional<OutputIterator>(output);
@@ -434,7 +432,6 @@ private:
             ++output;
         }
         *output = weight[n-1] * inverted_mv_denominator;
-        ++output;
 
         // Return coordinates.
         return boost::optional<OutputIterator>(output);

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_construction_helper.h $
-// $Id: Arr_spherical_construction_helper.h 3674c93 2022-11-15T15:21:01+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_construction_helper.h $
+// $Id: Arr_spherical_construction_helper.h 2d1e009 2021-03-25T12:53:48+02:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -151,7 +151,7 @@ public:
   bool swap_predecessors(Event* event) const
   {
     // If we insert an edge whose right end lies on the north pole, we have
-    // to flip the order of predecessor halfedges.
+    // to flip the order of predecessor halfegdes.
     // TODO what about the corner?
     return (event->parameter_space_in_x() == ARR_INTERIOR &&
             event->parameter_space_in_y() == ARR_TOP_BOUNDARY);
@@ -263,7 +263,7 @@ before_handle_event(Event* event)
 
   if (ps_x == ARR_RIGHT_BOUNDARY) {
     // Process a non-isolated event on the right identified boundary.
-    // Cannot be vertical, only curves approaching the right side are possible.
+    // Cannnot be vertical, only curves approaching the right side are possible.
     // If a vertex on the line of discontinuity does not exists, create one.
     DVertex* dv = m_top_traits->discontinuity_vertex(event->point());
     Vertex_handle v = (dv) ? Vertex_handle(dv) :

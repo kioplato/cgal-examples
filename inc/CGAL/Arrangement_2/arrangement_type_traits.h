@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arrangement_2/arrangement_type_traits.h $
-// $Id: arrangement_type_traits.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arrangement_2/arrangement_type_traits.h $
+// $Id: arrangement_type_traits.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -13,7 +13,7 @@
 
 /*!
   \file   arrangement_type_traits.h
-  \brief  The file contains meta-function related to the arrangement package.
+  \brief  The file contains meta-function related to the arrangement pakcage.
   Specifically, it contains the meta-function is_arrangement_2 that determines
   whether a given type is an arrangement.
 */

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_3/include/CGAL/Intersections_3/internal/Bbox_3_Segment_3_do_intersect.h $
-// $Id: Bbox_3_Segment_3_do_intersect.h e8ec440 2022-12-05T14:51:31+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_3/include/CGAL/Intersections_3/internal/Bbox_3_Segment_3_do_intersect.h $
+// $Id: Bbox_3_Segment_3_do_intersect.h e70a62a 2021-06-25T20:16:29+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -20,9 +20,9 @@
 #include <CGAL/Kernel/Same_uncertainty.h>
 #include <CGAL/kernel_assertions.h>
 
-#include <type_traits>
+#include <boost/type_traits/is_same.hpp>
 
-// inspired from https://people.csail.mit.edu/amy/papers/box-jgt.pdf
+// inspired from http://cag.csail.mit.edu/~amy/papers/box-jgt.pdf
 
 // This algorithm intersects the line with the x-, y-, and z-slabs of the
 // bounding box, and computes the interval [t1, t2], in the
@@ -66,7 +66,7 @@ class Do_intersect_bbox_segment_aux_is_greater<FT, bounded_0, true>
   double dmax;
 
 public:
-  CGAL_static_assertion((std::is_same<FT, double>::value));
+  CGAL_static_assertion((boost::is_same<FT, double>::value));
 
   Do_intersect_bbox_segment_aux_is_greater() : error(0.), tmax(0.), dmax(0.) {}
 
@@ -157,14 +157,13 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   // -----------------------------------
   // treat x coord
   // -----------------------------------
-  typedef typename Coercion_traits<FT,BFT>::Type CFT;
-  typename Coercion_traits<FT,BFT>::Cast to_CFT;
+  typedef typename Coercion_traits<double,FT>::Type CFT;
   CFT dmin, tmin, tmax, dmax;
   if(qx >= px)
   {
-    if(bounded_0 && compare(px, bxmax) == LARGER)
+    if(bounded_0 && px > bxmax)
       return false; // segment on the right of bbox
-    if(bounded_1 && compare(qx, bxmin) == SMALLER)
+    if(bounded_1 && qx < bxmin)
       return false; // segment on the left of bbox
 
     if(bounded_1 && bxmax > qx)
@@ -174,32 +173,32 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
     }
     else
     {
-      tmax = to_CFT(bxmax) - px;
+      tmax = bxmax - px;
       dmax = qx - px;
     }
 
-    tmin = CFT(bxmin) - px;
+    tmin = bxmin - px;
     dmin = qx - px;
   }
   else
   {
-    if(bounded_1 && compare(qx, bxmax) == LARGER)
+    if(bounded_1 && qx > bxmax)
       return false; // segment on the right of bbox
-    if(bounded_0 && compare(px, bxmin) == SMALLER)
+    if(bounded_0 && px < bxmin)
       return false; // segment on the left of bbox
 
-    if(bounded_1 && compare(bxmin, qx) == SMALLER)
+    if(bounded_1 && bxmin < qx)
     {
       tmax = 1;
       dmax = 1;
     }
     else
     {
-      tmax = px - to_CFT(bxmin);
+      tmax = px - bxmin;
       dmax = px - qx;
     }
 
-    tmin = px - to_CFT(bxmax);
+    tmin = px - bxmax;
     dmin = px - qx;
   }
 
@@ -211,7 +210,7 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   if((px == qx) &&  // <=> (dmin == 0)
      (!(bounded_0 && bounded_1))) // do not check for a segment
   {
-    if(compare(px, bxmax) == LARGER || compare(px, bxmin) == SMALLER)
+    if(px > bxmax || px < bxmin)
       return false;
 
     // Note: for a segment the condition has already been tested by the two
@@ -222,12 +221,12 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   // is a NaN. But the case with NaNs is treated as if the interval
   // [t1, t2] was ]-inf, +inf[.
 
-  CGAL_assertion(! is_negative(dmin));
-  CGAL_assertion(! is_negative(dmax));
-  CGAL_assertion_code(if(bounded_0) {)
-    CGAL_assertion(! is_negative(tmin));
-    CGAL_assertion(! is_negative(tmax));
-  CGAL_assertion_code(})
+  CGAL_assertion(dmin >= 0);
+  CGAL_assertion(dmax >= 0);
+  if(bounded_0) {
+    CGAL_assertion(tmin >= 0);
+    CGAL_assertion(tmax >= 0);
+  }
 
   // -----------------------------------
   // treat y coord
@@ -235,44 +234,44 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   CFT dymin, tymin, tymax, dymax;
   if(qy >= py)
   {
-    if(bounded_0 && compare(py, bymax) == LARGER)
+    if(bounded_0 && py > bymax)
       return false; // segment on the right of bbox
-    if(bounded_1 && compare(qy, bymin) == SMALLER)
+    if(bounded_1 && qy < bymin)
       return false; // segment on the left of bbox
 
-    if(bounded_1 && compare(bymax, qy) == LARGER)
+    if(bounded_1 && bymax > qy)
     {
       tymax = 1;
       dymax = 1;
     }
     else
     {
-      tymax = to_CFT(bymax) - py;
+      tymax = bymax - py;
       dymax = qy - py;
     }
 
-    tymin = to_CFT(bymin) - py;
+    tymin = bymin - py;
     dymin = qy - py;
   }
   else
   {
-    if(bounded_1 && compare(qy, bymax) == LARGER)
+    if(bounded_1 && qy > bymax)
       return false; // segment on the right of bbox
-    if(bounded_0 && compare(py, bymin) == SMALLER)
+    if(bounded_0 && py < bymin)
       return false; // segment on the left of bbox
 
-    if(bounded_1 && compare(bymin, qy) == SMALLER)
+    if(bounded_1 && bymin < qy)
     {
       tymax = 1;
       dymax = 1;
     }
     else
     {
-      tymax = py - to_CFT(bymin);
+      tymax = py - bymin;
       dymax = py - qy;
     }
 
-    tymin = py - CFT(bymax);
+    tymin = py - bymax;
     dymin = py - qy;
   }
 
@@ -284,7 +283,7 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   if((py == qy) &&  // <=> (dmin == 0)
      (! (bounded_0 && bounded_1))) // do not check for a segment
   {
-    if(py > to_CFT(bymax) || compare(py, bymin) == SMALLER)
+    if(py > bymax || py < bymin)
       return false;
   }
 
@@ -292,12 +291,12 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   // is a NaN. But the case with NaNs is treated as if the interval
   // [t1, t2] was ]-inf, +inf[.
 
-  CGAL_assertion(! is_negative(dymin));
-  CGAL_assertion(! is_negative(dymax));
+  CGAL_assertion(dymin >= 0);
+  CGAL_assertion(dymax >= 0);
   if(bounded_0)
   {
-    CGAL_assertion(! is_negative(tymin));
-    CGAL_assertion(! is_negative(tymax));
+    CGAL_assertion(tymin >= 0);
+    CGAL_assertion(tymax >= 0);
   }
 
   // -----------------------------------
@@ -306,44 +305,44 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   CFT dzmin, tzmin, tzmax, dzmax;
   if(qz >= pz)
   {
-    if(bounded_0 && compare(pz, bzmax)== LARGER)
+    if(bounded_0 && pz > bzmax)
       return false; // segment on the right of bbox
-    if(bounded_1 && compare(qz, bzmin) == SMALLER)
+    if(bounded_1 && qz < bzmin)
       return false; // segment on the left of bbox
 
-    if(bounded_1 && compare(bzmax, qz) == LARGER)
+    if(bounded_1 && bzmax > qz)
     {
       tzmax = 1;
       dzmax = 1;
     }
     else
     {
-      tzmax = to_CFT(bzmax) - pz;
+      tzmax = bzmax - pz;
       dzmax = qz - pz;
     }
 
-    tzmin = to_CFT(bzmin) - pz;
+    tzmin = bzmin - pz;
     dzmin = qz - pz;
   }
   else
   {
-    if(bounded_1 && compare(qz, bzmax) == LARGER)
+    if(bounded_1 && qz > bzmax)
       return false; // segment on the right of bbox
-    if(bounded_0 && compare(pz, bzmin) == SMALLER)
-    return false; // segment on the left of bbox
+    if(bounded_0 && pz < bzmin)
+      return false; // segment on the left of bbox
 
-    if(bounded_1 && compare(bzmin, qz) == SMALLER)
+    if(bounded_1 && bzmin < qz)
     {
       tzmax = 1;
       dzmax = 1;
     }
     else
     {
-      tzmax = pz - to_CFT(bzmin);
+      tzmax = pz - bzmin;
       dzmax = pz - qz;
     }
 
-    tzmin = pz - to_CFT(bzmax);
+    tzmin = pz - bzmax;
     dzmin = pz - qz;
   }
 
@@ -355,7 +354,7 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   if((pz == qz) &&  // <=> (dmin == 0)
      (! (bounded_0 && bounded_1))) // do not check for a segment
   {
-    if(compare(pz, bzmax) == LARGER || compare(pz, bzmin) == SMALLER)
+    if(pz > bzmax || pz < bzmin)
       return false;
   }
 
@@ -363,12 +362,13 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   // is a NaN. But the case with NaNs is treated as if the interval
   // [t1, t2] was ]-inf, +inf[.
 
-  CGAL_assertion(! is_negative(dzmin));
-  CGAL_assertion(! is_negative(dzmax));
-  CGAL_assertion_code(if(bounded_0) {)
-    CGAL_assertion(! is_negative(tzmin));
-    CGAL_assertion(! is_negative(tzmax));
-  CGAL_assertion_code(})
+  CGAL_assertion(dzmin >= 0);
+  CGAL_assertion(dzmax >= 0);
+  if(bounded_0)
+  {
+    CGAL_assertion(tzmin >= 0);
+    CGAL_assertion(tzmax >= 0);
+  }
 
   typedef Do_intersect_bbox_segment_aux_is_greater<CFT, bounded_0, use_static_filters> Is_greater;
   typedef typename Is_greater::result_type Is_greater_value;
@@ -421,8 +421,8 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
   if(is_indeterminate(b))
     return b;
 
-  CGAL_assertion(! is_negative(dmin));
-  CGAL_assertion(! is_negative(dmax));
+  CGAL_assertion(dmin >= 0);
+  CGAL_assertion(dmax >= 0);
 
   // If t1 > tzmax || tzmin > t2, return false.
   if((px != qx || py != qy) &&
@@ -453,9 +453,10 @@ template <typename FT,
           bool use_static_filters>
 inline
 typename Do_intersect_bbox_segment_aux_is_greater<FT, bounded_0, use_static_filters>::result_type
-do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
-                              const FT& qx, const FT& qy, const FT& qz,
-                              const Bbox_3& bb)
+do_intersect_bbox_segment_aux(
+    const FT& px, const FT& py, const FT& pz,
+    const FT& qx, const FT& qy, const FT& qz,
+    const Bbox_3& bb)
 
 {
   return do_intersect_bbox_segment_aux<FT,double,bounded_0,bounded_1,use_static_filters>(px, py, pz,
@@ -465,10 +466,9 @@ do_intersect_bbox_segment_aux(const FT& px, const FT& py, const FT& pz,
 }
 
 template <class K>
-typename K::Boolean
-do_intersect(const typename K::Segment_3& segment,
-             const CGAL::Bbox_3& bbox,
-             const K&)
+bool do_intersect(const typename K::Segment_3& segment,
+                  const CGAL::Bbox_3& bbox,
+                  const K&)
 {
   typedef typename K::FT FT;
   typedef typename K::Point_3 Point_3;
@@ -482,10 +482,9 @@ do_intersect(const typename K::Segment_3& segment,
 }
 
 template <class K>
-typename K::Boolean
-do_intersect(const CGAL::Bbox_3& bbox,
-             const typename K::Segment_3& segment,
-             const K& k)
+bool do_intersect(const CGAL::Bbox_3& bbox,
+                  const typename K::Segment_3& segment,
+                  const K& k)
 {
   return do_intersect(segment, bbox, k);
 }

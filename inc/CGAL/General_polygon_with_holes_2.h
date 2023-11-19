@@ -7,13 +7,12 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon/include/CGAL/General_polygon_with_holes_2.h $
-// $Id: General_polygon_with_holes_2.h 74746e5 2023-05-08T17:26:35+03:00 Efi Fogel
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon/include/CGAL/General_polygon_with_holes_2.h $
+// $Id: General_polygon_with_holes_2.h 78ff918 2021-06-23T23:34:14+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
-// Author(s): Baruch Zukerman <baruchzu@post.tau.ac.il>
-//            Efi Fogel <efifogel@gmail.com>
+// Author(s)     : Baruch Zukerman <baruchzu@post.tau.ac.il>
 
 #ifndef CGAL_GENERAL_POLYGON_WITH_HOLES_2_H
 #define CGAL_GENERAL_POLYGON_WITH_HOLES_2_H
@@ -24,118 +23,149 @@
 
 namespace CGAL {
 
-/*! \ingroup PkgPolygon2Ref
- *
- * The class `General_polygon_with_holes_2` models the concept
- * `GeneralPolygonWithHoles_2`. It represents a general polygon with holes.
- * It is parameterized with a type `Polygon` used to define the exposed
- * type `Polygon_2`. This type represents the outer boundary of the general
- * polygon and each hole.
- *
- * \tparam Polygon_ must have input and output operators.
- *
- * \cgalModels `GeneralPolygonWithHoles_2`
- */
-template <typename Polygon_>
-class General_polygon_with_holes_2 {
+/*!
+\ingroup PkgPolygon2Ref
+
+The class `General_polygon_with_holes_2` models the concept
+`GeneralPolygonWithHoles_2`. It represents a general polygon with
+holes. It is parameterized with a type `Polygon` used to define
+the exposed type `General_polygon_2`. This type represents the
+outer boundary of the general polygon and the outer boundaries of
+each hole.
+
+\tparam Polygon_ must have input and output operators.
+
+\cgalModels `GeneralPolygonWithHoles_2`
+
+*/
+template <class Polygon_>
+class General_polygon_with_holes_2
+{
 public:
+
 /// \name Definition
 
 /// @{
   /// polygon without hole type
-  typedef Polygon_                                    Polygon_2;
-#ifndef DOXYGEN_RUNNING
-  // Backward compatibility
-  typedef Polygon_2                                   General_polygon_2;
-#endif
+  typedef Polygon_                                                        General_polygon_2;
 /// @}
 
-  typedef std::deque<Polygon_2>                       Holes_container;
+  typedef std::deque<General_polygon_2>               Holes_container;
 
   typedef typename Holes_container::iterator          Hole_iterator;
   typedef typename Holes_container::const_iterator    Hole_const_iterator;
 
-  typedef unsigned int                                Size;
+  typedef unsigned int                                 Size;
 
-  General_polygon_with_holes_2() : m_pgn() {}
-
-
-  explicit General_polygon_with_holes_2(const Polygon_2& pgn_boundary) :
-    m_pgn(pgn_boundary)
+  General_polygon_with_holes_2() : m_pgn()
   {}
 
-  explicit General_polygon_with_holes_2(Polygon_2&& pgn_boundary) :
-    m_pgn(std::move(pgn_boundary))
+
+  explicit General_polygon_with_holes_2(const General_polygon_2& pgn_boundary)
+  : m_pgn(pgn_boundary)
   {}
 
-  template <typename HolesInputIterator>
-  General_polygon_with_holes_2(const Polygon_2& pgn_boundary,
-                               HolesInputIterator h_begin,
-                               HolesInputIterator h_end) :
-    m_pgn(pgn_boundary),
-    m_holes(h_begin, h_end)
+
+  template <class HolesInputIterator>
+  General_polygon_with_holes_2(const General_polygon_2& pgn_boundary,
+                       HolesInputIterator h_begin,
+                       HolesInputIterator h_end) : m_pgn(pgn_boundary),
+                                                   m_holes(h_begin, h_end)
   {}
 
-  template <typename HolesInputIterator>
-  General_polygon_with_holes_2(Polygon_2&& pgn_boundary,
-                               HolesInputIterator h_begin,
-                               HolesInputIterator h_end) :
-    m_pgn(std::move(pgn_boundary)),
-    m_holes(h_begin, h_end)
-  {}
+  Holes_container& holes()
+  {
+    return m_holes;
+  }
 
-  Holes_container& holes() { return m_holes; }
+  const Holes_container& holes() const
+  {
+    return m_holes;
+  }
 
-  const Holes_container& holes() const { return m_holes; }
+  Hole_iterator holes_begin()
+  {
+    return m_holes.begin();
+  }
 
-  Hole_iterator holes_begin() { return m_holes.begin(); }
+  Hole_iterator holes_end()
+  {
+    return m_holes.end();
+  }
 
-  Hole_iterator holes_end() { return m_holes.end(); }
+  Hole_const_iterator holes_begin() const
+  {
+    return m_holes.begin();
+  }
 
-  Hole_const_iterator holes_begin() const { return m_holes.begin(); }
+  Hole_const_iterator holes_end() const
+  {
+    return m_holes.end();
+  }
 
-  Hole_const_iterator holes_end() const { return m_holes.end(); }
+  bool is_unbounded() const
+  {
+    return m_pgn.is_empty();
+  }
 
-  bool is_unbounded() const { return m_pgn.is_empty(); }
+  General_polygon_2& outer_boundary()
+  {
+    return m_pgn;
+  }
 
-  Polygon_2& outer_boundary() { return m_pgn; }
+  const General_polygon_2& outer_boundary() const
+  {
+    return m_pgn;
+  }
 
-  const Polygon_2& outer_boundary() const { return m_pgn; }
+  void add_hole(const General_polygon_2& pgn_hole)
+  {
+    m_holes.push_back(pgn_hole);
+  }
 
-  void add_hole(const Polygon_2& pgn_hole) { m_holes.push_back(pgn_hole); }
+  void erase_hole(Hole_iterator hit)
+  {
+    m_holes.erase(hit);
+  }
 
-  void add_hole(Polygon_2&& pgn_hole) { m_holes.emplace_back(std::move(pgn_hole)); }
+  bool has_holes() const
+  {
+    return (!m_holes.empty());
+  }
 
-  void erase_hole(Hole_iterator hit) { m_holes.erase(hit); }
+  Size number_of_holes() const
+  {
+    return static_cast<Size>(m_holes.size());
+  }
 
-  void clear_outer_boundary() { m_pgn.clear(); }
-
-  void clear_holes() { m_holes.clear(); }
-
-  bool has_holes() const { return (!m_holes.empty()); }
-
-  Size number_of_holes() const { return static_cast<Size>(m_holes.size()); }
-
-  void clear() {
+  void clear()
+  {
     m_pgn.clear();
     m_holes.clear();
   }
 
-  bool is_plane() const { return (m_pgn.is_empty() && m_holes.empty()); }
+  bool is_plane() const
+  {
+    return (m_pgn.is_empty() && m_holes.empty());
+  }
+
+
 
 protected:
-  Polygon_2 m_pgn;
-  Holes_container m_holes;
+
+  General_polygon_2           m_pgn;
+  Holes_container            m_holes;
 };
+
 
 //-----------------------------------------------------------------------//
 //                          operator<<
 //-----------------------------------------------------------------------//
 /*!
-This operator exports a `General_polygon_with_holes_2` to the output stream `os`.
+This operator exports a General_polygon_with_holes_2 to the output stream `out`.
 
 An \ascii and a binary format exist. The format can be selected with
-the \cgal modifiers for streams, `set_ascii_mode()` and `set_binary_mode()`,
+the \cgal modifiers for streams, `set_ascii_mode(0` and `set_binary_mode()`
 respectively. The modifier `set_pretty_mode()` can be used to allow for (a
 few) structuring comments in the output. Otherwise, the output would
 be free of comments. The default for writing is \ascii without comments.
@@ -147,9 +177,10 @@ boundary is exported followed by the curves themselves.
 
 \relates General_polygon_with_holes_2
 */
-template <typename Polygon_>
-std::ostream&
-operator<<(std::ostream& os, const General_polygon_with_holes_2<Polygon_>& p) {
+template <class Polygon_>
+std::ostream
+&operator<<(std::ostream &os, const General_polygon_with_holes_2<Polygon_>& p)
+{
   typename General_polygon_with_holes_2<Polygon_>::Hole_const_iterator hit;
 
   switch(IO::get_mode(os)) {
@@ -183,9 +214,9 @@ operator<<(std::ostream& os, const General_polygon_with_holes_2<Polygon_>& p) {
 //-----------------------------------------------------------------------//
 
 /*!
-This operator imports a `General_polygon_with_holes_2` from the input stream `is`.
+This operator imports a General_polygon_with_holes_2 from the input stream `in`.
 
-Both \ascii and binary formats are supported, and the format is automatically detected.
+Both ASCII and binary formats are supported, and the format is automatically detected.
 
 The format consists of the number of curves of the outer boundary
 followed by the curves themselves, followed
@@ -194,19 +225,21 @@ outer boundary is followed by the curves themselves.
 
 \relates General_polygon_with_holes_2
 */
-template <typename Polygon_>
-std::istream&
-operator>>(std::istream& is, General_polygon_with_holes_2<Polygon_>& p) {
+template <class Polygon_>
+std::istream &operator>>(std::istream &is, General_polygon_with_holes_2<Polygon_>& p)
+{
   p.clear();
   is >> p.outer_boundary();
 
   unsigned int n_holes;
   is >> n_holes;
-  if (is) {
+  if (is)
+  {
     Polygon_ pgn_hole;
-    for (unsigned int i=0; i<n_holes; ++i) {
+    for (unsigned int i=0; i<n_holes; i++)
+    {
       is >> pgn_hole;
-      p.add_hole(std::move(pgn_hole));
+      p.add_hole(pgn_hole);
     }
   }
 

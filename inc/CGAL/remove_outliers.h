@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_processing_3/include/CGAL/remove_outliers.h $
-// $Id: remove_outliers.h d3fca65 2022-09-23T12:49:40+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_processing_3/include/CGAL/remove_outliers.h $
+// $Id: remove_outliers.h 7f72142 2021-11-16T17:15:46+01:00 Clément Jamin
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Laurent Saboret and Nader Salman and Pierre Alliez
@@ -20,10 +20,10 @@
 #include <CGAL/Point_set_processing_3/internal/Callback_wrapper.h>
 #include <CGAL/for_each.h>
 #include <CGAL/property_map.h>
-#include <CGAL/assertions.h>
+#include <CGAL/point_set_processing_assertions.h>
 #include <functional>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <boost/iterator/zip_iterator.hpp>
@@ -170,23 +170,22 @@ compute_avg_knn_sq_distance_3(
 */
 template <typename ConcurrencyTag,
           typename PointRange,
-          typename NamedParameters = parameters::Default_named_parameters
+          typename NamedParameters
 >
 typename PointRange::iterator
 remove_outliers(
   PointRange& points,
   unsigned int k,
-  const NamedParameters& np = parameters::default_values())
+  const NamedParameters& np)
 {
   using parameters::choose_parameter;
   using parameters::get_parameter;
 
   // geometric types
-  typedef Point_set_processing_3_np_helper<PointRange, NamedParameters> NP_helper;
-  typedef typename NP_helper::Point_map PointMap;
-  typedef typename NP_helper::Geom_traits Kernel;
+  typedef typename CGAL::GetPointMap<PointRange, NamedParameters>::type PointMap;
+  typedef typename Point_set_processing_3::GetK<PointRange, NamedParameters>::Kernel Kernel;
 
-  PointMap point_map = NP_helper::get_point_map(points, np);
+  PointMap point_map = choose_parameter<PointMap>(get_parameter(np, internal_np::point_map));
   typename Kernel::FT neighbor_radius = choose_parameter(get_parameter(np, internal_np::neighbor_radius),
                                                          typename Kernel::FT(0));
   double threshold_percent = choose_parameter(get_parameter(np, internal_np::threshold_percent), 10.);
@@ -206,12 +205,12 @@ remove_outliers(
   // precondition: at least one element in the container.
   // to fix: should have at least three distinct points
   // but this is costly to check
-  CGAL_precondition(points.begin() != points.end());
+  CGAL_point_set_processing_precondition(points.begin() != points.end());
 
   // precondition: at least 2 nearest neighbors
-  CGAL_precondition(k >= 2);
+  CGAL_point_set_processing_precondition(k >= 2);
 
-  CGAL_precondition(threshold_percent >= 0 && threshold_percent <= 100);
+  CGAL_point_set_processing_precondition(threshold_percent >= 0 && threshold_percent <= 100);
 
   Neighbor_query neighbor_query (points, point_map);
 
@@ -286,6 +285,19 @@ remove_outliers(
   // Returns the iterator on the first point to remove
   return out;
 }
+
+/// \cond SKIP_IN_MANUAL
+// variant with default NP
+template <typename ConcurrencyTag, typename PointRange>
+typename PointRange::iterator
+remove_outliers(
+  PointRange& points,
+  unsigned int k) ///< number of neighbors.
+{
+  return remove_outliers<ConcurrencyTag> (points, k, CGAL::Point_set_processing_3::parameters::all_default(points));
+}
+/// \endcond
+
 
 } //namespace CGAL
 

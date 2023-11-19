@@ -3,8 +3,8 @@
 // This file is part of CGAL (www.cgal.org).
 //
 
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Straight_skeleton_2/include/CGAL/Straight_skeleton_builder_2.h $
-// $Id: Straight_skeleton_builder_2.h 70ac415 2023-04-06T00:40:52+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Straight_skeleton_2/include/CGAL/Straight_skeleton_builder_2.h $
+// $Id: Straight_skeleton_builder_2.h b2d562e 2023-01-04T16:38:15+01:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Fernando Cacciola <fernando_cacciola@ciudad.com.ar>
@@ -23,6 +23,7 @@
 #include <CGAL/enum.h>
 
 #include <boost/tuple/tuple.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/mpl/bool.hpp>
@@ -30,9 +31,8 @@
 #include <algorithm>
 #include <exception>
 #include <iostream>
-#include <list>
 #include <map>
-#include <memory>
+#include <list>
 #include <queue>
 #include <string>
 #include <sstream>
@@ -119,10 +119,9 @@ private :
 
   typedef typename Traits::FT               FT ;
   typedef typename Traits::Point_2          Point_2 ;
-  typedef typename Traits::Segment_2        Segment_2 ;
   typedef typename Traits::Vector_2         Vector_2 ;
   typedef typename Traits::Direction_2      Direction_2 ;
-
+  typedef typename Traits::Segment_2        Segment_2 ;
   typedef typename Traits::Trisegment_2     Trisegment_2 ;
   typedef typename Traits::Trisegment_2_ptr Trisegment_2_ptr ;
 
@@ -156,9 +155,8 @@ private :
   typedef CGAL_SS_i::Edge_event_2        <SSkel,Traits> EdgeEvent ;
   typedef CGAL_SS_i::Split_event_2       <SSkel,Traits> SplitEvent ;
   typedef CGAL_SS_i::Pseudo_split_event_2<SSkel,Traits> PseudoSplitEvent ;
-  typedef CGAL_SS_i::Artificial_event_2  <SSkel,Traits> ArtificialEvent ;
 
-  typedef std::shared_ptr<Event> EventPtr ;
+  typedef boost::intrusive_ptr<Event> EventPtr ;
 
   typedef std::pair<Vertex_handle,Vertex_handle> Vertex_handle_pair ;
 
@@ -182,7 +180,7 @@ private :
 
   enum Site { AT_SOURCE = -1 , INSIDE = 0, AT_TARGET = +1 } ;
 
-  struct Multinode
+  struct Multinode : public Ref_counted_base
   {
     Multinode ( Halfedge_handle b, Halfedge_handle e )
       :
@@ -201,7 +199,7 @@ private :
     Vertex_handle_vector   nodes_to_remove ;
   } ;
 
-  typedef std::shared_ptr<Multinode> MultinodePtr ;
+  typedef boost::intrusive_ptr<Multinode> MultinodePtr ;
 
   struct MultinodeComparer
   {
@@ -311,10 +309,10 @@ private :
   Comparison_result CompareEventsSupportAnglesSplitSplit ( EventPtr const& aA, EventPtr const& aB )
   {
     CGAL_precondition ( aA->triedge().e0() == aB->triedge().e0() && aA->triedge().e1() == aB->triedge().e1() ) ;
-    return mTraits.compare_ss_event_angles_2_object()( CreateVector(aA->triedge().e0()),
-                                                       CreateVector(aA->triedge().e1()),
-                                                       CreateVector(aA->triedge().e2()),
-                                                       CreateVector(aB->triedge().e2()) );
+    return Compare_ss_event_angles_2(mTraits)( CreateVector(aA->triedge().e0()),
+                                               CreateVector(aA->triedge().e1()),
+                                               CreateVector(aA->triedge().e2()),
+                                               CreateVector(aB->triedge().e2()) );
   }
 
   Comparison_result CompareEventsSupportAnglesSplitPseudoSplit ( EventPtr const& aA, EventPtr const& aB )
@@ -324,17 +322,17 @@ private :
     PseudoSplitEvent& lPSEvent = dynamic_cast<PseudoSplitEvent&>(*aB) ;
     if(lPSEvent.is_at_source_vertex())
     {
-      return mTraits.compare_ss_event_angles_2_object()( CreateVector(aA->triedge().e0()),
-                                                         CreateVector(aA->triedge().e1()),
-                                                         CreateVector(aA->triedge().e2()),
-                                                         CreateVector(aB->triedge().e2()) );
+      return Compare_ss_event_angles_2(mTraits)( CreateVector(aA->triedge().e0()),
+                                                 CreateVector(aA->triedge().e1()),
+                                                 CreateVector(aA->triedge().e2()),
+                                                 CreateVector(aB->triedge().e2()) );
     }
     else
     {
-      return mTraits.compare_ss_event_angles_2_object()( CreateVector(aA->triedge().e0()),
-                                                         CreateVector(aA->triedge().e1()),
-                                                         CreateVector(aA->triedge().e2()),
-                                                         K().construct_opposite_vector_2_object()( CreateVector(aB->triedge().e2())) );
+      return Compare_ss_event_angles_2(mTraits)( CreateVector(aA->triedge().e0()),
+                                                 CreateVector(aA->triedge().e1()),
+                                                 CreateVector(aA->triedge().e2()),
+                                                 K().construct_opposite_vector_2_object()( CreateVector(aB->triedge().e2())) );
     }
   }
 
@@ -349,34 +347,34 @@ private :
     {
       if(lPSEventB.is_at_source_vertex())
       {
-        return mTraits.compare_ss_event_angles_2_object()( CreateVector(aA->triedge().e0()),
-                                                           CreateVector(aA->triedge().e1()),
-                                                           CreateVector(aA->triedge().e2()),
-                                                           CreateVector(aB->triedge().e2()) );
+        return Compare_ss_event_angles_2(mTraits)( CreateVector(aA->triedge().e0()),
+                                                   CreateVector(aA->triedge().e1()),
+                                                   CreateVector(aA->triedge().e2()),
+                                                   CreateVector(aB->triedge().e2()) );
       }
       else
       {
-        return mTraits.compare_ss_event_angles_2_object()( CreateVector(aA->triedge().e0()),
-                                                           CreateVector(aA->triedge().e1()),
-                                                           CreateVector(aA->triedge().e2()),
-                                                           K().construct_opposite_vector_2_object()( CreateVector(aB->triedge().e2())) );
+        return Compare_ss_event_angles_2(mTraits)( CreateVector(aA->triedge().e0()),
+                                                   CreateVector(aA->triedge().e1()),
+                                                   CreateVector(aA->triedge().e2()),
+                                                   K().construct_opposite_vector_2_object()( CreateVector(aB->triedge().e2())) );
       }
     }
     else // aA is a Pseudo-split Event at the target
     {
       if(lPSEventB.is_at_source_vertex())
       {
-        return mTraits.compare_ss_event_angles_2_object()( CreateVector(aA->triedge().e0()),
-                                                           CreateVector(aA->triedge().e1()),
-                                                           K().construct_opposite_vector_2_object()( CreateVector(aA->triedge().e2()) ),
-                                                           CreateVector(aB->triedge().e2()) );
+        return Compare_ss_event_angles_2(mTraits)( CreateVector(aA->triedge().e0()),
+                                                   CreateVector(aA->triedge().e1()),
+                                                   K().construct_opposite_vector_2_object()( CreateVector(aA->triedge().e2()) ),
+                                                   CreateVector(aB->triedge().e2()) );
       }
       else
       {
-        return mTraits.compare_ss_event_angles_2_object()( CreateVector(aA->triedge().e0()),
-                                                           CreateVector(aA->triedge().e1()),
-                                                           K().construct_opposite_vector_2_object()( CreateVector(aA->triedge().e2())),
-                                                           K().construct_opposite_vector_2_object()( CreateVector(aB->triedge().e2())) );
+        return Compare_ss_event_angles_2(mTraits)( CreateVector(aA->triedge().e0()),
+                                                   CreateVector(aA->triedge().e1()),
+                                                   K().construct_opposite_vector_2_object()( CreateVector(aA->triedge().e2())),
+                                                   K().construct_opposite_vector_2_object()( CreateVector(aB->triedge().e2())) );
       }
     }
   }
@@ -449,7 +447,7 @@ private :
     }
   }
 
-  // @todo Should split events always have lower priority than edge events?
+  // @todo Should split events always have lower priority than split events?
   Comparison_result CompareEventsSupportAngles ( EventPtr const& aA, EventPtr const& aB )
   {
     CGAL_precondition ( aA->type() != Event::cEdgeEvent && aB->type() != Event::cEdgeEvent ) ;
@@ -554,7 +552,7 @@ public:
 
   typedef std::priority_queue<EventPtr,std::vector<EventPtr>,Split_event_compare> SplitPQ ;
 
-  struct Vertex_data
+  struct Vertex_data : public Ref_counted_base
   {
     Vertex_data ( Vertex_handle aVertex, Split_event_compare const& aComparer )
       :
@@ -581,9 +579,10 @@ public:
     bool              mHasSimultaneousEvents ;
     SplitPQ           mSplitEvents ;
     Triedge           mTriedge ; // Here, E0,E1 corresponds to the vertex (unlike *event* triedges)
+    Trisegment_2_ptr  mTrisegment ; // Skeleton nodes cache the full trisegment tree that defines the originating event
   } ;
 
-  typedef std::shared_ptr<Vertex_data> Vertex_data_ptr ;
+  typedef boost::intrusive_ptr<Vertex_data> Vertex_data_ptr ;
 
   typedef std::priority_queue<EventPtr,std::vector<EventPtr>,Event_compare> PQ ;
 
@@ -629,11 +628,14 @@ private :
   // Null if aV is a contour or infinite node
   Trisegment_2_ptr const& GetTrisegment ( Vertex_handle aV ) const
   {
-    return aV->trisegment() ;
+    return GetVertexData(aV).mTrisegment ;
   }
 
   void SetTrisegment ( Vertex_handle aV, Trisegment_2_ptr const& aTrisegment )
   {
+    // @todo could get rid of the 'mTrisegment' in vertex data
+    // since it's also stored in the vertex directly (to be used during offset construction...)
+    GetVertexData(aV).mTrisegment = aTrisegment ;
     aV->set_trisegment(aTrisegment) ;
   }
 
@@ -659,31 +661,31 @@ private :
 
   typename K::Segment_2 CreateRawSegment ( Halfedge_const_handle aH ) const
   {
-    const Point_2& s = aH->opposite()->vertex()->point() ;
-    const Point_2& t = aH->vertex()->point() ;
+    Point_2 s = aH->opposite()->vertex()->point() ;
+    Point_2 t = aH->vertex()->point() ;
     return K().construct_segment_2_object()(s,t);
   }
 
-  template <typename GT> // this is 'Traits', but templating is required for SFINAE
+  template <typename GT> // actually just equal to 'Traits', but gotta template for SFINAE to work
   Segment_2 CreateSegment ( Halfedge_const_handle aH,
-                            std::enable_if_t<
-                              ! CGAL_SS_i::has_Segment_2_with_ID<GT>::value>* = nullptr ) const
+                            typename std::enable_if<
+                              ! CGAL_SS_i::has_Segment_2_with_ID<GT>::value>::type* = nullptr ) const
   {
     return Segment_2(CreateRawSegment(aH)) ;
   }
 
-  template <typename GT> // this is 'Traits', but templating is required for SFINAE
+  template <typename GT> // actually just equal to 'Traits', but gotta template for SFINAE to work
   Segment_2 CreateSegment ( Halfedge_const_handle aH,
-                            std::enable_if_t<
-                              CGAL_SS_i::has_Segment_2_with_ID<GT>::value>* = nullptr ) const
+                            typename std::enable_if<
+                              CGAL_SS_i::has_Segment_2_with_ID<GT>::value>::type* = nullptr ) const
   {
     return Segment_2(CreateRawSegment(aH), aH->id());
   }
 
   Vector_2 CreateVector ( Halfedge_const_handle aH ) const
   {
-    const Point_2& s = aH->opposite()->vertex()->point() ;
-    const Point_2& t = aH->vertex()->point() ;
+    Point_2 s = aH->opposite()->vertex()->point() ;
+    Point_2 t = aH->vertex()->point() ;
     return K().construct_vector_2_object()(s,t);
   }
 
@@ -692,68 +694,18 @@ private :
     return K().construct_direction_2_object()( CreateVector(aH) );
   }
 
-  Direction_2 CreatePerpendicularDirection ( Halfedge_const_handle aH ) const
-  {
-    const Direction_2 lD = CreateDirection(aH);
-    return K().construct_perpendicular_direction_2_object()( lD, CGAL::COUNTERCLOCKWISE );
-  }
-
   Trisegment_2_ptr CreateTrisegment ( Triedge const& aTriedge ) const
   {
     CGAL_precondition(aTriedge.is_valid() && aTriedge.is_skeleton());
 
-    Trisegment_2_ptr r = mTraits.construct_ss_trisegment_2_object()( CreateSegment<Traits>(aTriedge.e0()),
-                                                                     aTriedge.e0()->weight(),
-                                                                     CreateSegment<Traits>(aTriedge.e1()),
-                                                                     aTriedge.e1()->weight(),
-                                                                     CreateSegment<Traits>(aTriedge.e2()),
-                                                                     aTriedge.e2()->weight() );
+    Trisegment_2_ptr r = Construct_ss_trisegment_2(mTraits)(CreateSegment<Traits>(aTriedge.e0())
+                                                           ,CreateSegment<Traits>(aTriedge.e1())
+                                                           ,CreateSegment<Traits>(aTriedge.e2())
+                                                           );
 
-    CGAL_STSKEL_BUILDER_TRACE(5,"Trisegment for " << aTriedge << ":\n" << r ) ;
+    CGAL_STSKEL_BUILDER_TRACE(5,"Trisegment for " << aTriedge << ":" << r ) ;
 
-    // Consecutive collinear segments must not have the same weight
-    CGAL_assertion_code(if(r->collinearity() == TRISEGMENT_COLLINEARITY_01))
-    CGAL_assertion_code(if(aTriedge.e0()->weight() != aTriedge.e1()->weight()) {)
-    CGAL_STSKEL_BUILDER_TRACE(5, "Collinear check: " << CGAL_SS_i::are_edges_orderly_collinear(r->e0(), r->e1()));
-    CGAL_assertion(aTriedge.e1() != aTriedge.e0()->opposite()->prev()->opposite() &&
-                   aTriedge.e0() != aTriedge.e1()->opposite()->prev()->opposite());
-    CGAL_assertion_code(})
-
-    CGAL_assertion_code(if(r->collinearity() == TRISEGMENT_COLLINEARITY_12))
-    CGAL_assertion_code(if(aTriedge.e1()->weight() != aTriedge.e2()->weight()) {)
-    CGAL_STSKEL_BUILDER_TRACE(5, "Collinear check: " << CGAL_SS_i::are_edges_orderly_collinear(r->e1(), r->e2()));
-    CGAL_assertion(aTriedge.e2() != aTriedge.e1()->opposite()->prev()->opposite() &&
-                   aTriedge.e1() != aTriedge.e2()->opposite()->prev()->opposite());
-    CGAL_assertion_code(})
-
-    CGAL_assertion_code(if(r->collinearity() == TRISEGMENT_COLLINEARITY_02))
-    CGAL_assertion_code(if(aTriedge.e0()->weight() != aTriedge.e2()->weight()) {)
-    CGAL_STSKEL_BUILDER_TRACE(5, "Collinear check: " << CGAL_SS_i::are_edges_orderly_collinear(r->e0(), r->e2()));
-    CGAL_assertion(aTriedge.e2() != aTriedge.e0()->opposite()->prev()->opposite() &&
-                   aTriedge.e0() != aTriedge.e2()->opposite()->prev()->opposite());
-    CGAL_assertion_code(})
-
-    CGAL_assertion_code(if(r->collinearity() == TRISEGMENT_COLLINEARITY_ALL) {)
-    CGAL_assertion_code(if(aTriedge.e0()->weight() != aTriedge.e1()->weight()) {)
-    CGAL_STSKEL_BUILDER_TRACE(5, "Collinear check: " << CGAL_SS_i::are_edges_orderly_collinear(r->e0(), r->e1()));
-    CGAL_assertion(aTriedge.e1() != aTriedge.e0()->opposite()->prev()->opposite() &&
-                   aTriedge.e0() != aTriedge.e1()->opposite()->prev()->opposite());
-    CGAL_assertion_code(})
-
-    CGAL_assertion_code(if(aTriedge.e1()->weight() != aTriedge.e2()->weight()) {)
-    CGAL_STSKEL_BUILDER_TRACE(5, "Collinear check: " << CGAL_SS_i::are_edges_orderly_collinear(r->e1(), r->e2()));
-    CGAL_assertion(aTriedge.e2() != aTriedge.e1()->opposite()->prev()->opposite() &&
-                   aTriedge.e1() != aTriedge.e2()->opposite()->prev()->opposite());
-    CGAL_assertion_code(})
-
-    CGAL_assertion_code(if(aTriedge.e0()->weight() != aTriedge.e2()->weight()) {)
-    CGAL_STSKEL_BUILDER_TRACE(5, "Collinear check: " << CGAL_SS_i::are_edges_orderly_collinear(r->e0(), r->e2()));
-    CGAL_assertion(aTriedge.e2() != aTriedge.e0()->opposite()->prev()->opposite() &&
-                   aTriedge.e0() != aTriedge.e2()->opposite()->prev()->opposite());
-    CGAL_assertion_code(})
-    CGAL_assertion_code(})
-
-    CGAL_postcondition_msg((r != nullptr), "Unable to determine edges collinearity");
+    CGAL_postcondition_msg((r!= Trisegment_2_ptr()), "Unable to determine edges collinearity");
 
     return r ;
   }
@@ -834,8 +786,6 @@ private :
 
   void SetIsProcessed ( Vertex_handle aV )
   {
-    CGAL_STSKEL_BUILDER_TRACE(2, "Set V" << aV->id() << " Processed");
-
     GetVertexData(aV).mIsProcessed = true ;
 
     mVisitor.on_vertex_processed(aV);
@@ -868,7 +818,7 @@ private :
       if ( !lPQ.empty() )
       {
         // When there are simultaneous split events, we sort them to handle nearby pseudo split events
-        // together as to avoid multiple fronts crossing each other without noticing each other.
+        // together as to avoid multiple fronts crossing each other without seeing
         // and creating an invalid SLS.
         //
         // Unfortunately, the way that this sorting is performed requires knowing whether an event
@@ -910,17 +860,14 @@ private :
 
   bool ExistEvent ( Trisegment_2_ptr const& aS )
   {
-    return mTraits.do_ss_event_exist_2_object()( aS, mMaxTime ) ;
+    return Do_ss_event_exist_2(mTraits)(aS,mMaxTime);
   }
 
   bool IsOppositeEdgeFacingTheSplitSeed( Vertex_handle aSeed, Halfedge_handle aOpposite ) const
   {
     if ( aSeed->is_skeleton() )
-      return mTraits.is_edge_facing_ss_node_2_object()( GetTrisegment(aSeed),
-                                                        CreateSegment<Traits>(aOpposite) ) ;
-    else
-      return mTraits.is_edge_facing_ss_node_2_object()( aSeed->point(),
-                                                        CreateSegment<Traits>(aOpposite) ) ;
+         return Is_edge_facing_ss_node_2(mTraits)( GetTrisegment(aSeed), CreateSegment<Traits>(aOpposite) ) ;
+    else return Is_edge_facing_ss_node_2(mTraits)( aSeed->point()      , CreateSegment<Traits>(aOpposite) ) ;
   }
 
   Oriented_side EventPointOrientedSide( Event const&          aEvent
@@ -930,27 +877,22 @@ private :
                                       , bool                  aE0isPrimary
                                       ) const
   {
-    return mTraits.oriented_side_of_event_point_wrt_bisector_2_object()( aEvent.trisegment(),
-                                                                         CreateSegment<Traits>(aE0),
-                                                                         aE0->weight(),
-                                                                         CreateSegment<Traits>(aE1),
-                                                                         aE1->weight(),
-                                                                         GetTrisegment(aV01), // Can be null
-                                                                         aE0isPrimary ) ;
+    return Oriented_side_of_event_point_wrt_bisector_2(mTraits)( aEvent.trisegment()
+                                                               , CreateSegment<Traits>(aE0)
+                                                               , CreateSegment<Traits>(aE1)
+                                                               , GetTrisegment(aV01) // Can be null
+                                                               , aE0isPrimary
+                                                               ) ;
   }
 
   Comparison_result CompareEvents ( Trisegment_2_ptr const& aA, Trisegment_2_ptr const& aB ) const
   {
-    return mTraits.compare_ss_event_times_2_object()( aA, aB ) ;
+    return Compare_ss_event_times_2(mTraits)(aA,aB) ;
   }
 
   Comparison_result CompareEvents ( EventPtr const& aA, EventPtr const& aB ) const
   {
-    Comparison_result rResult = aA->triedge() != aB->triedge() ? CompareEvents( aA->trisegment(), aB->trisegment() )
-                                                               : EQUAL;
-
-    CGAL_STSKEL_BUILDER_TRACE(3, "Compare events " << aA->triedge() << " and " << aB->triedge() << " -> " << rResult);
-    return rResult;
+    return aA->triedge() != aB->triedge() ? CompareEvents( aA->trisegment(), aB->trisegment() ) : EQUAL ;
   }
 
   Comparison_result CompareEvents( Trisegment_2_ptr const& aTrisegment, Vertex_handle aSeedNode ) const
@@ -991,7 +933,7 @@ private :
 
   bool AreEventsSimultaneous( Trisegment_2_ptr const& x, Trisegment_2_ptr const& y ) const
   {
-    return mTraits.are_ss_events_simultaneous_2_object()( x, y ) ;
+    return Are_ss_events_simultaneous_2(mTraits)(x,y) ;
   }
 
   bool AreEventsSimultaneous( EventPtr const& x, EventPtr const& y ) const
@@ -1069,7 +1011,7 @@ private :
 
   boost::tuple<FT,Point_2> ConstructEventTimeAndPoint( Trisegment_2_ptr const& aS ) const
   {
-    boost::optional< boost::tuple<FT,Point_2> > r = mTraits.construct_ss_event_time_and_point_2_object()( aS ) ;
+    boost::optional< boost::tuple<FT,Point_2> > r = Construct_ss_event_time_and_point_2(mTraits)(aS);
     CGAL_postcondition_msg(!!r, "Unable to compute skeleton node coordinates");
     return *r ;
   }
@@ -1207,8 +1149,6 @@ private :
   // returns 'true' if something was merged
   bool MergeCoincidentNodes() ;
 
-  void EnforceSimpleConnectedness() ;
-
   bool FinishUp();
 
   bool Run();
@@ -1225,7 +1165,9 @@ private:
   std::vector<std::list<Vertex_handle>> mLAVLists;
 
   Vertex_handle_vector   mReflexVertices ;
+  Halfedge_handle_vector mDanglingBisectors ;
   Halfedge_handle_vector mContourHalfedges ;
+
 
   Vertex_handle_pair_vector mSplitNodes ;
 
@@ -1260,7 +1202,7 @@ private :
     InputPointIterator lCurr = aBegin ;
     // InputPointIterator lPrev = aBegin ;
 
-    CGAL_precondition_code(int c = 0 ;)
+    int c = 0 ;
 
     while ( lCurr != aEnd )
     {
@@ -1276,7 +1218,7 @@ private :
 
       Face_handle lFace = mSSkel->SSkel::Base::faces_push_back( Face(mFaceID++) ) ;
 
-      CGAL_precondition_code(++ c ;)
+      ++ c ;
 
       lCCWBorder->HBase_base::set_face(lFace);
       lFace     ->FBase     ::set_halfedge(lCCWBorder);
@@ -1361,26 +1303,25 @@ private :
     return CanSafelyIgnoreSplitEventImpl(lEvent, typename CGAL_SS_i::has_Filters_split_events_tag<Traits>::type());
   }
 
-  void ComputeUpperBoundForValidSplitEventsImpl(Vertex_handle,
-                                                Halfedge_handle_vector_iterator,
-                                                Halfedge_handle_vector_iterator,
+  void ComputeUpperBoundForValidSplitEventsImpl(Vertex_handle, Vertex_handle, Vertex_handle,
+                                                Halfedge_handle_vector_iterator, Halfedge_handle_vector_iterator,
                                                 boost::mpl::bool_<false>) const
   {
   }
 
-  void ComputeUpperBoundForValidSplitEventsImpl(Vertex_handle aNode,
+  void ComputeUpperBoundForValidSplitEventsImpl(Vertex_handle lPrev, Vertex_handle aNode, Vertex_handle lNext,
                                                 Halfedge_handle_vector_iterator contour_halfedges_begin,
                                                 Halfedge_handle_vector_iterator contour_halfedges_end,
                                                 boost::mpl::bool_<true>) const
   {
-    return mTraits.ComputeFilteringBound(aNode, contour_halfedges_begin, contour_halfedges_end);
+    return mTraits.ComputeFilteringBound(lPrev, aNode, lNext, contour_halfedges_begin, contour_halfedges_end);
   }
 
-  void ComputeUpperBoundForValidSplitEvents(Vertex_handle aNode,
+  void ComputeUpperBoundForValidSplitEvents(Vertex_handle lPrev, Vertex_handle aNode, Vertex_handle lNext,
                                             Halfedge_handle_vector_iterator contour_halfedges_begin,
                                             Halfedge_handle_vector_iterator contour_halfedges_end) const
   {
-    return ComputeUpperBoundForValidSplitEventsImpl(aNode, contour_halfedges_begin, contour_halfedges_end,
+    return ComputeUpperBoundForValidSplitEventsImpl(lPrev, aNode, lNext, contour_halfedges_begin, contour_halfedges_end,
                                                     typename CGAL_SS_i::has_Filters_split_events_tag<Traits>::type());
   }
 
@@ -1442,40 +1383,11 @@ public:
     return enter_contour(aBegin, aEnd, Cartesian_converter<K,K>(), aCheckValidity);
   }
 
-  template <typename WeightIterator, typename Converter>
-  Straight_skeleton_builder_2& enter_contour_weights(WeightIterator aWeightsBegin,
-                                                     WeightIterator aWeightsEnd,
-                                                     const Converter& cvt)
-  {
-    const auto lWeightsN = std::distance(aWeightsBegin, aWeightsEnd);
-    CGAL_assertion(std::size_t(lWeightsN) <= mSSkel->SSkel::Base::size_of_faces());
-
-    Face_iterator fit = std::next(mSSkel->SSkel::Base::faces_end(), -lWeightsN);
-
-    for(; aWeightsBegin!=aWeightsEnd; ++aWeightsBegin, ++fit)
-    {
-      CGAL_assertion(fit != mSSkel->SSkel::Base::faces_end());
-
-      Halfedge_handle lBorder = fit->halfedge();
-      FT lWeight = *aWeightsBegin;
-      CGAL_assertion(lBorder->opposite()->is_border());
-      CGAL_STSKEL_BUILDER_TRACE(4, "Assign " << lWeight << " cvt to " << cvt(lWeight) << " to E" << lBorder->id());
-      lBorder->set_weight(cvt(lWeight));
-    }
-
-    return *this;
-  }
-
-  template <typename WeightIterator>
-  Straight_skeleton_builder_2& enter_contour_weights(WeightIterator aWeightsBegin,
-                                                     WeightIterator aWeightsEnd)
-  {
-    return enter_contour_weightsg(aWeightsBegin, aWeightsEnd, NT_converter<FT,FT>());
-  }
 } ;
 
-} // namespace CGAL
+} // end namespace CGAL
 
 #include <CGAL/Straight_skeleton_2/Straight_skeleton_builder_2_impl.h>
 
-#endif // CGAL_STRAIGHT_SKELETON_BUILDER_2_H
+#endif // CGAL_STRAIGHT_SKELETON_BUILDER_2_H //
+// EOF //

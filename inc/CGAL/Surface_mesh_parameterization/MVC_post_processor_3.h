@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/MVC_post_processor_3.h $
-// $Id: MVC_post_processor_3.h 9e137bc 2023-01-31T12:26:55+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/MVC_post_processor_3.h $
+// $Id: MVC_post_processor_3.h 373d21e 2021-12-20T18:06:26+01:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -34,7 +34,8 @@
 
 #include <CGAL/Default.h>
 
-#include <unordered_set>
+#include <boost/unordered_set.hpp>
+
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -116,7 +117,7 @@ private:
   typedef typename boost::graph_traits<Triangle_mesh>::face_iterator        face_iterator;
   typedef typename boost::graph_traits<Triangle_mesh>::vertex_iterator      vertex_iterator;
 
-  typedef std::unordered_set<vertex_descriptor>         Vertex_set;
+  typedef boost::unordered_set<vertex_descriptor>       Vertex_set;
   typedef std::vector<face_descriptor>                  Faces_vector;
 
   // Traits subtypes:
@@ -460,7 +461,7 @@ private:
     CGAL_precondition(!ct.is_infinite(fh));
     typedef typename CT::Vertex_handle                    Vertex_handle;
 
-    // Doing it explicitly rather than a loop for clarity
+    // Doing it explicitely rather than a loop for clarity
     Vertex_handle vh0 = fh->vertex(0);
     Vertex_handle vh1 = fh->vertex(1);
     Vertex_handle vh2 = fh->vertex(2);
@@ -598,7 +599,7 @@ private:
   {
     Error_code status = OK;
 
-    double Du, Dv;
+    NT Du, Dv;
     if(!get_linear_algebra_traits().linear_solver(A, Bu, Xu, Du) ||
        !get_linear_algebra_traits().linear_solver(A, Bv, Xv, Dv)) {
       status = ERROR_CANNOT_SOLVE_LINEAR_SYSTEM;
@@ -703,8 +704,8 @@ public:
 
     // Prepare the constrained triangulation: collect exterior faces (faces in
     // the convex hull but not -- geometrically -- in 'mesh').
-    std::unordered_set<vertex_descriptor> vs;
-    internal::Bool_property_map<std::unordered_set<vertex_descriptor> > vpmap(vs);
+    boost::unordered_set<vertex_descriptor> vs;
+    internal::Bool_property_map<boost::unordered_set<vertex_descriptor> > vpmap(vs);
     prepare_CT_for_parameterization(ct, vpmap);
 
     // Run the MVC
@@ -726,8 +727,8 @@ public:
   ///
   /// \param mesh a triangulated surface.
   /// \param bhd a halfedge descriptor on the boundary of `mesh`.
-  /// \param uvmap an instantiation of the class `VertexUVmap`.
-  /// \param vimap an instantiation of the class `VertexIndexMap`.
+  /// \param uvmap an instanciation of the class `VertexUVmap`.
+  /// \param vimap an instanciation of the class `VertexIndexMap`.
   ///
   template <typename VertexUVMap,
             typename VertexIndexMap>

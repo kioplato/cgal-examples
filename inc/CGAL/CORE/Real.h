@@ -18,11 +18,11 @@
  *       Zilin Du <zilin@cs.nyu.edu>
  *       Sylvain Pion <pion@cs.nyu.edu>
  *
- * WWW URL: https://cs.nyu.edu/exact/
+ * WWW URL: http://cs.nyu.edu/exact/
  * Email: exact@cs.nyu.edu
  *
- * $URL: https://github.com/CGAL/cgal/blob/v5.6/CGAL_Core/include/CGAL/CORE/Real.h $
- * $Id: Real.h 0ff7882 2022-12-06T22:21:06+01:00 Mael
+ * $URL: https://github.com/CGAL/cgal/blob/v5.4.5/CGAL_Core/include/CGAL/CORE/Real.h $
+ * $Id: Real.h 10e99cb 2020-07-22T09:51:07+02:00 Laurent Rineau
  * SPDX-License-Identifier: LGPL-3.0-or-later
  ***************************************************************************/
 #ifndef _CORE_REAL_H_
@@ -115,7 +115,7 @@ public:
     *this += 1;
     return t;
   }
-  /// right decrement operator (i--)
+  /// right deccrement operator (i--)
   Real operator--(int) {
     Real t(*this);
     *this -= 1;
@@ -168,7 +168,7 @@ public:
   }
   //@}
 
-  /// \name Approximation Function
+  /// \name Aprroximation Function
   //@{
   /// approximation
   Real approx(const extLong& r=get_static_defRelPrec(),

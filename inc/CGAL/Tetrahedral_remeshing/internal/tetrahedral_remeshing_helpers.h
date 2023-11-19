@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/tetrahedral_remeshing_helpers.h $
-// $Id: tetrahedral_remeshing_helpers.h 49f7a40 2023-02-09T09:42:55+00:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/tetrahedral_remeshing_helpers.h $
+// $Id: tetrahedral_remeshing_helpers.h 7a0cb92 2022-10-28T12:50:23+02:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -18,7 +18,6 @@
 #include <utility>
 #include <array>
 #include <iterator>
-#include <unordered_set>
 
 #include <CGAL/Point_3.h>
 #include <CGAL/Weighted_point_3.h>
@@ -617,7 +616,7 @@ std::size_t nb_incident_subdomains(const typename C3t3::Vertex_handle v,
 {
   typedef typename C3t3::Subdomain_index Subdomain_index;
 
-  std::unordered_set<Subdomain_index> indices;
+  boost::unordered_set<Subdomain_index> indices;
   incident_subdomains(v, c3t3, std::inserter(indices, indices.begin()));
 
   return indices.size();
@@ -629,7 +628,7 @@ std::size_t nb_incident_subdomains(const typename C3t3::Edge& e,
 {
   typedef typename C3t3::Subdomain_index Subdomain_index;
 
-  std::unordered_set<Subdomain_index> indices;
+  boost::unordered_set<Subdomain_index> indices;
   incident_subdomains(e, c3t3, std::inserter(indices, indices.begin()));
 
   return indices.size();
@@ -641,7 +640,7 @@ std::size_t nb_incident_surface_patches(const typename C3t3::Edge& e,
 {
   typedef typename C3t3::Surface_patch_index Surface_patch_index;
 
-  std::unordered_set<Surface_patch_index, boost::hash<Surface_patch_index>> indices;
+  boost::unordered_set<Surface_patch_index> indices;
   incident_surface_patches(e, c3t3, std::inserter(indices, indices.begin()));
 
   return indices.size();
@@ -652,7 +651,7 @@ std::size_t nb_incident_complex_edges(const typename C3t3::Vertex_handle v,
                                       const C3t3& c3t3)
 {
   typedef typename C3t3::Edge Edge;
-  std::unordered_set<Edge> edges;
+  boost::unordered_set<Edge> edges;
   c3t3.triangulation().finite_incident_edges(v, std::inserter(edges, edges.begin()));
 
   std::size_t count = 0;
@@ -1313,7 +1312,7 @@ void dump_surface_off(const Tr& tr, const char* filename)
   }
 
   //write facets
-  CGAL_assertion_code(std::size_t nbf_print = 0);
+  std::size_t nbf_print = 0;
   for (Finite_facets_iterator fit = tr.finite_facets_begin();
        fit != tr.finite_facets_end(); ++fit)
   {
@@ -1324,7 +1323,7 @@ void dump_surface_off(const Tr& tr, const char* filename)
       ofs << "3  " << vertices.left.at(c->vertex((i + 1) % 4)) << " "
           << vertices.left.at(c->vertex((i + 2) % 4)) << " "
           << vertices.left.at(c->vertex((i + 3) % 4)) << std::endl;
-      CGAL_assertion_code(++nbf_print);
+      ++nbf_print;
     }
   }
   CGAL_assertion(nbf == nbf_print);
@@ -1342,7 +1341,7 @@ void dump_cells_off(const CellRange& cells, const Tr& /*tr*/, const char* filena
 
   Bimap_t vertices;
   int index = 0;
-  std::unordered_set<std::array<Vertex_handle, 3>, boost::hash<std::array<Vertex_handle, 3>> > facets;
+  boost::unordered_set<std::array<Vertex_handle, 3> > facets;
 
   for (Cell_handle c : cells)
   {
@@ -1581,7 +1580,7 @@ void dump_facets_in_complex(const C3t3& c3t3, const char* filename)
   }
 
   //write facets
-  CGAL_assertion_code(std::size_t nbf_print = 0);
+  std::size_t nbf_print = 0;
   for (Facets_in_complex_iterator fit = c3t3.facets_in_complex_begin();
        fit != c3t3.facets_in_complex_end(); ++fit)
   {
@@ -1590,7 +1589,7 @@ void dump_facets_in_complex(const C3t3& c3t3, const char* filename)
     ofs << "3  " << vertices.left.at(c->vertex((i + 1) % 4)) << " "
         << vertices.left.at(c->vertex((i + 2) % 4)) << " "
         << vertices.left.at(c->vertex((i + 3) % 4)) << std::endl;
-    CGAL_assertion_code(++nbf_print);
+    ++nbf_print;
   }
   CGAL_assertion(nbf == nbf_print);
 

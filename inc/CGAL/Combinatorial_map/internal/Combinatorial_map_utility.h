@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Combinatorial_map/include/CGAL/Combinatorial_map/internal/Combinatorial_map_utility.h $
-// $Id: Combinatorial_map_utility.h 7a62583 2022-11-14T19:14:33+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Combinatorial_map/include/CGAL/Combinatorial_map/internal/Combinatorial_map_utility.h $
+// $Id: Combinatorial_map_utility.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -16,9 +16,8 @@
 #include <CGAL/Compact_container.h>
 #include <CGAL/Concurrent_compact_container.h>
 #include <iostream>
-#include <cstdint>
-#include <type_traits>
 
+#include <boost/type_traits/is_same.hpp>
 #include <boost/function.hpp>
 #include <boost/mpl/has_xxx.hpp>
 
@@ -73,25 +72,6 @@ namespace CGAL
     template<typename T>
     struct Get_attributes_tuple<T, true>
     { typedef typename T::Attributes type; };
-
-    // Get the Index_type
-    BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(Has_index_type,Index_type,false)
-    template<typename T, typename I=typename T::Use_index,
-             bool typedefined=Has_index_type<T>::value >
-    struct Get_index_type
-    { typedef std::uint32_t type; }; // By default use uint32_t for index type
-    template<typename T>
-    struct Get_index_type<T, CGAL::Tag_true, true>
-    { typedef typename T::Index_type type; };
-
-    // Get the Concurrent_tag
-    BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(Has_concurrent_tag,Use_concurrent_container,false)
-    template<typename T, bool typedefined=Has_concurrent_tag<T>::value >
-    struct Get_concurrent_tag
-    { typedef CGAL::Tag_false type; };
-    template<typename T>
-    struct Get_concurrent_tag<T, true>
-    { typedef CGAL::Tag_true type; };
 
     // Convert a tuple in a same tuple where each void type was replaced into
     // CGAL::Void.
@@ -172,8 +152,8 @@ namespace CGAL
         <Type,k,std::tuple<T...>,dim>::pos - 1;
 
       static const int value =
-        ( pos==k  ) ?  ( std::is_same<T1,Type>::value ? 0:-dim-1 )
-        :  ( ( pos<k ) ? ( ( std::is_same<T1,Type>::value ? 1:0 )
+        ( pos==k  ) ?  ( boost::is_same<T1,Type>::value ? 0:-dim-1 )
+        :  ( ( pos<k ) ? ( ( boost::is_same<T1,Type>::value ? 1:0 )
                            + Nb_type_in_tuple_up_to_k
                            <Type,k,std::tuple
                            <T...>,dim >::value)
@@ -186,7 +166,7 @@ namespace CGAL
     {
       static const int pos=dim;
       static const int value=(pos==k?
-                              (std::is_same<T1,Type>::value?0:-dim-1) :
+                              (boost::is_same<T1,Type>::value?0:-dim-1) :
                               0);
     };
 
@@ -205,8 +185,8 @@ namespace CGAL
         <Type,k,std::tuple<T...>,dim >::pos - 1;
 
       static const int value =
-        ( pos==k  ) ?  ( std::is_same<T1,Type>::value ? -dim-1 : 0 )
-        :  ( ( pos<k ) ? ( ( std::is_same<T1,Type>::value ? 0:1 )
+        ( pos==k  ) ?  ( boost::is_same<T1,Type>::value ? -dim-1 : 0 )
+        :  ( ( pos<k ) ? ( ( boost::is_same<T1,Type>::value ? 0:1 )
                            + Nb_type_different_in_tuple_up_to_k
                            <Type,k,std::tuple<T...>,dim >::value)
              :0
@@ -219,7 +199,7 @@ namespace CGAL
     {
       static const int pos=dim;
       static const int value=(pos==k?
-                              (std::is_same<T1,Type>::value?-dim-1:0) :
+                              (boost::is_same<T1,Type>::value?-dim-1:0) :
                               0);
     };
 
@@ -433,29 +413,18 @@ namespace CGAL
         typedef typename CMap::template Container_for_attributes<T> type;
       };
 
-      template<class Container, class UseIndex>
-      struct Iterator_type
-      {
-        using type=typename Container::iterator;
-        using const_type=typename Container::const_iterator;
-      };
-
-      template<class Container>
-      struct Iterator_type<Container, CGAL::Tag_true>
-      {
-        using type=typename Container::Index;
-        using const_type=typename Container::Index;
-      };
-
       // defines as type Compact_container<T>::iterator
       template <class T>
       struct Add_compact_container_iterator{
         typedef std::allocator_traits<typename CMap::Alloc> Allocator_traits;
         typedef typename Allocator_traits::template rebind_alloc<T> Attr_allocator;
+        typedef typename CMap::template Container_for_attributes<T>::iterator
+        iterator_type;
 
-        // TODO? case when there is no Use_index typedef in CMap
-        using type=typename Iterator_type<typename CMap::template
-        Container_for_attributes<T>, typename CMap::Use_index>::type;
+        // TODO case when there is no Use_index typedef in CMap
+        typedef typename boost::mpl::if_
+        < typename boost::is_same<typename CMap::Use_index,Tag_true>::type,
+          typename CMap::Dart_handle, iterator_type >::type type;
       };
 
       // defines as type Compact_container<T>::const_iterator
@@ -463,9 +432,12 @@ namespace CGAL
       struct Add_compact_container_const_iterator{
         typedef std::allocator_traits<typename CMap::Alloc> Allocator_traits;
         typedef typename Allocator_traits::template rebind_alloc<T> Attr_allocator;
+        typedef typename CMap::template Container_for_attributes<T>::
+        const_iterator iterator_type;
 
-        using type=typename Iterator_type<typename CMap::template
-        Container_for_attributes<T>, typename CMap::Use_index>::const_type;
+        typedef typename boost::mpl::if_
+             < typename boost::is_same<typename CMap::Use_index,Tag_true>::type,
+               typename CMap::Dart_handle, iterator_type >::type type;
       };
 
       // All the attributes (with CGAL::Void)
@@ -511,8 +483,8 @@ namespace CGAL
       Attribute_const_iterators;
 
       typedef Attribute_containers      Attribute_ranges;
-      typedef Attribute_iterators       Attribute_descriptors;
-      typedef Attribute_const_iterators Attribute_const_descriptors;
+      typedef Attribute_iterators       Attribute_handles;
+      typedef Attribute_const_iterators Attribute_const_handles;
 
       typedef typename Tuple_converter< Define_cell_attribute_binary_functor,
                                         Enabled_attributes >::type
@@ -532,36 +504,31 @@ namespace CGAL
       struct Attribute_type<d,0>
       { typedef Void type; };
 
-      // Helper class allowing to retrieve the d-cell-descriptor attribute
-      template<int d, class Type=typename Attribute_type<d>::type,
-               typename WithIndex=typename CMap::Use_index>
-      struct Attribute_descriptor
+      // Helper class allowing to retreive the d-cell-handle attribute
+      template<int d, class Type=typename Attribute_type<d>::type>
+      struct Attribute_handle
       {
          typedef typename std::tuple_element
-               <Dimension_index<d>::value,Attribute_descriptors>::type type;
+               <Dimension_index<d>::value,Attribute_handles>::type type;
       };
 
       template<int d>
-      struct Attribute_descriptor<d, CGAL::Void, CGAL::Tag_false>
+      struct Attribute_handle<d, CGAL::Void>
       { typedef CGAL::Void* type; };
 
-      template<int d>
-      struct Attribute_descriptor<d, CGAL::Void, CGAL::Tag_true>
-      { typedef typename CMap::Dart_index type; };
-
-      // Helper class allowing to retrieve the d-cell-const descriptor attribute
+      // Helper class allowing to retreive the d-cell-const handle attribute
       template<int d, class Type=typename Attribute_type<d>::type>
-      struct Attribute_const_descriptor
+      struct Attribute_const_handle
       {
         typedef typename std::tuple_element
-          <Dimension_index<d>::value, Attribute_const_descriptors>::type type;
+          <Dimension_index<d>::value, Attribute_const_handles>::type type;
       };
 
       template<int d>
-      struct Attribute_const_descriptor<d, CGAL::Void>
+      struct Attribute_const_handle<d, CGAL::Void>
       { typedef CGAL::Void* type; };
 
-      // Helper class allowing to retrieve the d-cell-iterator attribute
+      // Helper class allowing to retreive the d-cell-iterator attribute
       template<int d, class Type=typename Attribute_type<d>::type>
       struct Attribute_iterator
       {
@@ -573,7 +540,7 @@ namespace CGAL
       struct Attribute_iterator<d, CGAL::Void>
       { typedef CGAL::Void* type; };
 
-      // Helper class allowing to retrieve the d-cell-const descriptor attribute
+      // Helper class allowing to retreive the d-cell-const handle attribute
       template<int d, class Type=typename Attribute_type<d>::type>
       struct Attribute_const_iterator
       {
@@ -585,7 +552,7 @@ namespace CGAL
       struct Attribute_const_iterator<d, CGAL::Void>
       { typedef CGAL::Void* type; };
 
-      // Helper class allowing to retrieve the d-cell-attribute range
+      // Helper class allowing to retreive the d-cell-attribute range
       template<int d, class Type=typename Attribute_type<d>::type>
       struct Attribute_range
       {
@@ -597,7 +564,7 @@ namespace CGAL
       struct Attribute_range<d, CGAL::Void>
       { typedef CGAL::Void type; };
 
-      // Helper class allowing to retrieve the d-cell-attribute const range
+      // Helper class allowing to retreive the d-cell-attribute const range
       template<int d, class Type=typename Attribute_type<d>::type>
       struct Attribute_const_range
       {

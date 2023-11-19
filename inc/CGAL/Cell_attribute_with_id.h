@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Combinatorial_map/include/CGAL/Cell_attribute_with_id.h $
-// $Id: Cell_attribute_with_id.h 7a62583 2022-11-14T19:14:33+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Combinatorial_map/include/CGAL/Cell_attribute_with_id.h $
+// $Id: Cell_attribute_with_id.h 52164b1 2019-10-19T15:34:59+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -42,11 +42,11 @@ namespace CGAL {
     friend class Concurrent_compact_container;
 
   protected:
-    /// Default constructor.
+    /// Default contructor.
     Cell_attribute_with_id()
     {}
 
-    /// Constructor with an info in parameter.
+    /// Contructor with an info in parameter.
     Cell_attribute_with_id(const Info_& ainfo) :
       Cell_attribute<Refs, Info_, Tag_, OnMerge, OnSplit, Tag_true>(ainfo)
     {}
@@ -64,7 +64,7 @@ namespace CGAL {
     friend class Concurrent_compact_container;
 
   protected:
-    /// Default constructor.
+    /// Default contructor.
     Cell_attribute_with_id()
     {}
   };

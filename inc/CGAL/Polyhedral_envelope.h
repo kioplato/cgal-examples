@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Polyhedral_envelope.h $
-// $Id: Polyhedral_envelope.h 343735b 2023-01-17T09:58:38+01:00 Sebastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Polyhedral_envelope.h $
+// $Id: Polyhedral_envelope.h 753fc4d 2021-08-04T09:04:48+02:00 Mael
 // SPDX-License-Identifier: ( GPL-3.0-or-later OR LicenseRef-Commercial ) AND MIT
 //
 // Author(s)     : Andreas Fabri
@@ -69,7 +69,6 @@
 #include <CGAL/AABB_primitive.h>
 
 #include <CGAL/Dynamic_property_map.h>
-#include <CGAL/assertions.h>
 
 #ifdef CGAL_ENVELOPE_DEBUG
 // This is for computing the surface mesh of a prism
@@ -88,6 +87,11 @@
 #include <type_traits>
 #include <unordered_set>
 #include <unordered_map>
+
+#ifdef DOXYGEN_RUNNING
+#define CGAL_PMP_NP_TEMPLATE_PARAMETERS NamedParameters
+#define CGAL_PMP_NP_CLASS NamedParameters
+#endif
 
 namespace CGAL {
 
@@ -194,7 +198,7 @@ private:
 
     template <class Point>
     Plane(const Point& p, const Point& q, const Point& r,
-          std::enable_if_t<!std::is_same<Point,ePoint_3>::value>* = 0)
+          typename std::enable_if<!std::is_same<Point,ePoint_3>::value>::type* = 0)
       : ep(p.x(),p.y(),p.z()), eq(q.x(),q.y(),q.z()), er(r.x(),r.y(),r.z()), eplane(ep,eq,er)
     {}
     ePoint_3 ep, eq, er;
@@ -355,16 +359,15 @@ public:
    *     \cgalParamType{a class model of `ReadablePropertyMap` with `boost::graph_traits<TriangleMesh>::%face_descriptor`
    *                    as key type and `double` as value type}
    *     \cgalParamDefault{Use `epsilon` for all faces}
-   *   \cgalParamNEnd
    * \cgalNamedParamsEnd
    *
-   * \note The triangle mesh gets copied internally, that is it can be modified after having passed as argument,
+   * \note The triangle mesh gets copied internally, that is it can be modifed after having passed as argument,
    *       while the queries are performed
    */
-  template <typename TriangleMesh, typename NamedParameters = parameters::Default_named_parameters>
+  template <typename TriangleMesh, typename NamedParameters>
   Polyhedral_envelope(const TriangleMesh& tmesh,
                       double epsilon,
-                      const NamedParameters& np = parameters::default_values())
+                      const NamedParameters& np)
   {
     using parameters::choose_parameter;
     using parameters::get_parameter;
@@ -404,7 +407,7 @@ public:
       else
         deg_faces.insert(f);
     }
-    if (is_default_parameter<NamedParameters, internal_np::face_epsilon_map_t>::value)
+    if (is_default_parameter(get_parameter(np, internal_np::face_epsilon_map)))
       init(epsilon);
     else
     {
@@ -458,16 +461,16 @@ public:
    *   \cgalParamNEnd
    * \cgalNamedParamsEnd
    *
-   * \note The triangle mesh gets copied internally, that is it can be modified after having passed as argument,
+   * \note The triangle mesh gets copied internally, that is it can be modifed after having passed as argument,
    *       while the queries are performed
    */
-  template <typename FaceRange, typename TriangleMesh, typename NamedParameters = parameters::Default_named_parameters>
+  template <typename FaceRange, typename TriangleMesh, typename NamedParameters>
   Polyhedral_envelope(const FaceRange& face_range,
                       const TriangleMesh& tmesh,
                       double epsilon,
-                      const NamedParameters& np = parameters::default_values()
+                      const NamedParameters& np
 #ifndef DOXYGEN_RUNNING
-                      , std::enable_if_t<!boost::has_range_const_iterator<TriangleMesh>::value>* = 0
+                      , typename std::enable_if<!boost::has_range_const_iterator<TriangleMesh>::value>::type* = 0
 #endif
   )
   {
@@ -513,7 +516,7 @@ public:
         deg_faces.insert(f);
     }
 
-    if (is_default_parameter<NamedParameters, internal_np::face_epsilon_map_t>::value)
+    if (is_default_parameter(get_parameter(np, internal_np::face_epsilon_map)))
       init(epsilon);
     else
     {
@@ -557,7 +560,6 @@ public:
     *     \cgalParamType{a model of `ReadablePropertyMap` whose value type is `Point_3` and whose key
     *                    is the value type of `PointRange::const_iterator`}
     *     \cgalParamDefault{`CGAL::Identity_property_map`}
-    *   \cgalParamNEnd
     *   \cgalParamNBegin{face_epsilon_map}
     *     \cgalParamDescription{a property map associating to each triangle an epsilon value}
     *     \cgalParamType{a class model of `ReadablePropertyMap` with `std::size_t` as key type and `double` as value type}
@@ -566,13 +568,13 @@ public:
     * \cgalNamedParamsEnd
     *
     */
-  template <typename PointRange, typename TriangleRange, typename NamedParameters = parameters::Default_named_parameters>
+  template <typename PointRange, typename TriangleRange, typename NamedParameters>
   Polyhedral_envelope(const PointRange& points,
                       const TriangleRange& triangles,
                       double epsilon,
-                      const NamedParameters& np = parameters::default_values()
+                      const NamedParameters& np
 #ifndef DOXYGEN_RUNNING
-                      , std::enable_if_t<boost::has_range_const_iterator<TriangleRange>::value>* = 0
+                      , typename std::enable_if<boost::has_range_const_iterator<TriangleRange>::value>::type* = 0
 #endif
                       )
   {
@@ -597,10 +599,8 @@ public:
       env_faces.emplace_back(face);
     }
 
-    if (is_default_parameter<NamedParameters, internal_np::face_epsilon_map_t>::value)
-    {
+    if (is_default_parameter(get_parameter(np, internal_np::face_epsilon_map)))
       init(epsilon);
-    }
     else
     {
       std::vector<double> epsilon_values;
@@ -622,6 +622,30 @@ public:
   }
 
   /// @}
+
+#ifndef DOXYGEN_RUNNING
+  template <typename TriangleMesh>
+  Polyhedral_envelope(const TriangleMesh& tmesh,
+                      double epsilon)
+    : Polyhedral_envelope(tmesh, epsilon, parameters::all_default())
+  {}
+
+  template <typename FaceRange, typename TriangleMesh>
+  Polyhedral_envelope(const FaceRange& face_range,
+                      const TriangleMesh& tmesh,
+                      double epsilon,
+                      typename std::enable_if<!boost::has_range_const_iterator<TriangleMesh>::value>::type* = 0)
+    : Polyhedral_envelope(face_range, tmesh, epsilon, parameters::all_default())
+  {}
+
+  template <typename PointRange, typename TriangleRange>
+  Polyhedral_envelope(const PointRange& points,
+                      const TriangleRange& triangles,
+                      double epsilon,
+                      typename std::enable_if<boost::has_range_const_iterator<TriangleRange>::value>::type* = 0)
+    : Polyhedral_envelope(points, triangles, epsilon, parameters::all_default())
+  {}
+#endif
 
 private:
 
@@ -864,11 +888,7 @@ private:
   Implicit_Seg_Facet_interpoint_Out_Prism_return_local_id(const ePoint_3 &ip,
                                                           const std::vector<unsigned int> &prismindex, const unsigned int &jump, int &id) const
   {
-    Oriented_side ori = ON_POSITIVE_SIDE; // The compiler sees the
-                                          // possibility that the
-                                          // nested for loop body is
-                                          // not executed and warns that
-                                          // ori may not be initialized
+    Oriented_side ori;
 
     for (unsigned int i = 0; i < prismindex.size(); i++){
       if (prismindex[i] == jump){
@@ -1032,7 +1052,7 @@ private:
 
 
   bool
-  is_two_facets_neighboring(const unsigned int & pid, const unsigned int &i, const unsigned int &j)const
+  is_two_facets_neighbouring(const unsigned int & pid, const unsigned int &i, const unsigned int &j)const
   {
     std::size_t facesize = halfspace[pid].size();
     if (i == j) return false;
@@ -1046,9 +1066,6 @@ private:
     if (j == 2 && i == facesize - 1) return true;
     return false;
   }
-  CGAL_DEPRECATED bool
-  is_two_facets_neighbouring(const unsigned int & pid, const unsigned int &i, const unsigned int &j)const
-  { return is_two_facets_neighboring(pid, i, j); }
 
 
   int
@@ -1190,7 +1207,7 @@ private:
               continue;
 
             if (true /* USE_ADJACENT_INFORMATION*/ ) {
-              bool neib = is_two_facets_neighboring(cindex, cutp[i], cutp[j]);
+              bool neib = is_two_facets_neighbouring(cindex, cutp[i], cutp[j]);
               if (neib == false) continue;
             }
 
@@ -1298,7 +1315,7 @@ private:
                       const int &prismid, const unsigned int &faceid)const
   {
     for (unsigned int i = 0; i < halfspace[prismid].size(); i++) {
-      /*bool neib = is_two_facets_neighboring(prismid, i, faceid);// this works only when the polyhedron is convex and no two neighbor facets are coplanar
+      /*bool neib = is_two_facets_neighbouring(prismid, i, faceid);// this works only when the polyhedron is convex and no two neighbour facets are coplanar
         if (neib == false) continue;*/
       if (i == faceid) continue;
       if(oriented_side(halfspace[prismid][i].eplane, ip) == ON_POSITIVE_SIDE){
@@ -1725,11 +1742,11 @@ private:
     idlist.emplace_back(filtered_intersection[queue[0]]);// idlist contains the id in prismid//it is fine maybe it is not really intersected
     coverlist[queue[0]] = 1 ;//when filtered_intersection[i] is already in the cover list, coverlist[i]=true
 
-    std::vector<unsigned int> neighbors;//local id
+    std::vector<unsigned int> neighbours;//local id
     std::vector<unsigned int > list;
-    std::vector<std::vector<unsigned int>*> neighbor_facets;
+    std::vector<std::vector<unsigned int>*> neighbour_facets;
     std::vector<std::vector<unsigned int>>  idlistorder;
-    std::vector<int> neighbor_cover;
+    std::vector<int> neighbour_cover;
     idlistorder.emplace_back(intersect_face[queue[0]]);
 
     for (unsigned int i = 0; i < queue.size(); i++) {
@@ -1765,7 +1782,7 @@ private:
               inter = Implicit_Seg_Facet_interpoint_Out_Prism_return_local_id_with_face_order_jump_over(ip, filtered_intersection, intersect_face, coverlist, jump1, check_id);
 
 
-              CGAL_assertion(inter != 2);// the point must exist because it is a seg-halfplane intersection
+              assert(inter != 2);// the point must exist because it is a seg-halfplane intersection
               if (inter == 1) {
 
                 return true;
@@ -1813,14 +1830,14 @@ private:
 
       localtree.all_intersected_primitives(bounding_boxes[jump1], std::back_inserter(list));
 
-      neighbors.resize(list.size());
-      neighbor_facets.resize(list.size());
-      neighbor_cover.resize(list.size());
+      neighbours.resize(list.size());
+      neighbour_facets.resize(list.size());
+      neighbour_cover.resize(list.size());
       for (unsigned int j = 0; j < list.size(); j++) {
-        neighbors[j] = filtered_intersection[list[j]];
-        neighbor_facets[j] = &(intersect_face[list[j]]);
-        if (coverlist[list[j]] == 1) neighbor_cover[j] = 1;
-        else neighbor_cover[j] = 0;
+        neighbours[j] = filtered_intersection[list[j]];
+        neighbour_facets[j] = &(intersect_face[list[j]]);
+        if (coverlist[list[j]] == 1) neighbour_cover[j] = 1;
+        else neighbour_cover[j] = 0;
       }
 
       for (unsigned int j = 0; j < i; j++) {
@@ -1867,7 +1884,7 @@ private:
             if (inter == 1) {
 
 
-              inter = Implicit_Tri_Facet_Facet_interpoint_Out_Prism_return_local_id_with_face_order_jump_over(ip, neighbors, neighbor_facets, neighbor_cover, jump1, jump2, check_id);
+              inter = Implicit_Tri_Facet_Facet_interpoint_Out_Prism_return_local_id_with_face_order_jump_over(ip, neighbours, neighbour_facets, neighbour_cover, jump1, jump2, check_id);
 
 
               if (inter == 1) {
@@ -2096,7 +2113,7 @@ private:
           std::cout << p.ep << " | "  << p.eq << " | "  << p.er << std::endl;
           ePoint_3 pv(ver[faces[i][0]].x(), ver[faces[i][0]].y(),ver[faces[i][0]].z());
           Orientation ori = orientation(p.ep, p.eq, p.er, pv);
-          CGAL_assertion(ori == NEGATIVE);
+          assert(ori == NEGATIVE);
         }
 #endif
 
@@ -2232,19 +2249,14 @@ public:
    *       the initial list of prisms.
    * \todo apply that to the soup versions
    */
-  template <typename TriangleMesh, typename CGAL_NP_TEMPLATE_PARAMETERS>
+  template <typename TriangleMesh, typename CGAL_PMP_NP_TEMPLATE_PARAMETERS>
   bool
-  operator()(const TriangleMesh& tmesh,
-             const CGAL_NP_CLASS& np = parameters::default_values()
-#ifndef DOXYGEN_RUNNING
-             , std::enable_if_t<!boost::has_range_const_iterator<TriangleMesh>::value>* = 0
-#endif
-    ) const
+  operator()(const TriangleMesh& tmesh, const CGAL_PMP_NP_CLASS& np) const
   {
     using parameters::choose_parameter;
     using parameters::get_parameter;
 
-    typename GetVertexPointMap<TriangleMesh, CGAL_NP_CLASS>::const_type
+    typename GetVertexPointMap<TriangleMesh, CGAL_PMP_NP_CLASS>::const_type
       vpm = choose_parameter(get_parameter(np, internal_np::vertex_point),
                              get_const_property_map(CGAL::vertex_point, tmesh));
 
@@ -2262,6 +2274,16 @@ public:
 
     return true;
   }
+
+#ifndef DOXYGEN_RUNNING
+  template <typename TriangleMesh>
+  bool
+  operator()(const TriangleMesh& tmesh,
+             typename std::enable_if<!boost::has_range_const_iterator<TriangleMesh>::value>::type* = 0) const
+  {
+    return this->operator()(tmesh, parameters::all_default());
+  }
+#endif
 
   /**
     * returns `true`, iff all the triangles in `triangles` are inside the polyhedral envelope.
@@ -2287,10 +2309,10 @@ public:
     * \cgalNamedParamsEnd
     *
     */
-  template <typename PointRange, typename TriangleRange, typename NamedParameters = parameters::Default_named_parameters>
+  template <typename PointRange, typename TriangleRange, typename NamedParameters>
   bool operator()(const PointRange& points,
                   const TriangleRange& triangles,
-                  const NamedParameters& np = parameters::default_values()) const
+                  const NamedParameters& np) const
   {
     using parameters::choose_parameter;
     using parameters::get_parameter;
@@ -2316,6 +2338,16 @@ public:
     return true;
   }
 
+#ifndef DOXYGEN_RUNNING
+  template <typename PointRange, typename TriangleRange>
+  bool operator()(const PointRange& points,
+                  const TriangleRange& triangles) const
+  {
+    return this->operator()(points, triangles, parameters::all_default());
+  }
+
+#endif
+
   /**
    * returns `true`, iff all the triangles in `triangle_range` are inside the polyhedral envelope.
    * @tparam TriangleRange a model of `ConstRange` with `ConstRange::const_iterator`
@@ -2329,7 +2361,7 @@ public:
   bool
   operator()(const TriangleRange& triangle_range
 #ifndef DOXYGEN_RUNNING
-             , std::enable_if_t<boost::has_range_const_iterator<TriangleRange>::value>* = 0
+             , typename std::enable_if<boost::has_range_const_iterator<TriangleRange>::value>::type* = 0
 #endif
     ) const
   {

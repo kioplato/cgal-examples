@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/compute_c3t3_statistics.h $
-// $Id: compute_c3t3_statistics.h 05b446e 2022-12-05T12:38:31+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/compute_c3t3_statistics.h $
+// $Id: compute_c3t3_statistics.h e1b319b 2022-10-28T10:11:57+02:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -19,7 +19,8 @@
 #include <vector>
 #include <algorithm>
 #include <fstream>
-#include <unordered_set>
+
+#include <boost/unordered_set.hpp>
 
 #include <CGAL/Tetrahedral_remeshing/internal/tetrahedral_remeshing_helpers.h>
 
@@ -39,12 +40,14 @@ void compute_statistics(const Triangulation& tr,
   typedef typename Tr::Cell_handle   Cell_handle;
   typedef typename Tr::Vertex_handle Vertex_handle;
   typedef typename Gt::Point_3       Point;
-  typedef typename Tr::Facet         Facet;
+  typedef typename Tr::Finite_facets_iterator Finite_facets_iterator;
   typedef typename Tr::Finite_cells_iterator  Finite_cells_iterator;
   typedef typename Tr::Cell::Subdomain_index  Subdomain_index;
 
   std::size_t nb_edges = 0;
   double total_edges = 0;
+  std::size_t nb_angle = 0;
+  double total_angle = 0;
 
   double min_edges_length = (std::numeric_limits<double>::max)();
   double max_edges_length = 0.;
@@ -55,10 +58,11 @@ void compute_statistics(const Triangulation& tr,
   double max_dihedral_angle = 0.;
   double min_dihedral_angle = 180.;
 
-  for (Facet f : tr.finite_facets())
+  for (Finite_facets_iterator fit = tr.finite_facets_begin();
+       fit != tr.finite_facets_end(); ++fit)
   {
-    const Cell_handle cell = f.first;
-    const int& index = f.second;
+    const Cell_handle cell = fit->first;
+    const int& index = fit->second;
     if (!get(cell_selector, cell) || !get(cell_selector, cell->neighbor(index)))
       continue;
 
@@ -85,7 +89,7 @@ void compute_statistics(const Triangulation& tr,
     = tr.geom_traits().compute_approximate_dihedral_angle_3_object();
 
   std::size_t nb_tets = 0;
-  std::unordered_set<Vertex_handle> selected_vertices;
+  boost::unordered_set<Vertex_handle> selected_vertices;
   std::vector<Subdomain_index> sub_ids;
   for (Finite_cells_iterator cit = tr.finite_cells_begin();
        cit != tr.finite_cells_end();
@@ -152,27 +156,33 @@ void compute_statistics(const Triangulation& tr,
     double a = CGAL::to_double(CGAL::abs(approx_dihedral_angle(p0, p1, p2, p3)));
     if (a < min_dihedral_angle) { min_dihedral_angle = a; }
     if (a > max_dihedral_angle) { max_dihedral_angle = a; }
-
+    total_angle += a;
+    ++nb_angle;
     a = CGAL::to_double(CGAL::abs(approx_dihedral_angle(p0, p2, p1, p3)));
     if (a < min_dihedral_angle) { min_dihedral_angle = a; }
     if (a > max_dihedral_angle) { max_dihedral_angle = a; }
-
+    total_angle += a;
+    ++nb_angle;
     a = CGAL::to_double(CGAL::abs(approx_dihedral_angle(p0, p3, p1, p2)));
     if (a < min_dihedral_angle) { min_dihedral_angle = a; }
     if (a > max_dihedral_angle) { max_dihedral_angle = a; }
-
+    total_angle += a;
+    ++nb_angle;
     a = CGAL::to_double(CGAL::abs(approx_dihedral_angle(p1, p2, p0, p3)));
     if (a < min_dihedral_angle) { min_dihedral_angle = a; }
     if (a > max_dihedral_angle) { max_dihedral_angle = a; }
-
+    total_angle += a;
+    ++nb_angle;
     a = CGAL::to_double(CGAL::abs(approx_dihedral_angle(p1, p3, p0, p2)));
     if (a < min_dihedral_angle) { min_dihedral_angle = a; }
     if (a > max_dihedral_angle) { max_dihedral_angle = a; }
-
+    total_angle += a;
+    ++nb_angle;
     a = CGAL::to_double(CGAL::abs(approx_dihedral_angle(p2, p3, p0, p1)));
     if (a < min_dihedral_angle) { min_dihedral_angle = a; }
     if (a > max_dihedral_angle) { max_dihedral_angle = a; }
-
+    total_angle += a;
+    ++nb_angle;
   }
 
   std::size_t nb_subdomains = sub_ids.size();

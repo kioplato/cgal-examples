@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Linear_cell_complex/include/CGAL/Cell_attribute_with_point.h $
-// $Id: Cell_attribute_with_point.h c25da7a 2022-05-23T13:28:00+02:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Linear_cell_complex/include/CGAL/Cell_attribute_with_point.h $
+// $Id: Cell_attribute_with_point.h 9e250c0 2020-02-12T10:33:57+01:00 Guillaume Damiand
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -62,33 +62,6 @@ namespace CGAL {
     template <class, class>
     friend class Concurrent_compact_container;
 
-    template <class, class, class, class>
-    friend class Compact_container_with_index;
-
-    template<unsigned int, class, class>
-    friend class Combinatorial_map_storage_1;
-
-    template<unsigned int, class, class>
-    friend class Combinatorial_map_storage_with_index;
-
-    template<unsigned int, class, class>
-    friend class Generalized_map_storage_1;
-
-    template<unsigned int, class, class>
-    friend class Generalized_map_storage_with_index;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class CMap_linear_cell_complex_storage_1;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class CMap_linear_cell_complex_storage_with_index;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class GMap_linear_cell_complex_storage_1;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class GMap_linear_cell_complex_storage_with_index;
-
   public:
     typedef Cell_attribute_with_point<LCC, Info_, Tag, Functor_on_merge_,
                                       Functor_on_split_> Self;
@@ -98,8 +71,8 @@ namespace CGAL {
     typedef Point_for_cell<typename LCC::Point> Base2;
 
     typedef typename LCC::Point             Point;
-    typedef typename LCC::Dart_descriptor       Dart_descriptor;
-    typedef typename LCC::Dart_const_descriptor Dart_const_descriptor;
+    typedef typename LCC::Dart_handle       Dart_handle;
+    typedef typename LCC::Dart_const_handle Dart_const_handle;
 
     typedef Info_                Info;
     typedef Functor_on_merge_    Functor_on_merge;
@@ -147,36 +120,6 @@ namespace CGAL {
     template <class, class>
     friend class Concurrent_compact_container;
 
-    template <class, class, class, class>
-    friend class Compact_container_with_index;
-
-    template <class, class>
-    friend class Concurrent_compact_container;
-
-    template<unsigned int, class, class>
-    friend class Combinatorial_map_storage_1;
-
-    template<unsigned int, class, class>
-    friend class Combinatorial_map_storage_with_index;
-
-    template<unsigned int, class, class>
-    friend class Generalized_map_storage_1;
-
-    template<unsigned int, class, class>
-    friend class Generalized_map_storage_with_index;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class CMap_linear_cell_complex_storage_1;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class CMap_linear_cell_complex_storage_with_index;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class GMap_linear_cell_complex_storage_1;
-
-    template<unsigned int, unsigned int, class, class, class>
-    friend class GMap_linear_cell_complex_storage_with_index;
-
   public:
     typedef Cell_attribute<LCC, void, Tag,
                            Functor_on_merge_, Functor_on_split_, WithID> Base1;
@@ -184,8 +127,8 @@ namespace CGAL {
 
     typedef void                            Info;
     typedef typename LCC::Point             Point;
-    typedef typename LCC::Dart_descriptor       Dart_descriptor;
-    typedef typename LCC::Dart_const_descriptor Dart_const_descriptor;
+    typedef typename LCC::Dart_handle       Dart_handle;
+    typedef typename LCC::Dart_const_handle Dart_const_handle;
 
     typedef Functor_on_merge_ Functor_on_merge;
     typedef Functor_on_split_ Functor_on_split;

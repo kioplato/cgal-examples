@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/STL_Extension/include/CGAL/Object.h $
-// $Id: Object.h 679ee1f 2023-01-30T19:39:42+00:00 Giles Bathgate
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/STL_Extension/include/CGAL/Object.h $
+// $Id: Object.h b575892 2021-06-08T18:21:46+01:00 Giles Bathgate
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -52,6 +52,8 @@ class Object
     template<class T>
     friend T object_cast(const Object & o);
 
+    typedef void (Object::*bool_type)() const;
+    void this_type_does_not_support_comparisons() const {}
   public:
 
     struct private_tag{};
@@ -95,8 +97,8 @@ class Object
     }
 
     // safe-bool conversion
-    explicit operator bool() const {
-      return !empty();
+    operator bool_type() const {
+      return empty() == false ? &Object::this_type_does_not_support_comparisons : 0;
     }
 
 

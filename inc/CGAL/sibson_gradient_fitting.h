@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Interpolation/include/CGAL/sibson_gradient_fitting.h $
-// $Id: sibson_gradient_fitting.h 4f5f834 2022-06-10T07:37:53+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Interpolation/include/CGAL/sibson_gradient_fitting.h $
+// $Id: sibson_gradient_fitting.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -24,11 +24,13 @@
 
 #include <boost/any.hpp>
 #include <boost/mpl/if.hpp>
+#include <boost/utility/enable_if.hpp>
 #include <boost/utility/result_of.hpp>
 
 #include <iterator>
 #include <utility>
 #include <vector>
+
 #include <type_traits>
 #include <functional>
 
@@ -227,11 +229,11 @@ sibson_gradient_fitting_nn_2(const Dt& dt,
                              const Traits& traits,
                              // Some SFINAE to distinguish whether the argument type
                              // of the value functor is 'DT::Point' or 'DT::Vertex_handle'
-                             std::enable_if_t<
+                             typename boost::enable_if_c<
                                std::is_constructible<
                                  std::function<boost::any(typename Dt::Point)>,
                                  ValueFunctor
-                             >::value>* = nullptr)
+                             >::value>::type* = nullptr)
 {
   typedef typename Traits::FT                                        FT;
   typedef typename Dt::Point                                         VF_arg_type;
@@ -253,11 +255,11 @@ sibson_gradient_fitting_nn_2(const Dt& dt,
                              OutputFunctor fct,
                              ValueFunctor value_function,
                              const Traits& traits,
-                             std::enable_if_t<
+                             typename boost::enable_if_c<
                                std::is_constructible<
                                  std::function<boost::any(typename Dt::Vertex_handle)>,
                                  ValueFunctor
-                             >::value>* = nullptr)
+                             >::value>::type* = nullptr)
 {
   typedef typename Traits::FT                                        FT;
   typedef typename Dt::Vertex_handle                                 VF_arg_type;
@@ -297,11 +299,11 @@ sibson_gradient_fitting_rn_2(const Rt& rt,
                              const Traits& traits,
                              // Some SFINAE to distinguish whether the argument type
                              // of the value functor is 'Rt::Point' (weighted point) or 'Rt::Vertex_handle'
-                             std::enable_if_t<
+                             typename boost::enable_if_c<
                                std::is_constructible<
                                  std::function<boost::any(typename Rt::Point)>,
                                  ValueFunctor
-                             >::value>* = nullptr)
+                             >::value>::type* = nullptr)
 {
   typedef typename Traits::FT                                        FT;
   typedef typename Rt::Point                                         VF_arg_type;
@@ -323,11 +325,11 @@ sibson_gradient_fitting_rn_2(const Rt& rt,
                              OutputFunctor fct,
                              ValueFunctor value_function,
                              const Traits& traits,
-                             std::enable_if_t<
+                             typename boost::enable_if_c<
                                std::is_constructible<
                                  std::function<boost::any(typename Rt::Vertex_handle)>,
                                  ValueFunctor
-                             >::value>* = nullptr)
+                             >::value>::type* = nullptr)
 {
   typedef typename Traits::FT                                        FT;
   typedef typename Rt::Vertex_handle                                 VF_arg_type;

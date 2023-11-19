@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Cartesian_kernel/include/CGAL/Cartesian/plane_constructions_3.h $
-// $Id: plane_constructions_3.h 9023aaa 2022-04-07T10:39:01+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Cartesian_kernel/include/CGAL/Cartesian/plane_constructions_3.h $
+// $Id: plane_constructions_3.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -41,23 +41,6 @@ plane_from_points(const typename R::Point_3 &p,
   return PlaneC3<R>(a, b, c, d);
 }
 
-
-template <class R>
-CGAL_KERNEL_LARGE_INLINE
-PlaneC3<R>
-plane_from_points(Origin,
-                  const typename R::Point_3 &q,
-                  const typename R::Point_3 &r)
-{
-  typename R::FT a, b, c, d(0);
-  plane_from_pointsC3( /* origin,  */
-                      q.x(), q.y(), q.z(),
-                      r.x(), r.y(), r.z(),
-                      a, b, c);
-  return PlaneC3<R>(a, b, c, d);
-}
-
-
 template <class R>
 CGAL_KERNEL_LARGE_INLINE
 PlaneC3<R>
@@ -68,15 +51,6 @@ plane_from_point_direction(const typename R::Point_3 &p,
   plane_from_point_directionC3(p.x(), p.y(), p.z(), d.dx(), d.dy(), d.dz(),
                                A, B, C, D);
   return PlaneC3<R>(A, B, C, D);
-}
-
-template <class R>
-CGAL_KERNEL_LARGE_INLINE
-PlaneC3<R>
-plane_from_point_direction(Origin,
-                           const typename R::Direction_3 &d)
-{
-  return PlaneC3<R>(d.dx(), d.dy(), d.dz(), 0);
 }
 
 } //namespace CGAL

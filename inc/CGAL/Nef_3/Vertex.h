@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Nef_3/include/CGAL/Nef_3/Vertex.h $
-// $Id: Vertex.h 4547818 2022-11-15T13:39:40+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Nef_3/include/CGAL/Nef_3/Vertex.h $
+// $Id: Vertex.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -128,7 +128,7 @@ class Vertex_base {
       Refs*& sncp() { return sncp_; }
 
       /* all sobjects of the local graph are stored in a global list
-         where each vertex has a continuous range in each list for its
+         where each vertex has a continous range in each list for its
          sobjects. All objects of the range [sxxx_begin_,sxxx_last_]
          belong to a vertex. This range is empty iff
          sxxx_begin_ == sxxx_last_ == sncp()->sxxx_end()
@@ -261,7 +261,8 @@ class Vertex_base {
           fend = sfaces_end();
         while (fit != fend) {
           SFace_iterator fdel = fit++;
-          sncp()->reset_sm_object_list(fdel->boundary_entry_objects());
+          /* TO VERIFY: next statement needs access to a private attribute */
+          sncp()->reset_sm_object_list(fdel->boundary_entry_objects_);
           sncp()->delete_sface_only(fdel);
         }
         sfaces_begin_ = sfaces_last_ = sncp()->sfaces_end();

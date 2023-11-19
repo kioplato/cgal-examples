@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_processing_3/include/CGAL/cluster_point_set.h $
-// $Id: cluster_point_set.h d3fca65 2022-09-23T12:49:40+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_processing_3/include/CGAL/cluster_point_set.h $
+// $Id: cluster_point_set.h e935a3d 2021-04-28T15:24:10+02:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Simon Giraudot
@@ -20,7 +20,7 @@
 #include <CGAL/Point_set_processing_3/internal/bbox_diagonal.h>
 #include <CGAL/for_each.h>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <queue>
@@ -128,10 +128,10 @@ CGAL::Emptyset_iterator get_adjacencies (const NamedParameters&, CGAL::Emptyset_
 
    \return the number of clusters identified.
 */
-template <typename PointRange, typename ClusterMap, typename NamedParameters = parameters::Default_named_parameters>
+template <typename PointRange, typename ClusterMap, typename NamedParameters>
 std::size_t cluster_point_set (PointRange& points,
                                ClusterMap cluster_map,
-                               const NamedParameters& np = parameters::default_values())
+                               const NamedParameters& np)
 {
   using parameters::choose_parameter;
   using parameters::get_parameter;
@@ -140,16 +140,15 @@ std::size_t cluster_point_set (PointRange& points,
   typedef typename PointRange::iterator iterator;
   typedef typename iterator::value_type value_type;
   typedef typename boost::property_traits<ClusterMap>::value_type Cluster_index_t;
-  typedef Point_set_processing_3_np_helper<PointRange, NamedParameters> NP_helper;
-  typedef typename NP_helper::Point_map PointMap;
-  typedef typename NP_helper::Geom_traits Kernel;
+  typedef typename CGAL::GetPointMap<PointRange, NamedParameters>::type PointMap;
+  typedef typename Point_set_processing_3::GetK<PointRange, NamedParameters>::Kernel Kernel;
   typedef typename Point_set_processing_3::GetAdjacencies<PointRange, NamedParameters>::type Adjacencies;
 
-  CGAL_static_assertion_msg(!(std::is_same<typename GetSvdTraits<NamedParameters>::type,
-                                           typename GetSvdTraits<NamedParameters>::NoTraits>::value),
+  CGAL_static_assertion_msg(!(boost::is_same<typename GetSvdTraits<NamedParameters>::type,
+                                             typename GetSvdTraits<NamedParameters>::NoTraits>::value),
                             "Error: no SVD traits");
 
-  PointMap point_map = NP_helper::get_point_map(points, np);
+  PointMap point_map = choose_parameter(get_parameter(np, internal_np::point_map), PointMap());
   typename Kernel::FT neighbor_radius = choose_parameter(get_parameter(np, internal_np::neighbor_radius),
                                                          typename Kernel::FT(-1));
   typename Kernel::FT factor = choose_parameter(get_parameter(np, internal_np::attraction_factor),
@@ -169,7 +168,7 @@ std::size_t cluster_point_set (PointRange& points,
   // precondition: at least one element in the container.
   // to fix: should have at least three distinct points
   // but this is costly to check
-  CGAL_precondition(points.begin() != points.end());
+  CGAL_point_set_processing_precondition(points.begin() != points.end());
 
   // If no radius is given, init with 1% of bbox diagonal
   if (neighbor_radius < 0)
@@ -259,6 +258,18 @@ std::size_t cluster_point_set (PointRange& points,
 
   return nb_clusters;
 }
+
+/// \cond SKIP_IN_MANUAL
+// overload with default NP
+template <typename PointRange, typename ClusterMap>
+std::size_t cluster_point_set (PointRange& points,
+                               ClusterMap cluster_map,
+                               unsigned int k)
+{
+  return cluster_point_set (points, cluster_map, k,
+                            CGAL::Point_set_processing_3::parameters::all_default(points));
+}
+/// \endcond
 
 } // namespace CGAL
 

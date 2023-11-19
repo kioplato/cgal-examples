@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Polyhedral_envelope_filter.h $
-// $Id: Polyhedral_envelope_filter.h eed54a0 2022-11-15T18:45:39+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Polyhedral_envelope_filter.h $
+// $Id: Polyhedral_envelope_filter.h 02db50a 2021-01-04T10:36:14+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Andreas Fabri
@@ -42,7 +42,7 @@ namespace internal {
 
 };
 
-} // namespace internal
+} // namesapce internal
 
 template<typename GeomTraits,typename BaseFilter = internal::Dummy_filter2>
 class Polyhedral_envelope_filter
@@ -140,7 +140,7 @@ public:
         Point pw = get(profile.vertex_point_map(),w);
 
         if(! (*m_envelope)(p, pv, pw)){
-          // the triangle intersects the envelope
+          // the triange intersects the envelope
           return boost::none;
         }
         pv = pw;

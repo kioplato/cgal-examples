@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/manifoldness.h $
-// $Id: manifoldness.h 550d86c 2022-11-22T10:48:27+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/manifoldness.h $
+// $Id: manifoldness.h 41765b6 2021-02-05T16:10:22+01:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Sebastien Loriot,
@@ -13,10 +13,10 @@
 #ifndef CGAL_POLYGON_MESH_PROCESSING_MANIFOLDNESS_H
 #define CGAL_POLYGON_MESH_PROCESSING_MANIFOLDNESS_H
 
-#include <CGAL/license/Polygon_mesh_processing/combinatorial_repair.h>
+#include <CGAL/license/Polygon_mesh_processing/repair.h>
 
-#include <CGAL/Named_function_parameters.h>
-#include <CGAL/boost/graph/named_params_helper.h>
+#include <CGAL/Polygon_mesh_processing/internal/named_function_params.h>
+#include <CGAL/Polygon_mesh_processing/internal/named_params_helper.h>
 
 #include <CGAL/algorithm.h>
 #include <CGAL/assertions.h>
@@ -33,21 +33,19 @@
 namespace CGAL {
 namespace Polygon_mesh_processing {
 
-/// \ingroup PMP_combinatorial_repair_grp
-///
-/// \brief returns whether a vertex of a polygon mesh is non-manifold.
-///
-/// \warning This function has linear runtime with respect to the size of the mesh. The function
-///          `non_manifold_vertices()` should be used when gathering all non manifold vertices.
+/// \ingroup PMP_repairing_grp
+/// returns whether a vertex of a polygon mesh is non-manifold.
 ///
 /// @tparam PolygonMesh a model of `HalfedgeListGraph`
 ///
 /// @param v a vertex of `pm`
 /// @param pm a triangle mesh containing `v`
 ///
-/// \return `true` if the vertex is non-manifold, `false` otherwise
+/// \warning This function has linear runtime with respect to the size of the mesh.
 ///
 /// \sa `duplicate_non_manifold_vertices()`
+///
+/// \return `true` if the vertex is non-manifold, `false` otherwise.
 template <typename PolygonMesh>
 bool is_non_manifold_vertex(typename boost::graph_traits<PolygonMesh>::vertex_descriptor v,
                             const PolygonMesh& pm)
@@ -284,14 +282,11 @@ std::size_t make_umbrella_manifold(typename boost::graph_traits<PolygonMesh>::ha
 
 } // end namespace internal
 
-/// \ingroup PMP_combinatorial_repair_grp
-///
-/// \brief collects the non-manifold vertices (if any) present in the mesh.
-///
-/// A non-manifold vertex `v` is returned via one incident halfedge `h` such that `target(h, pm) = v`
-/// for all the umbrellas that `v` appears in (an <i>umbrella</i> being the set of faces incident
-/// to all the halfedges reachable by walking around `v` using `hnext = prev(opposite(h, pm), pm)`,
-/// starting from `h`).
+/// \ingroup PMP_repairing_grp
+/// collects the non-manifold vertices (if any) present in the mesh. A non-manifold vertex `v` is returned
+/// via one incident halfedge `h` such that `target(h, pm) = v` for all the umbrellas that `v` appears in
+/// (an <i>umbrella</i> being the set of faces incident to all the halfedges reachable by walking around `v`
+/// using `hnext = prev(opposite(h, pm), pm)`, starting from `h`).
 ///
 /// @tparam PolygonMesh a model of `HalfedgeListGraph`
 /// @tparam OutputIterator a model of `OutputIterator` holding objects of type
@@ -300,10 +295,10 @@ std::size_t make_umbrella_manifold(typename boost::graph_traits<PolygonMesh>::ha
 /// @param pm a triangle mesh
 /// @param out the output iterator that collects halfedges incident to `v`
 ///
-/// \return the output iterator
-///
 /// \sa `is_non_manifold_vertex()`
 /// \sa `duplicate_non_manifold_vertices()`
+///
+/// \return the output iterator.
 template <typename PolygonMesh, typename OutputIterator>
 OutputIterator non_manifold_vertices(const PolygonMesh& pm,
                                      OutputIterator out)
@@ -394,8 +389,7 @@ OutputIterator non_manifold_vertices(const PolygonMesh& pm,
   return out;
 }
 
-/// \ingroup PMP_combinatorial_repair_grp
-///
+/// \ingroup PMP_repairing_grp
 /// duplicates all the non-manifold vertices of the input mesh.
 ///
 /// @tparam PolygonMesh a model of `HalfedgeListGraph` and `MutableHalfedgeGraph`
@@ -432,12 +426,10 @@ OutputIterator non_manifold_vertices(const PolygonMesh& pm,
 ///   \cgalParamNEnd
 /// \cgalNamedParamsEnd
 ///
-/// \return the number of vertices created
-///
-/// \see `non_manifold_vertices()`
-template <typename PolygonMesh, typename NamedParameters = parameters::Default_named_parameters>
+/// \return the number of vertices created.
+template <typename PolygonMesh, typename NamedParameters>
 std::size_t duplicate_non_manifold_vertices(PolygonMesh& pm,
-                                            const NamedParameters& np = parameters::default_values())
+                                            const NamedParameters& np)
 {
   using parameters::get_parameter;
   using parameters::choose_parameter;
@@ -466,6 +458,12 @@ std::size_t duplicate_non_manifold_vertices(PolygonMesh& pm,
   }
 
   return nb_new_vertices;
+}
+
+template <class PolygonMesh>
+std::size_t duplicate_non_manifold_vertices(PolygonMesh& pm)
+{
+  return duplicate_non_manifold_vertices(pm, parameters::all_default());
 }
 
 } // namespace Polygon_mesh_processing

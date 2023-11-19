@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Kernel_23/include/CGAL/Segment_3.h $
-// $Id: Segment_3.h 5872413 2022-06-10T08:48:53+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Kernel_23/include/CGAL/Segment_3.h $
+// $Id: Segment_3.h 8fa0f55 2021-05-27T10:27:38+02:00 Laurent Rineau
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -18,6 +18,7 @@
 #define CGAL_SEGMENT_3_H
 
 #include <CGAL/assertions.h>
+#include <boost/type_traits/is_same.hpp>
 #include <CGAL/Kernel/Return_base_tag.h>
 #include <CGAL/kernel_assertions.h>
 #include <CGAL/kernel_config.h>
@@ -38,7 +39,7 @@ class Segment_3 : public R_::Kernel_base::Segment_3
   typedef typename R_::Aff_transformation_3  Aff_transformation_3;
 
   typedef Segment_3                          Self;
-  CGAL_static_assertion((std::is_same<Self, typename R_::Segment_3>::value));
+  CGAL_static_assertion((boost::is_same<Self, typename R_::Segment_3>::value));
 
 public:
 
@@ -135,8 +136,10 @@ public:
   }
 
   bool has_on(const Point_3 &p) const
-  {
-    return R().has_on_3_object()(*this, p);
+  { // TODO : use one predicate.
+    return R_().are_ordered_along_line_3_object()(source(),
+                                                 p,
+                                                 target());
   }
 
   Segment_3 opposite() const
@@ -146,7 +149,8 @@ public:
 
   Direction_3 direction() const
   {
-    return R().construct_direction_3_object()(*this);
+    typename R::Construct_vector_3 construct_vector;
+    return Direction_3( construct_vector( source(), target()));
   }
 
   bool is_degenerate() const

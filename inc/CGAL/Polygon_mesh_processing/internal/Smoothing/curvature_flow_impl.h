@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/Smoothing/curvature_flow_impl.h $
-// $Id: curvature_flow_impl.h 1dce90e 2023-04-07T10:04:21+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/Smoothing/curvature_flow_impl.h $
+// $Id: curvature_flow_impl.h 91336eb 2022-10-20T17:28:00+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -17,8 +17,8 @@
 #include <CGAL/license/Polygon_mesh_processing/meshing_hole_filling.h>
 
 #include <CGAL/Polygon_mesh_processing/measure.h>
-#include <CGAL/Named_function_parameters.h>
-#include <CGAL/boost/graph/named_params_helper.h>
+#include <CGAL/Polygon_mesh_processing/internal/named_function_params.h>
+#include <CGAL/Polygon_mesh_processing/internal/named_params_helper.h>
 #include <CGAL/Weights/cotangent_weights.h>
 #include <CGAL/Dynamic_property_map.h>
 #include <CGAL/utility.h>
@@ -70,14 +70,13 @@ public:
   Shape_smoother(TriangleMesh& mesh,
                  VertexPointMap& vpmap,
                  VertexConstraintMap& vcmap,
-                 const bool scale_volume_after_smoothing = true,
-                 const GeomTraits& traits = GeomTraits())
+                 const GeomTraits& traits)
     :
       mesh_(mesh),
       vpmap_(vpmap),
       vcmap_(vcmap),
       vimap_(get(Vertex_local_index(), mesh_)),
-      scale_volume_after_smoothing_(scale_volume_after_smoothing),
+      scale_volume_after_smoothing(true),
       traits_(traits),
       weight_calculator_(mesh_, vpmap_, traits_, false /*no clamping*/, false /*no bounding from below*/)
   { }
@@ -105,12 +104,12 @@ public:
         if(anchor_point == boost::none)
           anchor_point = get(vpmap_, v);
         else
-          scale_volume_after_smoothing_ = false;
+          scale_volume_after_smoothing = false;
       }
     }
 
     if(!CGAL::is_closed(mesh_))
-      scale_volume_after_smoothing_ = false;
+      scale_volume_after_smoothing = false;
   }
 
   void setup_system(Eigen_matrix& A,
@@ -127,7 +126,7 @@ public:
                     const Eigen_vector& bx, const Eigen_vector& by, const Eigen_vector& bz,
                     SparseLinearSolver& solver)
   {
-    double D;
+    FT D;
 
     // calls compute once to factorize with the preconditioner
     if(!solver.factor(A, D))
@@ -223,12 +222,12 @@ public:
   {
     namespace PMP = CGAL::Polygon_mesh_processing;
 
-    if(!scale_volume_after_smoothing_)
+    if(!scale_volume_after_smoothing)
       return update_mesh_no_scaling(Xx, Xy, Xz);
 
     const FT old_vol = volume(mesh_, parameters::vertex_point_map(vpmap_).geom_traits(traits_));
 
-    // If no vertex is constrained, then the smoothed mesh will share the same centroid as the input mesh
+    // If no vertex is constrained, then the smoothed mesh will simply share the same centroid as the input mesh
     Point pre_smooth_anchor_point;
     if(anchor_point != boost::none)
       pre_smooth_anchor_point = *anchor_point;
@@ -363,7 +362,7 @@ private:
   // of volume. We need an anchor point to scale up, either a constrained point or the centroid
   // of the initial mesh if no vertex is constrained. If there is more than a constrained vertex,
   // then no scaling can be done without violating the constraint.
-  bool scale_volume_after_smoothing_;
+  bool scale_volume_after_smoothing;
   boost::optional<Point> anchor_point;
 
   // linear system data

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Segment_2.h $
-// $Id: Bbox_2_Segment_2.h 8ba0b41 2022-11-22T12:35:10+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_2/include/CGAL/Intersections_2/Bbox_2_Segment_2.h $
+// $Id: Bbox_2_Segment_2.h ce4cbe6 2020-03-19T11:41:57+01:00 Maxime Gimeno
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -20,21 +20,20 @@
 
 namespace CGAL {
 
+
 template <class K>
-inline
-typename K::Boolean
-do_intersect(const Segment_2<K>& seg,
-             const Bbox_2& box)
+inline bool do_intersect(
+    const Segment_2<K> &seg,
+    const Bbox_2 &box)
 {
   typename K::Iso_rectangle_2 rec(box.xmin(), box.ymin(), box.xmax(), box.ymax());
   return do_intersect(rec, seg);
 }
 
 template <class K>
-inline
-typename K::Boolean
-do_intersect(const Bbox_2& box,
-             const Segment_2<K>& seg)
+inline bool do_intersect(
+    const Bbox_2 &box,
+    const Segment_2<K> &seg)
 {
   return do_intersect(seg, box);
 }
@@ -42,8 +41,7 @@ do_intersect(const Bbox_2& box,
 template<typename K>
 typename Intersection_traits<K, typename K::Segment_2, Bbox_2>::result_type
 intersection(const CGAL::Bbox_2& box,
-             const Segment_2<K>& seg)
-             {
+             const Segment_2<K>& seg) {
   typename K::Iso_rectangle_2 rec(box.xmin(), box.ymin(), box.xmax(), box.ymax());
   return intersection(rec, seg);
 }
@@ -51,11 +49,9 @@ intersection(const CGAL::Bbox_2& box,
 template<typename K>
 typename Intersection_traits<K, typename K::Segment_2, Bbox_2>::result_type
 intersection(const Segment_2<K>& seg,
-             const CGAL::Bbox_2& box)
-{
+             const CGAL::Bbox_2& box) {
   return intersection(box, seg);
 }
 
-} // namespace CGAL
-
+}
 #endif // CGAL_INTERSECTIONS_BBOX_2_SEGMENT_2_H

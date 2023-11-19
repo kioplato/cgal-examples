@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Square_border_parameterizer_3.h $
-// $Id: Square_border_parameterizer_3.h 9c1ad66 2022-08-24T08:35:13+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Surface_mesh_parameterization/include/CGAL/Surface_mesh_parameterization/Square_border_parameterizer_3.h $
+// $Id: Square_border_parameterizer_3.h 50c870e 2020-07-21T17:12:19+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Laurent Saboret, Pierre Alliez, Bruno Levy
@@ -15,14 +15,12 @@
 #include <CGAL/license/Surface_mesh_parameterization.h>
 
 #include <CGAL/disable_warnings.h>
-#include <CGAL/assertions.h>
 
 #include <CGAL/Surface_mesh_parameterization/internal/kernel_traits.h>
 #include <CGAL/Surface_mesh_parameterization/Error_code.h>
 
 #include <CGAL/circulator.h>
 #include <CGAL/boost/graph/iterator.h>
-
 
 
 #include <cfloat>
@@ -202,7 +200,7 @@ private:
                                       VertexParameterizedMap vpmap,
                                       Offset_map& offset)
   {
-    CGAL_assertion(offset.empty());
+    assert(offset.empty());
 
     put(vpmap, v0, true);
     put(vpmap, v1, true);
@@ -236,7 +234,7 @@ private:
       if(get(vpmap, vt)) {
         // If both extremeties of a segment are corners, offsets are already correct
         if(!get(vpmap, vs)) {
-          CGAL_assertion(len != 0.0);
+          assert(len != 0.0);
           double ld = 1.0 / len;
           for(std::size_t i=index_of_previous_corner+1; i<=current_index; ++i) {
             // ld * offset[i] is in [0;1[
@@ -273,8 +271,8 @@ public:
   ///
   /// \param mesh a triangulated surface.
   /// \param bhd a halfedge descriptor on the boundary of `mesh`.
-  /// \param uvmap an instantiation of the class `VertexUVmap`.
-  /// \param vpmap an instantiation of the class `VertexParameterizedMap`.
+  /// \param uvmap an instanciation of the class `VertexUVmap`.
+  /// \param vpmap an instanciation of the class `VertexParameterizedMap`.
   ///
   /// \pre `mesh` must be a triangular mesh.
   /// \pre The vertices must be indexed (vimap must be initialized).
@@ -335,7 +333,7 @@ public:
     for(halfedge_descriptor hd : halfedges_around_face(start_hd, mesh)) {
       vertex_descriptor vd = source(hd, mesh);
       Point_2 uv;
-      CGAL_assertion(counter < offset.size());
+      assert(counter < offset.size());
 
       if(corners_encountered == 0)
         uv = Point_2(offset[counter++], 0.0);

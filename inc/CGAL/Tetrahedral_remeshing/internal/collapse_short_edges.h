@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/collapse_short_edges.h $
-// $Id: collapse_short_edges.h 05b446e 2022-12-05T12:38:31+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Tetrahedral_remeshing/include/CGAL/Tetrahedral_remeshing/internal/collapse_short_edges.h $
+// $Id: collapse_short_edges.h 1891985 2022-10-28T13:13:36+02:00 Jane Tournois
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -19,17 +19,16 @@
 #include <boost/bimap/set_of.hpp>
 #include <boost/bimap/multiset_of.hpp>
 #include <boost/array.hpp>
+#include <boost/unordered_set.hpp>
 #include <boost/container/small_vector.hpp>
-#include <boost/functional/hash.hpp>
 
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <unordered_set>
 
-#include <CGAL/SMDS_3/tet_soup_to_c3t3.h>
+#include <CGAL/Mesh_3/tet_soup_to_c3t3.h>
 #include <CGAL/utility.h>
 #include <CGAL/Tetrahedral_remeshing/internal/tetrahedral_remeshing_helpers.h>
 
@@ -67,8 +66,8 @@ public:
     , v0_init(e.first->vertex(e.second))
     , v1_init(e.first->vertex(e.third))
   {
-    typedef std::array<int, 3> Facet;
-    typedef std::array<int, 4> Tet;
+    typedef std::array<int, 3> Facet; // 3 = id
+    typedef std::array<int, 5> Tet_with_ref; // first 4 = id, fifth = reference
 
     std::unordered_set<Vertex_handle> vertices_to_insert;
     for (Cell_handle ch : cells_to_insert)
@@ -96,25 +95,23 @@ public:
       }
     }
 
-    std::vector<Tet> finite_cells;
-    std::vector<int> subdomains;
+    std::vector<Tet_with_ref> finite_cells;
     for (Cell_handle ch : cells_to_insert)
     {
-      finite_cells.push_back( { v2i.at(ch->vertex(0)),
-                                v2i.at(ch->vertex(1)),
-                                v2i.at(ch->vertex(2)),
-                                v2i.at(ch->vertex(3)) } );
-      subdomains.push_back(ch->subdomain_index());
+      Tet_with_ref t = { { v2i.at(ch->vertex(0)),
+                           v2i.at(ch->vertex(1)),
+                           v2i.at(ch->vertex(2)),
+                           v2i.at(ch->vertex(3)),
+                           ch->subdomain_index() } };
+      finite_cells.push_back(t);
     }
 
     // finished
     std::vector<Vertex_handle> new_vertices;
     std::map<Facet, typename C3t3::Surface_patch_index> border_facets;
-    if (CGAL::SMDS_3::build_triangulation_impl(
-            triangulation, points, finite_cells, subdomains, border_facets,
-            new_vertices, /*verbose*/ false,
-            /*replace_domain_0*/ false,
-            /*allow_non_manifold*/false))
+     if (CGAL::build_triangulation<Tr, false>(triangulation,
+                                              points, finite_cells, border_facets,
+                                              new_vertices, false/*verbose*/))
     {
       CGAL_assertion(triangulation.tds().is_valid());
       CGAL_assertion(triangulation.infinite_vertex() == new_vertices[0]);
@@ -160,7 +157,7 @@ public:
         v0_new_pos = vec(point(vh1->point()));
       }
 
-      std::unordered_set<Cell_handle> invalid_cells;
+      boost::unordered_set<Cell_handle> invalid_cells;
 
       typedef typename Tr::Cell_circulator Cell_circulator;
       Cell_circulator circ = triangulation.incident_cells(edge);
@@ -557,12 +554,12 @@ bool collapse_preserves_surface_star(const typename C3t3::Edge& edge,
   typename Tr::Geom_traits::Construct_normal_3
     normal = gt.construct_normal_3_object();
 
-  std::unordered_set<Facet, boost::hash<Facet>> facets;
+  boost::unordered_set<Facet> facets;
   tr.finite_incident_facets(v0, std::inserter(facets, facets.end()));
   tr.finite_incident_facets(v1, std::inserter(facets, facets.end()));
 
 // note : checking a 2nd ring of facets does not change the result
-//  std::unordered_set<Facet, boost::hash<Facet>> ring2;
+//  boost::unordered_set<Facet> ring2;
 //  for (const Facet& f : facets)
 //  {
 //    for (int i = 1; i < 4; ++i)
@@ -674,7 +671,7 @@ bool are_edge_lengths_valid(const typename C3t3::Edge& edge,
   const Vertex_handle v1 = edge.first->vertex(edge.second);
   const Vertex_handle v2 = edge.first->vertex(edge.third);
 
-  std::unordered_map<Vertex_handle, FT> edges_sqlength_after_collapse;
+  boost::unordered_map<Vertex_handle, FT> edges_sqlength_after_collapse;
 
   std::vector<Edge> inc_edges;
   c3t3.triangulation().finite_incident_edges(v1,
@@ -794,7 +791,7 @@ collapse(const typename C3t3::Cell_handle ch,
 
   bool valid = true;
   std::vector<Cell_handle> cells_to_remove;
-  std::unordered_set<Cell_handle> invalid_cells;
+  boost::unordered_set<Cell_handle> invalid_cells;
 
   for(const Cell_handle& c : inc_cells)
   {
@@ -992,7 +989,7 @@ bool is_cells_set_manifold(const C3t3&,
   typedef std::array<Vh, 3> FV;
   typedef std::pair<Vh, Vh> EV;
 
-  std::unordered_map<FV, int, boost::hash<FV>> facets;
+  boost::unordered_map<FV, int> facets;
   for (Cell_handle c : cells)
   {
     for (int i = 0; i < 4; ++i)
@@ -1000,7 +997,7 @@ bool is_cells_set_manifold(const C3t3&,
       const FV fvi = make_vertex_array(c->vertex((i + 1) % 4),
         c->vertex((i + 2) % 4),
         c->vertex((i + 3) % 4));
-      typename std::unordered_map<FV, int, boost::hash<FV>>::iterator fit = facets.find(fvi);
+      typename boost::unordered_map<FV, int>::iterator fit = facets.find(fvi);
       if (fit == facets.end())
         facets.insert(std::make_pair(fvi, 1));
       else
@@ -1008,7 +1005,7 @@ bool is_cells_set_manifold(const C3t3&,
     }
   }
 
-  std::unordered_map<EV, int, boost::hash<EV>> edges;
+  boost::unordered_map<EV, int> edges;
   for (const auto& fvv : facets)
   {
     if (fvv.second != 1)
@@ -1017,7 +1014,7 @@ bool is_cells_set_manifold(const C3t3&,
     for (int i = 0; i < 3; ++i)
     {
       const EV evi = make_vertex_pair(fvv.first[i], fvv.first[(i + 1) % 3]);
-      typename std::unordered_map<EV, int, boost::hash<EV>>::iterator eit = edges.find(evi);
+      typename boost::unordered_map<EV, int>::iterator eit = edges.find(evi);
       if (eit == edges.end())
         edges.insert(std::make_pair(evi, 1));
       else

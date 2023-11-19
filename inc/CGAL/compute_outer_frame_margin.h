@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Straight_skeleton_2/include/CGAL/compute_outer_frame_margin.h $
-// $Id: compute_outer_frame_margin.h 70ac415 2023-04-06T00:40:52+02:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Straight_skeleton_2/include/CGAL/compute_outer_frame_margin.h $
+// $Id: compute_outer_frame_margin.h 9051fc1 2020-10-08T22:54:11+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Fernando Cacciola <fernando_cacciola@ciudad.com.ar>
@@ -24,11 +24,9 @@
 
 namespace CGAL {
 
-template<class ForwardPointIterator, class WeightIterator, class Traits>
+template<class ForwardPointIterator, class Traits>
 boost::optional< typename Traits::FT > compute_outer_frame_margin ( ForwardPointIterator aBegin
                                                                   , ForwardPointIterator aEnd
-                                                                  , WeightIterator       aWBegin
-                                                                  , WeightIterator       CGAL_assertion_code(aWEnd)
                                                                   , typename Traits::FT  aOffset
                                                                   , Traits const&        aTraits
                                                                   )
@@ -48,19 +46,14 @@ boost::optional< typename Traits::FT > compute_outer_frame_margin ( ForwardPoint
 
   typedef boost::optional<Point_2> OptionalPoint_2 ;
 
-  CGAL_STSKEL_BUILDER_TRACE(2, "Computing outer frame margin..." );
-
   FT lMaxSDist(0) ;
 
-  WeightIterator lWIt = aWBegin ;
   ForwardPointIterator lLast = std::prev(aEnd) ;
 
   bool lOverflow = false ;
 
-  for ( ForwardPointIterator lCurr = aBegin ; lCurr != aEnd ; ++ lCurr, ++ lWIt )
+  for ( ForwardPointIterator lCurr = aBegin ; lCurr != aEnd ; ++ lCurr )
   {
-    CGAL_assertion(lWIt != aWEnd);
-
     ForwardPointIterator lPrev = ( lCurr == aBegin ? lLast  : std::prev  (lCurr) ) ;
     ForwardPointIterator lNext = ( lCurr == lLast  ? aBegin : std::next  (lCurr) ) ;
 
@@ -69,9 +62,7 @@ boost::optional< typename Traits::FT > compute_outer_frame_margin ( ForwardPoint
       Segment_2 lLEdge = construct_segment(*lPrev,*lCurr);
       Segment_2 lREdge = construct_segment(*lCurr,*lNext);
 
-      WeightIterator lNextWeight = ( lCurr == lLast  ? aWBegin : std::next(lWIt) ) ;
-
-      OptionalPoint_2 lP = aTraits.construct_offset_point_2_object()(aOffset,lLEdge,*lWIt,lREdge,*lNextWeight, Trisegment_2_ptr() );
+      OptionalPoint_2 lP = Construct_offset_point_2(aTraits)(aOffset,lLEdge,lREdge, Trisegment_2_ptr() );
 
       if ( !lP )
       {
@@ -97,36 +88,17 @@ boost::optional< typename Traits::FT > compute_outer_frame_margin ( ForwardPoint
   if ( ! lOverflow )
   {
     FT lDist = CGAL_SS_i::inexact_sqrt(lMaxSDist) ;
-    double approx = ceil( to_interval(lDist + ( aOffset * FT(1.05) ) ).second );
 
-    // Add a %5 gap, and ceil to get simpler values
-    CGAL_STSKEL_BUILDER_TRACE(4, "outer frame margin: " << approx );
-    return boost::optional<FT> ( approx ) ;
+    return boost::optional<FT>( lDist + ( aOffset * FT(1.05) ) ) ; // Add a %5 gap
   }
+  else
+    return boost::optional<FT>();
 
-  return boost::none;
 }
 
-
-// `Traits` first is to help overload resolution in the 3-argument version (see below)
-template<class Traits, class ForwardPointIterator>
-boost::optional< typename Traits::FT > compute_outer_frame_margin ( ForwardPointIterator aBegin
-                                                                  , ForwardPointIterator aEnd
-                                                                  , typename Traits::FT  aOffset
-                                                                  , Traits const&        aTraits
-                                                                  )
-{
-  typedef typename Traits::FT FT ;
-  std::vector<FT> aUWeights(std::distance(aBegin,aEnd), FT(1)) ;
-  return compute_outer_frame_margin(aBegin,aEnd,aUWeights.begin(),aUWeights.end(),aOffset,aTraits) ;
-}
-
-template<class ForwardPointIterator, class WeightIterator, class FT>
-boost::optional<FT> compute_outer_frame_margin(ForwardPointIterator aBegin,
-                                               ForwardPointIterator aEnd,
-                                               WeightIterator aWBegin,
-                                               WeightIterator aWEnd,
-                                               const FT aOffset)
+template<class FT, class ForwardPointIterator>
+boost::optional<FT> compute_outer_frame_margin ( ForwardPointIterator aBegin, ForwardPointIterator aEnd,
+                                                 FT aOffset )
 {
   typedef typename std::iterator_traits<ForwardPointIterator>::value_type Point_2 ;
 
@@ -134,23 +106,12 @@ boost::optional<FT> compute_outer_frame_margin(ForwardPointIterator aBegin,
 
   Polygon_offset_builder_traits_2<K> traits ;
 
-  return compute_outer_frame_margin(aBegin,aEnd,aWBegin,aWEnd,aOffset,traits);
+  return compute_outer_frame_margin(aBegin,aEnd,aOffset,traits);
 }
 
-template<class FT, class ForwardPointIterator>
-boost::optional<FT> compute_outer_frame_margin(ForwardPointIterator aBegin,
-                                               ForwardPointIterator aEnd,
-                                               const FT aOffset)
-{
-  typedef typename std::iterator_traits<ForwardPointIterator>::value_type Point_2 ;
+} // end namespace CGAL
 
-  typedef typename Kernel_traits<Point_2>::Kernel K;
-  typedef Polygon_offset_builder_traits_2<K> Builder_traits;
-  Builder_traits traits ;
+#endif // CGAL_COMPUTE_OUTER_FRAME_MARGIN_H //
+// EOF //
 
-  return compute_outer_frame_margin<Builder_traits>(aBegin,aEnd,aOffset,traits);
-}
 
-} // namespace CGAL
-
-#endif // CGAL_COMPUTE_OUTER_FRAME_MARGIN_H

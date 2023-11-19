@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/TDS_3/include/CGAL/Triangulation_simplex_3.h $
-// $Id: Triangulation_simplex_3.h 8a6f8f2 2023-06-18T21:20:56+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/TDS_3/include/CGAL/Triangulation_simplex_3.h $
+// $Id: Triangulation_simplex_3.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -96,10 +96,8 @@ public:
 
   // returns the dimension of the simplex
   int dimension () const {
-    if(ref == -1) return -1;
-    else return (ref & 3);
+    return (ref & 3);
   }
-
   // returns an incident cell:
   Cell_handle incident_cell() {
     return ch;
@@ -163,7 +161,6 @@ operator==(Triangulation_simplex_3<TriangulationDataStructure_3> s0,
   typename Sim::Cell_handle neighbor;
 
   switch (s0.dimension()) {
-  case -1: return s1.dimension() == -1;
   case (0): // Vertex
     return (s0.ch->vertex(s0.index(0)) == s1.ch->vertex(s1.index(0)));
   case (1): // Edge
@@ -183,7 +180,7 @@ operator==(Triangulation_simplex_3<TriangulationDataStructure_3> s0,
     }
     return false;
   case (3):
-    return s0.ch.operator->() == s1.ch.operator->();
+    return (&(*s0.ch) == &(*s1.ch));
   }
   CGAL_error();
   return false;

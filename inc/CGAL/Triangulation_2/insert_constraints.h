@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Triangulation_2/include/CGAL/Triangulation_2/insert_constraints.h $
-// $Id: insert_constraints.h dd5989d 2023-03-21T16:28:53+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Triangulation_2/include/CGAL/Triangulation_2/insert_constraints.h $
+// $Id: insert_constraints.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -34,7 +34,7 @@ namespace CGAL {
                                     IndicesIterator indices_beyond )
   {
     if(indices_first == indices_beyond){
-      return t.insert(points.begin(), points.end());
+      return 0;
     }
     typedef typename T::Vertex_handle Vertex_handle;
     typedef typename T::Face_handle Face_handle;

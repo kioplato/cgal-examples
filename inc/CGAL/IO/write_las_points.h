@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_processing_3/include/CGAL/IO/write_las_points.h $
-// $Id: write_las_points.h eed54a0 2022-11-15T18:45:39+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_processing_3/include/CGAL/IO/write_las_points.h $
+// $Id: write_las_points.h 5578bf4 2021-09-27T15:35:40+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Simon Giraudot
@@ -17,15 +17,16 @@
 #include <CGAL/IO/helpers.h>
 
 #include <CGAL/Bbox_3.h>
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 #include <CGAL/property_map.h>
 #include <CGAL/value_type_traits.h>
+#include <CGAL/point_set_processing_assertions.h>
 #include <CGAL/Kernel_traits.h>
-#include <CGAL/assertions.h>
 
 #include <boost/cstdint.hpp>
 #include <boost/version.hpp>
+#include <boost/utility/enable_if.hpp>
 
 #ifdef BOOST_MSVC
 #  pragma warning(push)
@@ -56,7 +57,12 @@
 #include <sstream>
 #include <string>
 #include <tuple>
-#include <type_traits>
+
+#ifdef DOXYGEN_RUNNING
+#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
+#define CGAL_BGL_NP_CLASS NamedParameters
+#define CGAL_DEPRECATED
+#endif
 
 namespace CGAL {
 
@@ -164,7 +170,7 @@ namespace LAS {
    handlers. A `PropertyHandle` is a `std::pair<PropertyMap,
    LAS_property::Tag >` used to write a scalar value
    `LAS_property::Tag::type` as a %LAS property (for example,
-   writing an `int` variable as an `int` %LAS property). An exception
+   writing an `int` vairable as an `int` %LAS property). An exception
    is used for points that are written using a `std::tuple` object.
 
    See documentation of `read_LAS_with_properties()` for the
@@ -193,7 +199,7 @@ bool write_LAS_with_properties(std::ostream& os, ///< output stream.
                                LAS_property::Z> point_property, ///< property handler for points
                                PropertyHandler&& ... properties) ///< parameter pack of property handlers
 {
-  CGAL_precondition(points.begin() != points.end());
+  CGAL_point_set_processing_precondition(points.begin() != points.end());
 
   if(!os)
   {
@@ -277,19 +283,19 @@ bool write_LAS_with_properties(std::ostream& os, ///< output stream.
    \sa \ref IOStreamLAS
    \sa `write_LAS_with_properties()`
 */
-template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_LAS(std::ostream& os,
                const PointRange& points,
-               const CGAL_NP_CLASS& np = parameters::default_values()
+               const CGAL_BGL_NP_CLASS& np
 #ifndef DOXYGEN_RUNNING
-               , std::enable_if_t<internal::is_Range<PointRange>::value>* = nullptr
+               , typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr
 #endif
                )
 {
   using parameters::choose_parameter;
   using parameters::get_parameter;
 
-  typedef typename CGAL::GetPointMap<PointRange, CGAL_NP_CLASS>::type PointMap;
+  typedef typename CGAL::GetPointMap<PointRange, CGAL_BGL_NP_CLASS>::type PointMap;
   PointMap point_map = choose_parameter<PointMap>(get_parameter(np, internal_np::point_map));
 
   if(!os)
@@ -332,12 +338,12 @@ bool write_LAS(std::ostream& os,
 
    \sa `write_LAS_with_properties()`
 */
-template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_LAS(const std::string& filename,
                const PointRange& points,
-               const CGAL_NP_CLASS& np = parameters::default_values()
+               const CGAL_BGL_NP_CLASS& np
 #ifndef DOXYGEN_RUNNING
-               , std::enable_if_t<internal::is_Range<PointRange>::value>* = nullptr
+               , typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr
 #endif
                )
 {
@@ -345,6 +351,27 @@ bool write_LAS(const std::string& filename,
   CGAL::IO::set_mode(os, CGAL::IO::BINARY);
   return write_LAS(os, points, np);
 }
+
+/// \cond SKIP_IN_MANUAL
+
+// variant with default NP
+template <typename PointRange>
+bool write_LAS(std::ostream& os, const PointRange& points,
+               typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr)
+{
+  return write_LAS(os, points, CGAL::Point_set_processing_3::parameters::all_default(points));
+}
+
+template <typename PointRange>
+bool write_LAS(const std::string& filename, const PointRange& points,
+               typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr)
+{
+  std::ofstream os(filename, std::ios::binary);
+  CGAL::IO::set_mode(os, CGAL::IO::BINARY);
+  return write_LAS(os, points, parameters::all_default());
+}
+
+/// \endcond
 
 } // namespace IO
 
@@ -402,8 +429,8 @@ CGAL_DEPRECATED bool write_las_points_with_properties(std::ostream& os,
 
   \deprecated This function is deprecated since \cgal 5.3, `CGAL::IO::write_LAS()` should be used instead.
 */
-template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
-bool write_las_points(std::ostream& os, const PointRange& points, const CGAL_NP_CLASS& np = parameters::default_values())
+template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+bool write_las_points(std::ostream& os, const PointRange& points, const CGAL_BGL_NP_CLASS& np)
 {
   return IO::write_LAS(os, points, np);
 }

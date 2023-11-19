@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_3/include/CGAL/Mesh_3/mesh_standard_cell_criteria.h $
-// $Id: mesh_standard_cell_criteria.h d7843a2 2022-12-14T17:05:57+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_3/include/CGAL/Mesh_3/mesh_standard_cell_criteria.h $
+// $Id: mesh_standard_cell_criteria.h 6fe18d8 2021-01-20T15:32:23+01:00 Laurent Rineau
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -142,19 +142,11 @@ class Cell_uniform_size_criterion
 
 public:
   // Constructor
-  Cell_uniform_size_criterion(const FT& radius_bound,
-                              const bool is_lower_bound = false)
-    : sq_radius_bound_(radius_bound*radius_bound)
-    , is_lower_bound_(is_lower_bound)
-  {}
+  Cell_uniform_size_criterion(const FT& radius_bound)
+    : sq_radius_bound_(radius_bound*radius_bound)   {}
 
   // Destructor
   ~Cell_uniform_size_criterion() {}
-
-  bool is_lower_bound() const
-  {
-    return is_lower_bound_;
-  }
 
 protected:
   virtual void do_accept(Visitor_& v) const
@@ -190,19 +182,11 @@ protected:
 
     const FT size = sq_radius(p, q, r, s);
 
-    if (!is_lower_bound() && size > sq_radius_bound_ )
+    if ( size > sq_radius_bound_ )
     {
 #ifdef CGAL_MESH_3_DEBUG_CELL_CRITERIA
       std::cerr << "bad cell " << (void*)(ch.operator->()) << " (radius bound): size[" << size
                 << "] bound[" << sq_radius_bound_ << "]\n" ;
-#endif
-      return Is_bad(Quality(sq_radius_bound_/ size));
-    }
-    else if(is_lower_bound() && size <= sq_radius_bound_)
-    {
-#ifdef CGAL_MESH_3_DEBUG_FACET_CRITERIA
-      std::cerr << "Cell too small (uniform size): sq_radius[" << size
-        << "] bound[" << B_ << "]\n";
 #endif
       return Is_bad(Quality(sq_radius_bound_/size));
     }
@@ -212,7 +196,6 @@ protected:
 
 private:
   FT sq_radius_bound_;
-  const bool is_lower_bound_;
 
 };  // end class Cell_uniform_size_criterion
 
@@ -395,6 +378,11 @@ class Cell_criteria_visitor_with_features
   typedef Criterion_visitor<Tr, typename Tr::Cell_handle> Base;
   typedef Cell_criteria_visitor_with_features<Tr> Self;
 
+
+  typedef Abstract_criterion<Tr, Self>                  Criterion;
+  typedef Mesh_3::Cell_size_criterion<Tr, Self>         Cell_size_criterion;
+  typedef Mesh_3::Cell_radius_edge_criterion<Tr, Self>  Cell_radius_edge_criterion;
+
   typedef typename Tr::Geom_traits    Gt;
   typedef typename Gt::FT             FT;
   typedef typename Tr::Weighted_point Weighted_point;
@@ -513,8 +501,7 @@ public:
   ~Cell_criteria_visitor_with_features() {}
 
   // visit functions
-  template<typename T, typename V>
-  void visit(const Mesh_3::Cell_size_criterion<T,V>& criterion)
+  void visit(const Cell_size_criterion& criterion)
   {
     if (   ratio_ < size_ratio_
         && (do_spheres_intersect_ || 1 == wp_nb_) )
@@ -526,8 +513,7 @@ public:
     Base::do_visit(criterion);
   }
 
-  template<typename T, typename V>
-  void visit(const Mesh_3::Cell_radius_edge_criterion<T,V>& criterion)
+  void visit(const Cell_radius_edge_criterion& criterion)
   {
     if (   (wp_nb_ >= 2 && do_spheres_intersect_)
         || 1 == wp_nb_ )
@@ -539,8 +525,7 @@ public:
     Base::do_visit(criterion);
   }
 
-  template<typename T, typename V>
-  void visit(const Abstract_criterion<T,V>& criterion)
+  void visit(const Criterion& criterion)
   {
     Base::do_visit(criterion);
   }
@@ -550,74 +535,9 @@ private:
   bool do_spheres_intersect_;
   FT ratio_;
   FT size_ratio_;
-};  // end class Cell_criteria_visitor_with_features
+};  // end class Cell_criterion_visitor
 
 
-template<typename Tr>
-class Cell_criterion_visitor_with_radius_lower_bound
-  : public Cell_criteria_visitor_with_features<Tr>
-{
-  typedef Cell_criteria_visitor_with_features<Tr> Base;
-  typedef Cell_criterion_visitor_with_radius_lower_bound<Tr> Self;
-
-  typedef typename Tr::Geom_traits    Gt;
-  typedef typename Gt::FT             FT;
-
-public:
-  typedef typename Base::Quality  Cell_quality;
-  typedef typename Base::Is_bad   Is_cell_bad;
-  typedef typename Base::Handle   Handle;
-  typedef Handle                  Cell_handle;
-
-  // Constructor
-  Cell_criterion_visitor_with_radius_lower_bound(const Tr& tr,
-                                                const Cell_handle& ch)
-    : Base(tr, ch)
-    , dont_go_further_(false)
-  {}
-
-  Is_cell_bad is_bad() const
-  {
-    if (dont_go_further_)
-      return Is_cell_bad();
-    else
-    return Base::is_bad();
-  }
-
-  bool go_further() const
-  {
-    if (dont_go_further_)
-      return false;
-    else
-      return Base::go_further();
-  }
-
-  // visit functions
-  template<typename Criterion>
-  void visit(const Criterion& criterion)
-  {
-    Base::visit(criterion);
-  }
-
-  template<typename T, typename V>
-  void visit(const Mesh_3::Abstract_criterion<T, V>& criterion)
-  {
-    Base::visit(criterion);
-  }
-
-  template<typename T, typename V>
-  void visit(const Mesh_3::Cell_uniform_size_criterion<T, V>& criterion)
-  {
-    Base::visit(criterion);
-
-    if (criterion.is_lower_bound() && Base::is_bad())
-      dont_go_further_ = true;
-  }
-
-private:
-  bool dont_go_further_;
-
-};// end class Cell_criterion_visitor_with_radius_lower_bound
 
 }  // end namespace Mesh_3
 

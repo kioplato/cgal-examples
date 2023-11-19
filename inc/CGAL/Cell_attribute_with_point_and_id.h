@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Linear_cell_complex/include/CGAL/Cell_attribute_with_point_and_id.h $
-// $Id: Cell_attribute_with_point_and_id.h 4547818 2022-11-15T13:39:40+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Linear_cell_complex/include/CGAL/Cell_attribute_with_point_and_id.h $
+// $Id: Cell_attribute_with_point_and_id.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -36,15 +36,15 @@ namespace CGAL {
     typedef typename Base::Point Point;
 
   protected:
-    /// Default constructor.
+    /// Default contructor.
     Cell_attribute_with_point_and_id()
     {}
 
-    /// Constructor with an info in parameter.
+    /// Contructor with an info in parameter.
     Cell_attribute_with_point_and_id(const Point& apoint) : Base(apoint)
     {}
 
-    /// Constructor with a point and an attribute in parameters.
+    /// Contructor with a point and an attribute in parameters.
     Cell_attribute_with_point_and_id(const Point& apoint, const Info_& ainfo) :
       Base(apoint, ainfo)
     {}
@@ -68,11 +68,11 @@ namespace CGAL {
     typedef typename Base::Point Point;
 
   protected:
-    /// Default constructor.
+    /// Default contructor.
     Cell_attribute_with_point_and_id()
     {}
 
-    /// Constructor with a point in parameter.
+    /// Contructor with a point in parameter.
     Cell_attribute_with_point_and_id(const Point& apoint) : Base(apoint)
     {}
   };

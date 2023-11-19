@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_processing_3/include/CGAL/jet_smooth_point_set.h $
-// $Id: jet_smooth_point_set.h eed54a0 2022-11-15T18:45:39+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_processing_3/include/CGAL/jet_smooth_point_set.h $
+// $Id: jet_smooth_point_set.h 8682f9b 2020-08-24T11:45:17+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Pierre Alliez, Marc Pouget and Laurent Saboret
@@ -22,10 +22,10 @@
 #include <CGAL/for_each.h>
 #include <CGAL/Monge_via_jet_fitting.h>
 #include <CGAL/property_map.h>
-#include <CGAL/assertions.h>
+#include <CGAL/point_set_processing_assertions.h>
 #include <functional>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
 
 #include <boost/iterator/zip_iterator.hpp>
@@ -182,29 +182,28 @@ jet_smooth_point(
 */
 template <typename ConcurrencyTag,
           typename PointRange,
-          typename NamedParameters = parameters::Default_named_parameters
+          typename NamedParameters
 >
 void
 jet_smooth_point_set(
   PointRange& points,
   unsigned int k,
-  const NamedParameters& np = parameters::default_values())
+  const NamedParameters& np)
 {
   using parameters::choose_parameter;
   using parameters::get_parameter;
 
   // basic geometric types
   typedef typename PointRange::iterator iterator;
-  typedef Point_set_processing_3_np_helper<PointRange, NamedParameters> NP_helper;
-  typedef typename NP_helper::Point_map PointMap;
-  typedef typename NP_helper::Geom_traits Kernel;
+  typedef typename CGAL::GetPointMap<PointRange, NamedParameters>::type PointMap;
+  typedef typename Point_set_processing_3::GetK<PointRange, NamedParameters>::Kernel Kernel;
   typedef typename GetSvdTraits<NamedParameters>::type SvdTraits;
 
-  CGAL_static_assertion_msg(!(std::is_same<SvdTraits,
+  CGAL_static_assertion_msg(!(boost::is_same<SvdTraits,
                               typename GetSvdTraits<NamedParameters>::NoTraits>::value),
                             "Error: no SVD traits");
 
-  PointMap point_map = NP_helper::get_point_map(points, np);
+  PointMap point_map = choose_parameter<PointMap>(get_parameter(np, internal_np::point_map));
   typename Kernel::FT neighbor_radius = choose_parameter(get_parameter(np, internal_np::neighbor_radius),
                                                          typename Kernel::FT(0));
   unsigned int degree_fitting = choose_parameter(get_parameter(np, internal_np::degree_fitting), 2);
@@ -218,12 +217,12 @@ jet_smooth_point_set(
   // precondition: at least one element in the container.
   // to fix: should have at least three distinct points
   // but this is costly to check
-  CGAL_precondition(points.begin() != points.end());
+  CGAL_point_set_processing_precondition(points.begin() != points.end());
 
   // precondition: at least 2 nearest neighbors
-  CGAL_precondition(k >= 2);
+  CGAL_point_set_processing_precondition(k >= 2);
 
-  // Instantiate a KD-tree search.
+  // Instanciate a KD-tree search.
   Neighbor_query neighbor_query (points, point_map);
 
   // Iterates over input points and mutates them.
@@ -271,6 +270,22 @@ jet_smooth_point_set(
        return true;
      });
 }
+
+
+/// \cond SKIP_IN_MANUAL
+// variant with default NP
+template <typename ConcurrencyTag,
+          typename PointRange>
+void
+jet_smooth_point_set(
+  PointRange& points,
+  unsigned int k) ///< number of neighbors.
+{
+  jet_smooth_point_set<ConcurrencyTag>
+    (points, k, CGAL::Point_set_processing_3::parameters::all_default(points));
+}
+/// \endcond
+
 
 } //namespace CGAL
 

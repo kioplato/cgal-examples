@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arr_non_caching_segment_traits_2.h $
-// $Id: Arr_non_caching_segment_traits_2.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arr_non_caching_segment_traits_2.h $
+// $Id: Arr_non_caching_segment_traits_2.h 436ba5f 2020-06-30T21:23:16+03:00 Efi Fogel
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s): Efi Fogel    <efif@post.tau.ac.il>
@@ -22,7 +22,7 @@
  * This traits class handles general segments. It is a model of the
  * ArrangementTraits_2 concept, a refinement of the ArrangementBasicTraits_2
  * concept. The class is templated by a kernel and inherits from the
- * Arr_non_caching_segment_basic_traits_2 class instantiated with the kernel -
+ * Arr_non_caching_segment_basic_traits_2 class instanciated with the kernel -
  * a model of the ArrangementBasicTraits_2 concept. It defined a few additional
  * functors required by the concept it models.
  */
@@ -143,7 +143,7 @@ public:
   { return Make_x_monotone_2(); }
 
   /*! \class
-   * A functor for splitting a segment into two segments.
+   * A functor for splitting a segment into two segements.
    */
   class Split_2 {
     typedef Arr_non_caching_segment_traits_2<Kernel_T>    Self;
@@ -233,14 +233,14 @@ public:
       // There is no intersection:
       if (! res) return oi;
 
-      // Check if the intersection is a point:
+      // Chack if the intersection is a point:
       const Point_2* p_p = boost::get<Point_2>(&*res);
       if (p_p != nullptr) {
         // Create a pair representing the point with its multiplicity,
         // which is always 1 for line segments for all practical purposes.
         // If the two segments intersect at their endpoints, then the
         // multiplicity is undefined, but we deliberately ignore it for
-        // efficiency reasons.
+        // efficieny reasons.
         *oi++ = Intersection_result(Intersection_point(*p_p, 1));
         return oi;
       }
@@ -402,18 +402,6 @@ public:
   /*! Obtain a Compare_endpoints_xy_2 functor object */
   Compare_endpoints_xy_2 compare_endpoints_xy_2_object() const
   { return Compare_endpoints_xy_2(); }
-  //@}
-
-  //! \name Functor definitions for constructions.
-  //@{
-
-  //! Functor
-  typedef typename Kernel::Construct_segment_2    Construct_curve_2;
-
-  /*! Obtain a Construct_curve_2 functor object. */
-  Construct_curve_2 construct_curve_2_object() const
-  { return this->construct_segment_2_object(); }
-
   //@}
 };
 

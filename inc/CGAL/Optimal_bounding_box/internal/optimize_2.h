@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Optimal_bounding_box/include/CGAL/Optimal_bounding_box/internal/optimize_2.h $
-// $Id: optimize_2.h 13882cc 2022-11-08T17:29:15+01:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Optimal_bounding_box/include/CGAL/Optimal_bounding_box/internal/optimize_2.h $
+// $Id: optimize_2.h 93ee230 2021-08-23T22:25:14+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mael Rouxel-Labbé
@@ -104,9 +104,7 @@ compute_2D_deviation(const PointRange& points,
   if(theta > 0.25 * CGAL_PI) // @todo is there a point to this
     theta = 0.5 * CGAL_PI - theta;
 
-  //cast from double to float looses data, so cast with {} is not allowed
-  //cast from double to exact types also works
-  return std::make_pair(pol.area(), FT(theta));
+  return std::make_pair(pol.area(), FT{theta});
 }
 
 template <typename PointRange, typename Traits>
@@ -125,10 +123,8 @@ void optimize_along_OBB_axes(typename Traits::Matrix& rot,
   rotated_points.reserve(points.size());
 
   FT xmin, ymin, zmin, xmax, ymax, zmax;
-  //cast from double to float looses data, so cast with {} is not allowed
-  //cast from double to exact types also works
-  xmin = ymin = zmin = FT((std::numeric_limits<double>::max)());
-  xmax = ymax = zmax = FT(std::numeric_limits<double>::lowest());
+  xmin = ymin = zmin = FT{(std::numeric_limits<double>::max)()};
+  xmax = ymax = zmax = FT{std::numeric_limits<double>::lowest()};
 
   for(const Point& pt : points)
   {

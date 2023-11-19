@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Shape_regularization/include/CGAL/Shape_regularization/regularize_segments.h $
-// $Id: regularize_segments.h 75b03e6 2022-01-10T15:33:04+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Shape_regularization/include/CGAL/Shape_regularization/regularize_segments.h $
+// $Id: regularize_segments.h 9acece5 2021-08-12T17:11:09+02:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -28,7 +28,7 @@
 // Boost includes.
 /// \cond SKIP_IN_MANUAL
 #include <CGAL/boost/graph/named_params_helper.h>
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 /// \endcond
 
 // Internal includes.
@@ -129,13 +129,13 @@ namespace Segments {
   typename NeighQuery,
   typename RegType,
   typename QPSolver,
-  typename NamedParameters = parameters::Default_named_parameters>
+  typename NamedParameters>
   void regularize_segments(
     InputRange& input_range,
     NeighQuery& neighbor_query,
     RegType& regularization_type,
     QPSolver& quadratic_program,
-    const NamedParameters& np = parameters::default_values()) {
+    const NamedParameters& np) {
 
     using SegmentMap = typename internal::GetSegmentMap<InputRange, NamedParameters>::type;
     using Segment_2 = typename SegmentMap::value_type;
@@ -149,6 +149,25 @@ namespace Segments {
       input_range, neighbor_query, regularization_type, quadratic_program, np);
     regularizer.regularize();
   }
+
+  /// \cond SKIP_IN_MANUAL
+  template<
+  typename InputRange,
+  typename NeighQuery,
+  typename RegType,
+  typename QPSolver>
+  void regularize_segments(
+    InputRange& input_range,
+    NeighQuery& neighbor_query,
+    RegType& regularization_type,
+    QPSolver& quadratic_program) {
+
+    CGAL_precondition(input_range.size() >= 2);
+    regularize_segments(
+      input_range, neighbor_query, regularization_type, quadratic_program,
+      CGAL::parameters::all_default());
+  }
+  /// \endcond
 
   #if defined(CGAL_USE_OSQP) || defined(DOXYGEN_RUNNING)
 
@@ -366,11 +385,11 @@ namespace Segments {
   template<
   typename InputRange,
   typename OutIterator,
-  typename NamedParameters = parameters::Default_named_parameters>
+  typename NamedParameters>
   OutIterator parallel_groups(
     const InputRange& input_range,
     OutIterator groups,
-    const NamedParameters& np = parameters::default_values()) {
+    const NamedParameters& np) {
 
     using SegmentMap = typename internal::GetSegmentMap<InputRange, NamedParameters>::type;
     using Segment_2 = typename SegmentMap::value_type;
@@ -389,6 +408,20 @@ namespace Segments {
       input_range, np, segment_map, traits);
     return grouping.groups(groups);
   }
+
+  /// \cond SKIP_IN_MANUAL
+  template<
+  typename InputRange,
+  typename OutIterator>
+  OutIterator parallel_groups(
+    const InputRange& input_range,
+    OutIterator groups) {
+
+    CGAL_precondition(input_range.size() >= 1);
+    return parallel_groups(
+      input_range, groups, CGAL::parameters::all_default());
+  }
+  /// \endcond
 
   /*!
     \ingroup PkgShapeRegularizationRefSegments
@@ -459,11 +492,11 @@ namespace Segments {
   template<
   typename InputRange,
   typename OutIterator,
-  typename NamedParameters = parameters::Default_named_parameters>
+  typename NamedParameters>
   OutIterator collinear_groups(
     const InputRange& input_range,
     OutIterator groups,
-    const NamedParameters& np = parameters::default_values()) {
+    const NamedParameters& np) {
 
     using SegmentMap = typename internal::GetSegmentMap<InputRange, NamedParameters>::type;
     using Segment_2 = typename SegmentMap::value_type;
@@ -482,6 +515,20 @@ namespace Segments {
       input_range, np, segment_map, traits);
     return grouping.groups(groups);
   }
+
+  /// \cond SKIP_IN_MANUAL
+  template<
+  typename InputRange,
+  typename OutIterator>
+  OutIterator collinear_groups(
+    const InputRange& input_range,
+    OutIterator groups) {
+
+    CGAL_precondition(input_range.size() >= 1);
+    return collinear_groups(
+      input_range, groups, CGAL::parameters::all_default());
+  }
+  /// \endcond
 
   /*!
     \ingroup PkgShapeRegularizationRefSegments
@@ -552,11 +599,11 @@ namespace Segments {
   template<
   typename InputRange,
   typename OutIterator,
-  typename NamedParameters = parameters::Default_named_parameters>
+  typename NamedParameters>
   OutIterator orthogonal_groups(
     const InputRange& input_range,
     OutIterator groups,
-    const NamedParameters& np = parameters::default_values()) {
+    const NamedParameters& np) {
 
     using SegmentMap = typename internal::GetSegmentMap<InputRange, NamedParameters>::type;
     using Segment_2 = typename SegmentMap::value_type;
@@ -575,6 +622,20 @@ namespace Segments {
       input_range, np, segment_map, traits);
     return grouping.groups(groups);
   }
+
+  /// \cond SKIP_IN_MANUAL
+  template<
+  typename InputRange,
+  typename OutIterator>
+  OutIterator orthogonal_groups(
+    const InputRange& input_range,
+    OutIterator groups) {
+
+    CGAL_precondition(input_range.size() >= 1);
+    return orthogonal_groups(
+      input_range, groups, CGAL::parameters::all_default());
+  }
+  /// \endcond
 
   /*!
     \ingroup PkgShapeRegularizationRefSegments
@@ -644,11 +705,11 @@ namespace Segments {
   template<
   typename InputRange,
   typename OutIterator,
-  typename NamedParameters = parameters::Default_named_parameters>
+  typename NamedParameters>
   OutIterator unique_segments(
     const InputRange& input_range,
     OutIterator segments,
-    const NamedParameters& np = parameters::default_values()) {
+    const NamedParameters& np) {
 
     using SegmentMap = typename internal::GetSegmentMap<InputRange, NamedParameters>::type;
     using Segment_2 = typename SegmentMap::value_type;
@@ -667,6 +728,20 @@ namespace Segments {
       input_range, np, segment_map, traits);
     return unique.segments(segments);
   }
+
+  /// \cond SKIP_IN_MANUAL
+  template<
+  typename InputRange,
+  typename OutIterator>
+  OutIterator unique_segments(
+    const InputRange& input_range,
+    OutIterator segments) {
+
+    CGAL_precondition(input_range.size() >= 1);
+    return unique_segments(
+      input_range, segments, CGAL::parameters::all_default());
+  }
+  /// \endcond
 
 } // namespace Segments
 } // namespace Shape_regularization

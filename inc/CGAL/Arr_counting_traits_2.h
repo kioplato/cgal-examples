@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arr_counting_traits_2.h $
-// $Id: Arr_counting_traits_2.h ae3e2b6 2023-03-31T11:10:52+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arr_counting_traits_2.h $
+// $Id: Arr_counting_traits_2.h 055f87d 2021-09-15T10:10:45+01:00 Andreas Fabri
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s): Efi Fogel      <efif@post.tau.ac.il>
@@ -21,7 +21,7 @@
  * A counting traits-class for the arrangement package.
  * This is a meta-traits class. It is parameterized with another traits class
  * and inherits from it. For each traits method it maintains a counter that
- * counts the number of invocations into the method.
+ * counts the number of invokations into the method.
  */
 
 #include <iostream>
@@ -85,17 +85,18 @@ public:
   typedef Arr_counting_traits_2<Base>           Self;
 
   /*! Construct default */
-  template<typename ... Args>
-  Arr_counting_traits_2(Args ... args) :
-    Base(args...)
+  Arr_counting_traits_2() : Base()
   {
     clear_counters();
     increment();
   }
 
-  /*! Disable copy constructor.
-   */
-  Arr_counting_traits_2(const Arr_counting_traits_2&) = delete;
+  /*! Construct copy */
+  Arr_counting_traits_2(const Arr_counting_traits_2& other) : Base(other)
+  {
+    clear_counters();
+    increment();
+  }
 
   /*! Obtain the counter of the given operation */
   size_t count(Operation_id id) const

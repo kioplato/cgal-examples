@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/BGL/include/CGAL/boost/graph/Seam_mesh.h $
-// $Id: Seam_mesh.h 62a31ba 2022-11-14T17:44:33+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/BGL/include/CGAL/boost/graph/Seam_mesh.h $
+// $Id: Seam_mesh.h 5d41446 2020-09-22T11:53:27+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -19,11 +19,10 @@
 
 #include <CGAL/circulator.h>
 #include <CGAL/Unique_hash_map.h>
-#include <CGAL/assertions.h>
 
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/unordered_set.hpp>
 
-#include <unordered_set>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -177,7 +176,7 @@ public:
 
 /// \ingroup PkgBGLAdaptors
 ///
-/// This class is a data structure that takes a triangle mesh, further referred
+/// This class is a data structure that takes a triangle mesh, further refered
 /// to as `underlying mesh` and turns some marked edges of that mesh into
 /// virtual boundary edges.
 ///
@@ -935,7 +934,7 @@ public:
 
   void build_TM_vertices_vector(std::vector<TM_vertex_descriptor>& tm_vds) const
   {
-    CGAL_precondition(tm_vds.empty());
+    assert(tm_vds.empty());
 
     // If the input is a list of integers, we need to build a correspondence
     // between vertices and integers.
@@ -1009,7 +1008,7 @@ public:
   TM_halfedge_descriptor add_seams(InputIterator first, InputIterator last)
   {
     // must have an even number of input vertices
-    CGAL_precondition(std::distance(first, last) % 2 == 0);
+    assert(std::distance(first, last) % 2 == 0);
 
     TM_halfedge_descriptor tmhd = boost::graph_traits<TM>::null_halfedge();
     InputIterator it = first;

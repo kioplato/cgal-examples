@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Number_types/include/CGAL/Quotient.h $
-// $Id: Quotient.h 3fa4364 2022-06-10T08:41:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Number_types/include/CGAL/Quotient.h $
+// $Id: Quotient.h 8d32692 2021-09-09T15:48:59+02:00 Jane Tournois
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -33,9 +33,6 @@
 #include <CGAL/Kernel/mpl.h>
 
 #include <boost/operators.hpp>
-#ifdef CGAL_USE_BOOST_MP
-#include <boost/multiprecision/cpp_int.hpp>
-#endif // CGAL_USE_BOOST_MP
 
 namespace CGAL {
 
@@ -48,15 +45,6 @@ namespace CGAL {
 template < typename NT >
 inline void
 simplify_quotient(NT &, NT &) {}
-
-#ifdef CGAL_USE_BOOST_MP
-inline void
-simplify_quotient(boost::multiprecision::cpp_int & a, boost::multiprecision::cpp_int & b) {
-  const boost::multiprecision::cpp_int r = boost::multiprecision::gcd(a, b);
-  a /= r;
-  b /= r;
-}
-#endif // CGAL_USE_BOOST_MP
 
 // This one should be replaced by some functor or tag.
 // Meanwhile, the class is specialized for Gmpz, mpz_class, leda_integer.
@@ -628,7 +616,7 @@ public:
     };
 
     typedef typename boost::mpl::if_c<
-        !std::is_same< typename Algebraic_structure_traits<NT>::Sqrt,
+        !boost::is_same< typename Algebraic_structure_traits<NT>::Sqrt,
                          Null_functor >::value,
          typename INTERN_QUOTIENT::Sqrt_selector< Type,
                                                   Is_exact >::Sqrt,
@@ -699,7 +687,7 @@ template < class NT > class Real_embeddable_traits_quotient_base< Quotient<NT> >
       : public CGAL::cpp98::unary_function< Type, std::pair< double, double > > {
       public:
         std::pair<double, double> operator()( const Type& x ) const {
-          const Interval_nt<> quot =
+          Interval_nt<> quot =
                           Interval_nt<>(CGAL_NTS to_interval(x.numerator())) /
                           Interval_nt<>(CGAL_NTS to_interval(x.denominator()));
           return std::make_pair(quot.inf(), quot.sup());

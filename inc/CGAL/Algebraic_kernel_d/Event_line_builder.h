@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/Event_line_builder.h $
-// $Id: Event_line_builder.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Algebraic_kernel_d/include/CGAL/Algebraic_kernel_d/Event_line_builder.h $
+// $Id: Event_line_builder.h 4e519a3 2021-05-05T13:15:37+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -118,7 +118,7 @@ public:
      * curve.
      *
      * Additionally, the \c id of the event line to be created has to be
-     * specified, and
+     * specfied, and
      * the number of arcs that are entering from the left and leaving to the
      * right are needed. Furthermore, the flag \c root_of_resultant tells
      * whether \c alpha is a root of the resultant of the specified curve, and
@@ -314,7 +314,7 @@ protected:
      *
      * If the first elements in the sequence are known to be zero,
      * \c first_elements_zero can be set accordingly. The zero test is then
-     * omitted for that leading elements.
+     * ommitted for that leading elements.
      */
     template<typename InputIterator>
     std::pair<int,int> compute_mk(Algebraic_real_1 alpha,

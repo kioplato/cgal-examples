@@ -4,8 +4,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_3/include/CGAL/Intersections_3/internal/Bbox_3_Line_3_do_intersect.h $
-// $Id: Bbox_3_Line_3_do_intersect.h e8ec440 2022-12-05T14:51:31+01:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_3/include/CGAL/Intersections_3/internal/Bbox_3_Line_3_do_intersect.h $
+// $Id: Bbox_3_Line_3_do_intersect.h 9c6456f 2021-07-29T14:23:40+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -14,7 +14,7 @@
 #ifndef CGAL_INTERNAL_INTERSECTIONS_3_BBOX_3_LINE_3_DO_INTERSECT_H
 #define CGAL_INTERNAL_INTERSECTIONS_3_BBOX_3_LINE_3_DO_INTERSECT_H
 
-// inspired from https://people.csail.mit.edu/amy/papers/box-jgt.pdf
+// inspired from http://cag.csail.mit.edu/~amy/papers/box-jgt.pdf
 
 #include <CGAL/Bbox_3.h>
 #include <CGAL/Coercion_traits.h>
@@ -25,9 +25,9 @@ namespace CGAL {
 namespace Intersections {
 namespace internal {
 
-template <typename K, typename LFT, typename BFT>
+template <typename LFT, typename BFT>
 inline
-typename K::Boolean
+bool
 bbox_line_do_intersect_aux(const LFT px, const LFT py, const LFT pz,
                            const LFT vx, const LFT vy, const LFT vz,
                            const BFT bxmin, const BFT bymin, const BFT bzmin,
@@ -63,7 +63,7 @@ bbox_line_do_intersect_aux(const LFT px, const LFT py, const LFT pz,
   }
 
   //if px is not in the x-slab
-  if(is_zero(dmin) && (is_positive(tmin) || is_negative(tmax)))
+  if(dmin == FT(0) && (tmin > FT(0) || tmax < FT(0)))
     return false;
 
   FT dmax = dmin;
@@ -135,10 +135,9 @@ bbox_line_do_intersect_aux(const LFT px, const LFT py, const LFT pz,
 }
 
 template <class K>
-typename K::Boolean
-do_intersect(const typename K::Line_3& line,
-             const CGAL::Bbox_3& bbox,
-             const K&)
+bool do_intersect(const typename K::Line_3& line,
+                  const CGAL::Bbox_3& bbox,
+                  const K&)
 {
   typedef typename K::Point_3 Point_3;
   typedef typename K::Vector_3 Vector_3;
@@ -146,17 +145,16 @@ do_intersect(const typename K::Line_3& line,
   const Point_3& point = line.point();
   const Vector_3& v = line.to_vector();
 
-  return bbox_line_do_intersect_aux<K>(point.x(), point.y(), point.z(),
-                                       v.x(), v.y(), v.z(),
-                                       bbox.xmin(), bbox.ymin(), bbox.zmin(),
-                                       bbox.xmax(), bbox.ymax(), bbox.zmax());
+  return bbox_line_do_intersect_aux(point.x(), point.y(), point.z(),
+                                    v.x(), v.y(), v.z(),
+                                    bbox.xmin(), bbox.ymin(), bbox.zmin(),
+                                    bbox.xmax(), bbox.ymax(), bbox.zmax());
 }
 
 template <class K>
-typename K::Boolean
-do_intersect(const CGAL::Bbox_3& bbox,
-             const typename K::Line_3& line,
-             const K& k)
+bool do_intersect(const CGAL::Bbox_3& bbox,
+                  const typename K::Line_3& line,
+                  const K& k)
 {
   return do_intersect(line, bbox, k);
 }

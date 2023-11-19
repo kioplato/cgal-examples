@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polyhedron/include/CGAL/Polyhedron_3.h $
-// $Id: Polyhedron_3.h eed54a0 2022-11-15T18:45:39+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polyhedron/include/CGAL/Polyhedron_3.h $
+// $Id: Polyhedron_3.h cff3cdb 2021-08-12T10:23:57+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -855,10 +855,6 @@ public:
 
     Facet_iterator facets_end() { return hds_.faces_end();}
 
-    // added for convenience
-    Facet_iterator faces_begin() { return hds_.faces_begin();}
-    Facet_iterator faces_end() { return hds_.faces_end();}
-
     Facet_handles facet_handles() {
         return make_prevent_deref_range(facets_begin(), facets_end());
     }
@@ -890,15 +886,11 @@ public:
     Facet_const_iterator facets_begin() const { return hds_.faces_begin();}
     Facet_const_iterator facets_end()   const { return hds_.faces_end();}
 
-    // added for convenience
-    Facet_const_iterator faces_begin() const { return hds_.faces_begin();}
-    Facet_const_iterator faces_end()   const { return hds_.faces_end();}
-
     Facet_const_handles facet_handles() const {
         return make_prevent_deref_range(facets_begin(), facets_end());
     }
 
-    // Auxiliary iterators for convenience
+    // Auxiliary iterators for convinience
     Point_iterator       points_begin()       { return vertices_begin();}
     Point_iterator       points_end()         { return vertices_end();}
 
@@ -1310,7 +1302,7 @@ public:
         // Three copies of the vertices and two new triangles will be
         // created. h,i,j will be incident to the first new triangle. The
         // returnvalue will be an halfedge iterator denoting the new
-        // halfedges of the second new triangle which was h beforehand.
+        // halfegdes of the second new triangle which was h beforehand.
         // Precondition: h,i,j are distinct, consecutive vertices of the
         // polyhedron and form a cycle: i.e. `h->vertex() == i->opposite()
         // ->vertex()', ..., `j->vertex() == h->opposite()->vertex()'. The
@@ -1456,10 +1448,10 @@ public:
 
     /// Erases the small connected components and the isolated vertices.
     ///
+    /// @commentheading Preconditions:
+    /// supports vertices, halfedges, and removal operation.
     ///
-    /// \pre supports vertices, halfedges, and removal operation.
-    ///
-    /// *Parameters*
+    /// @commentheading Template Parameters:
     /// @param nb_components_to_keep the number of large connected components to keep.
     ///
     /// @return the number of connected components erased (ignoring isolated vertices).
@@ -1473,7 +1465,7 @@ public:
         // removes all vertices, halfedges, and facets.
 
     void erase_all() { clear(); }
-        // equivalent to `clear()'. Deprecated.
+        // equivalent to `clear()'. Depricated.
 
 // Special Operations on Polyhedral Surfaces
 
@@ -1591,7 +1583,7 @@ public:
                      << std::endl;
                 break;
             }
-            // Distinct facets on each side of an halfedge.
+            // Distinct facets on each side of an halfegde.
             valid = valid && ( ! check_tag( Supports_halfedge_face()) ||
                                D.get_face(i) != D.get_face(i->opposite()));
             if ( ! valid) {

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Point_set_processing_3/include/CGAL/IO/write_xyz_points.h $
-// $Id: write_xyz_points.h d3b13fb 2022-12-05T19:00:39+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Point_set_processing_3/include/CGAL/IO/write_xyz_points.h $
+// $Id: write_xyz_points.h a34debc 2021-06-23T22:56:35+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s) : Pierre Alliez and Laurent Saboret
@@ -17,41 +17,49 @@
 #include <CGAL/IO/helpers.h>
 
 #include <CGAL/property_map.h>
-#include <CGAL/assertions.h>
+#include <CGAL/point_set_processing_assertions.h>
 #include <CGAL/Kernel_traits.h>
 #include <CGAL/Iterator_range.h>
 
-#include <CGAL/Named_function_parameters.h>
+#include <CGAL/boost/graph/Named_function_parameters.h>
 #include <CGAL/boost/graph/named_params_helper.h>
+
+#include <boost/utility/enable_if.hpp>
 
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include <type_traits>
+
+#ifdef DOXYGEN_RUNNING
+#define CGAL_BGL_NP_TEMPLATE_PARAMETERS NamedParameters
+#define CGAL_BGL_NP_CLASS NamedParameters
+#define CGAL_DEPRECATED
+#endif
 
 namespace CGAL {
 namespace Point_set_processing_3 {
 namespace internal {
 
-template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_XYZ_PSP(std::ostream& os,
                    const PointRange& points,
-                   const CGAL_NP_CLASS& np = CGAL::parameters::default_values())
+                   const CGAL_BGL_NP_CLASS& np)
 {
   using CGAL::parameters::choose_parameter;
   using CGAL::parameters::get_parameter;
 
   // basic geometric types
-  typedef Point_set_processing_3_np_helper<PointRange, CGAL_NP_CLASS> NP_helper;
-  typedef typename NP_helper::Const_point_map PointMap;
-  typedef typename NP_helper::Normal_map NormalMap;
+  typedef typename CGAL::GetPointMap<PointRange, CGAL_BGL_NP_CLASS>::type                    PointMap;
+  typedef typename Point_set_processing_3::GetNormalMap<PointRange, CGAL_BGL_NP_CLASS>::type NormalMap;
 
-  const bool has_normals = NP_helper::has_normal_map(points, np);
+  bool has_normals = !(std::is_same<NormalMap,
+                                    typename Point_set_processing_3::GetNormalMap<
+                                      PointRange, CGAL_BGL_NP_CLASS>::NoMap>::value);
 
-  PointMap point_map = NP_helper::get_const_point_map(points, np);
-  NormalMap normal_map = NP_helper::get_normal_map(points, np);
+  PointMap point_map = choose_parameter<PointMap>(get_parameter(np, internal_np::point_map));
+  NormalMap normal_map = choose_parameter<NormalMap>(get_parameter(np, internal_np::normal_map));
 
-  CGAL_precondition(points.begin() != points.end());
+  CGAL_point_set_processing_precondition(points.begin() != points.end());
 
   if(!os)
   {
@@ -121,17 +129,28 @@ namespace IO {
 
    \returns `true` if writing was successful, `false` otherwise.
 */
-template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_XYZ(std::ostream& os,
                const PointRange& points,
-               const CGAL_NP_CLASS& np = parameters::default_values()
+               const CGAL_BGL_NP_CLASS& np
 #ifndef DOXYGEN_RUNNING
-               , std::enable_if_t<internal::is_Range<PointRange>::value>* = nullptr
+               , typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr
 #endif
                )
 {
   return Point_set_processing_3::internal::write_XYZ_PSP(os, points, np);
 }
+
+/// \cond SKIP_IN_MANUAL
+
+template <typename PointRange>
+bool write_XYZ(std::ostream& os, const PointRange& points,
+               typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr)
+{
+  return write_XYZ(os, points, parameters::all_default());
+}
+
+/// \endcond
 
 /**
    \ingroup PkgPointSetProcessing3IOXyz
@@ -174,18 +193,30 @@ bool write_XYZ(std::ostream& os,
 
    \returns `true` if writing was successful, `false` otherwise.
 */
-template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
+template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
 bool write_XYZ(const std::string& filename,
                const PointRange& points,
-               const CGAL_NP_CLASS& np = parameters::default_values()
+               const CGAL_BGL_NP_CLASS& np
 #ifndef DOXYGEN_RUNNING
-               , std::enable_if_t<internal::is_Range<PointRange>::value>* = nullptr
+               , typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr
 #endif
                )
 {
   std::ofstream os(filename);
   return write_XYZ(os, points, np);
 }
+
+/// \cond SKIP_IN_MANUAL
+
+template <typename PointRange>
+bool write_XYZ(const std::string& filename, const PointRange& points,
+               typename boost::enable_if<internal::is_Range<PointRange> >::type* = nullptr)
+{
+  std::ofstream os(filename);
+  return write_XYZ(os, points, parameters::all_default());
+}
+
+/// \endcond
 
 } // namespace IO
 
@@ -286,11 +317,21 @@ bool write_xyz_points(std::ostream& os, ///< output stream.
   \deprecated This function is deprecated since \cgal 5.3,
               \link PkgPointSetProcessing3IOXyz `CGAL::write_XYZ()` \endlink should be used instead.
 */
-template <typename PointRange, typename CGAL_NP_TEMPLATE_PARAMETERS>
-CGAL_DEPRECATED bool write_xyz_points(std::ostream& os, const PointRange& points, const CGAL_NP_CLASS& np = parameters::default_values())
+template <typename PointRange, typename CGAL_BGL_NP_TEMPLATE_PARAMETERS>
+CGAL_DEPRECATED bool write_xyz_points(std::ostream& os, const PointRange& points, const CGAL_BGL_NP_CLASS& np)
 {
   return IO::write_XYZ(os, points, np);
 }
+
+/// \cond SKIP_IN_MANUAL
+
+template <typename PointRange>
+CGAL_DEPRECATED bool write_xyz_points(std::ostream& os, const PointRange& points)
+{
+  return IO::write_XYZ(os, points, parameters::all_default());
+}
+
+/// \endcond
 
 #endif // CGAL_NO_DEPRECATED_CODE
 

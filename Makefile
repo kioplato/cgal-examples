@@ -1,11 +1,13 @@
 # Compiler to use.
 CXX := g++
 # Compiler flags.
-CXXFLAGS := -Wall -Wextra -Werror -Wpedantic
+CXXFLAGS := -Wall -Wextra -Werror -pipe -fPIC -I/usr/include/qt5/QtWidgets -I/usr/include/qt5 -I/usr/include/qt5/Qt3DInput -I/usr/include/qt5/QtCore -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtOpenGL
 # Linker flags.
-CXXLFLAGS :=
+LDFLAGS := -L/usr/lib64/
+# Libraries to link.
+LIBS := -lgmp -lmpfr -lQt5Core -lQt5Widgets -lQt5Gui -lQt5Widgets -lQt5Help -lQt5ScriptTools -lQt5Script -lQt5WebEngineWidgets -lQt5WebEngine -lQt5WebEngineCore -lQt5QuickControls2 -lQt5QuickTemplates2 -lQt5Location -lQt5Scxml -lQt5WebChannel -lQt5PositioningQuick -lQt5Positioning -lQt5Svg -lQt5OpenGL -lQt5Charts -lQt5PrintSupport -lQt5Bluetooth -lQt5DataVisualization -lQt53DExtras -lQt53DAnimation -lQt53DRender -lQt53DInput -lQt53DLogic -lQt53DCore -lQt5X11Extras -lQt5WaylandClient -lQt5Sensors -lQt5DBus -lQt5XmlPatterns -lQt5WebSockets -lQt5SerialPort -lQt5Xml -lQt5Concurrent -lQt5MultimediaWidgets -lQt5Multimedia -lQt5QuickWidgets -lQt5QuickParticles -lQt5QuickTest -lQt5QuickShapes -lQt5Quick -lQt5QmlWorkerScript -lQt5QmlModels -lQt5Qml -lQt5Sql -lQt5Test -lQt5Network -lQt5XcbQpa -lQt5Gui -lQt5Core
 
-# Directories to use.
+# Directories to use.ª
 BIN_DIR := bin
 OBJ_DIR := obj
 INC_DIR := inc
@@ -25,14 +27,14 @@ EXES := $(patsubst $(MWE_DIR)/%.cpp,$(BIN_DIR)/%,$(MWES))
 release: CXXFLAGS += -O3 -march=native -mtune=native
 release: config _build
 
-debug: CXXFLAGS += -Og -ggdb3
+debug: CXXFLAGS += -Og -ggdb3 -DCGAL_DISABLE_ROUNDING_MATH_CHECK
 debug: config _build
 
 config:
 	@echo "Variables:"
 	@echo "  CXX       = $(CXX)"
 	@echo "  CXXFLAGS  = $(CXXFLAGS)"
-	@echo "  CXXLFLAGS = $(CXXLFLAGS)"
+	@echo "  LDFLAGS   = $(LDFLAGS)"
 	@echo
 	@echo "  BIN_DIR = $(BIN_DIR)"
 	@echo "  OBJ_DIR = $(OBJ_DIR)"
@@ -59,4 +61,4 @@ help:
 _build: $(EXES)
 
 $(BIN_DIR)/%: $(MWE_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(CXXLFLAGS) -I $(INC_DIR) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -I$(INC_DIR) $< -o $@ $(LIBS)

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_3/include/CGAL/Mesh_3/experimental/Sizing_field_minimum.h $
-// $Id: Sizing_field_minimum.h 3fa4364 2022-06-10T08:41:19+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_3/include/CGAL/Mesh_3/experimental/Sizing_field_minimum.h $
+// $Id: Sizing_field_minimum.h 254d60f 2019-10-19T15:23:19+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -22,6 +22,9 @@
 
 #include <CGAL/license/Mesh_3.h>
 
+#include <boost/static_assert.hpp>
+#include <boost/type_traits/is_same.hpp>
+
 namespace CGAL
 {
   template <typename SizingField1, typename SizingField2>
@@ -33,15 +36,15 @@ namespace CGAL
     typedef typename SizingField1::Index    Index;
 
     BOOST_STATIC_ASSERT_MSG((
-      std::is_same<typename SizingField1::FT,
+      boost::is_same<typename SizingField1::FT,
                      typename SizingField2::FT>::value),
       "FT type should be the same for both sizing fields");
     BOOST_STATIC_ASSERT_MSG((
-      std::is_same<typename SizingField1::Point_3,
+      boost::is_same<typename SizingField1::Point_3,
                      typename SizingField2::Point_3>::value),
       "Point_3 type should be the same for both sizing fields");
     BOOST_STATIC_ASSERT_MSG((
-      std::is_same<typename SizingField1::Index,
+      boost::is_same<typename SizingField1::Index,
                      typename SizingField2::Index>::value),
       "Index type should be the same for both sizing fields");
 

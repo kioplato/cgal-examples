@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_insertion_helper.h $
-// $Id: Arr_spherical_insertion_helper.h 014c06f 2022-11-14T15:32:47+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Arrangement_on_surface_2/include/CGAL/Arr_topology_traits/Arr_spherical_insertion_helper.h $
+// $Id: Arr_spherical_insertion_helper.h 6e1fc8a 2021-09-02T16:53:07+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -143,7 +143,7 @@ before_handle_event(Event* event)
  */
 template <typename Tr, typename Arr, typename Evnt, typename Sbcv>
 void Arr_spherical_insertion_helper<Tr, Arr, Evnt, Sbcv>::
-before_handle_event_imp(Event* /* event */, Arr_all_sides_oblivious_tag)
+before_handle_event_imp(Event* event, Arr_all_sides_oblivious_tag)
 { return; }
 
 /* A notification invoked before the surface-sweep starts handling a given
@@ -163,7 +163,7 @@ before_handle_event_imp(Event* event, Arr_not_all_sides_oblivious_tag)
   if (event->is_isolated()) return;
 
   if (ps_y == ARR_BOTTOM_BOUNDARY) {
-    // Process bottom contraction boundary:
+    // Process bootom contraction boundary:
     // The event has only one right curve, as there is exactly one curve
     // incident to an event with boundary conditions.
     CGAL_assertion((event->number_of_left_curves() == 0) &&

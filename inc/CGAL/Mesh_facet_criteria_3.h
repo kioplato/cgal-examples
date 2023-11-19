@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Mesh_3/include/CGAL/Mesh_facet_criteria_3.h $
-// $Id: Mesh_facet_criteria_3.h 9fd54ba 2022-12-05T15:33:08+01:00 Jane Tournois
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Mesh_3/include/CGAL/Mesh_facet_criteria_3.h $
+// $Id: Mesh_facet_criteria_3.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -28,7 +28,7 @@
 namespace CGAL {
 
 template<typename Tr,
-         typename Visitor_ = Mesh_3::Facet_criterion_visitor_with_radius_lower_bound<Tr> >
+         typename Visitor_ = Mesh_3::Facet_criterion_visitor_with_features<Tr> >
 class Mesh_facet_criteria_3
 {
 public:
@@ -55,12 +55,9 @@ public:
   Mesh_facet_criteria_3(const FT& angle_bound,
                         const Sizing_field & radius_bound,
                         const Sizing_field2& distance_bound,
-                        const Mesh_facet_topology topology = FACET_VERTICES_ON_SURFACE,
-                        const FT& min_radius_bound = 0.)
+                        const Mesh_facet_topology topology =
+                          FACET_VERTICES_ON_SURFACE)
   {
-    if (FT(0) != min_radius_bound)
-      init_min_radius(min_radius_bound);
-
     if ( FT(0) != angle_bound )
       init_aspect(angle_bound);
 
@@ -77,8 +74,8 @@ public:
   ~Mesh_facet_criteria_3() { }
 
    /**
-   * @brief returns whether the facet `facet` is bad or not.
-   * @param tr the triangulation within which `facet` lives
+   * @brief returns whether the facet \c facet is bad or not.
+   * @param tr the triangulation within which \c facet lives
    * @param facet the facet
    */
   Is_facet_bad operator()(const Tr& tr, const Facet& facet) const
@@ -114,12 +111,6 @@ private:
   {
     typedef Mesh_3::Variable_size_criterion<Tr,Visitor,Sizing_field> Variable_size_criterion;
     criteria_.add(new Variable_size_criterion(radius_bound));
-  }
-
-  void init_min_radius(const FT& min_radius_bound)
-  {
-    typedef Mesh_3::Uniform_size_criterion<Tr, Visitor> Uniform_size_criterion;
-    criteria_.add(new Uniform_size_criterion(min_radius_bound, true/*lower bound*/));
   }
 
   void init_distance(const FT& distance_bound, Tag_false)

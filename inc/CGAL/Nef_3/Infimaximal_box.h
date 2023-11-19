@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Nef_3/include/CGAL/Nef_3/Infimaximal_box.h $
-// $Id: Infimaximal_box.h 3c56c3e 2023-01-19T00:58:05+00:00 Giles Bathgate
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Nef_3/include/CGAL/Nef_3/Infimaximal_box.h $
+// $Id: Infimaximal_box.h e9d41d7 2020-04-21T10:03:00+02:00 Maxime Gimeno
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -24,7 +24,6 @@
 #include <CGAL/Extended_homogeneous.h>
 
 #include <CGAL/Nef_3/SNC_intersection.h>
-#include <CGAL/Nef_3/SNC_iteration.h>
 
 namespace CGAL {
 
@@ -152,7 +151,7 @@ class Infimaximal_box {
     create_vertices_on_infibox(SNC_constructor&,
                                const Plane_3&, const std::list<Point_3>&,
                                const Mark&, const Mark&, const Mark&) {
-    // TODO: create warning or assertion
+    // TODO: warning oder assertion einbauen
     return std::list<typename SNC_constructor::Vertex_handle>();
   }
 

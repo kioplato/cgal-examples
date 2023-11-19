@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/Corefinement/intersection_nodes.h $
-// $Id: intersection_nodes.h d594929 2022-06-22T16:56:51+02:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Polygon_mesh_processing/include/CGAL/Polygon_mesh_processing/internal/Corefinement/intersection_nodes.h $
+// $Id: intersection_nodes.h 00c185b 2021-03-12T12:06:20+01:00 Dmitry Anisimov
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -65,6 +65,12 @@ private:
   Exact_kernel ek;
   Exact_to_double exact_to_double;
 
+  typename Exact_kernel::Point_3
+  to_exact(const typename Input_kernel::Point_3& p) const
+  {
+    return typename Exact_kernel::Point_3(p.x(), p.y(), p.z());
+  }
+
 public:
   const TriangleMesh &tm1, &tm2;
   const VertexPointMap1& vpm1;
@@ -79,12 +85,6 @@ public:
   , vpm1(vpm1_)
   , vpm2(vpm2_)
   {}
-
-  static typename Exact_kernel::Point_3
-  to_exact(const typename Input_kernel::Point_3& p)
-  {
-    return typename Exact_kernel::Point_3(p.x(), p.y(), p.z());
-  }
 
   const Point_3& operator[](std::size_t i) const {
     return nodes[i];
@@ -132,7 +132,7 @@ public:
   template <class Mesh_to_map_node>
   void finalize(const Mesh_to_map_node&) {}
 
-  void check_no_duplicates() const
+  void check_no_duplicates()
   {
     CGAL_assertion(nodes.size() == std::set<Point_3>(nodes.begin(), nodes.end()).size());
   }
@@ -202,9 +202,8 @@ public:
     return enodes[i];
   }
 
-  static
   Exact_kernel::Point_3
-  to_exact(const Point_3& p)
+  to_exact(const Point_3& p) const
   {
     return Exact_kernel::Point_3(p.x(), p.y(), p.z());
   }
@@ -297,8 +296,10 @@ public:
       for (std::size_t i=0, e=enodes.size(); i!=e; ++i)
       {
         Point_3 pt = exact_to_double(enodes[i]);
-        tm1_vertices.update_vertex_point(i, pt, vpm1);
-        tm2_vertices.update_vertex_point(i, pt, vpm2);
+        if ( tm1_vertices[i] != GT::null_vertex() )
+          put(vpm1, tm1_vertices[i], pt);
+        if ( tm2_vertices[i] != GT::null_vertex() )
+          put(vpm2, tm2_vertices[i], pt);
       }
     }
     else{
@@ -306,12 +307,13 @@ public:
       for (std::size_t i=0, e=enodes.size(); i!=e; ++i)
       {
         Point_3 pt = exact_to_double(enodes[i]);
-        tm1_vertices.update_vertex_point(i, pt, vpm1);
+        if ( tm1_vertices[i] != GT::null_vertex() )
+          put(vpm1, tm1_vertices[i], pt);
       }
     }
   }
 
-  void check_no_duplicates() const
+  void check_no_duplicates()
   {
     CGAL_assertion(enodes.size() == std::set<typename Exact_kernel::Point_3>(enodes.begin(), enodes.end()).size());
   }
@@ -420,7 +422,7 @@ public:
     nodes.push_back(p);
   }
 
-  static const Point_3& to_exact(const Point_3& p) { return p; }
+  const Point_3& to_exact(const Point_3& p) const { return p; }
 
   template <class VPM> // VertexPointMap1 or VertexPointMap2
   void call_put(const VPM& vpm, vertex_descriptor vd, std::size_t i, TriangleMesh&)
@@ -435,7 +437,7 @@ public:
   {}
 
 
-  void check_no_duplicates() const
+  void check_no_duplicates()
   {
     CGAL_assertion(nodes.size() == std::set<Point_3>(nodes.begin(), nodes.end()).size());
   }

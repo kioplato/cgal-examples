@@ -2,8 +2,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Subdivision_method_3/include/CGAL/Subdivision_method_3/internal/subdivision_hosts_impl_3.h $
-// $Id: subdivision_hosts_impl_3.h 5693780 2023-03-17T14:46:49+01:00 Andreas Fabri
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Subdivision_method_3/include/CGAL/Subdivision_method_3/internal/subdivision_hosts_impl_3.h $
+// $Id: subdivision_hosts_impl_3.h e893ac1 2020-08-18T10:06:51+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -21,7 +21,8 @@
 #include <CGAL/circulator.h>
 #include <CGAL/tags.h>
 
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
+
 #include <iterator>
 #include <list>
 #include <vector>
@@ -79,9 +80,8 @@ void PQQ_1step(Poly& p, VertexPointMap vpm, Mask mask) {
   Point* face_point_buffer = edge_point_buffer + num_e;
 
   int i=0;
-  std::unordered_map<vertex_descriptor,int> v_index;
+  boost::unordered_map<vertex_descriptor,int> v_index;
   for(vertex_descriptor vh : p_vertices){
-    vertex_point_buffer[i] = get(vpm, vh);
     v_index[vh]= i++;
   }
 
@@ -200,7 +200,7 @@ void PTQ_1step(Poly& p, VertexPointMap vpm, Mask mask) {
   Point* edge_point_buffer = vertex_point_buffer + num_v;
 
   int i=0;
-  std::unordered_map<vertex_descriptor,int> v_index;
+  boost::unordered_map<vertex_descriptor,int> v_index;
   for(vertex_descriptor vh : p_vertices){
     v_index[vh]= i++;
   }

@@ -9,8 +9,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Intersections_3/include/CGAL/Intersections_3/Bbox_3_Triangle_3.h $
-// $Id: Bbox_3_Triangle_3.h 3a4e230 2022-11-22T12:22:42+01:00 Mael Rouxel-Labbé
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Intersections_3/include/CGAL/Intersections_3/Bbox_3_Triangle_3.h $
+// $Id: Bbox_3_Triangle_3.h c2d1adf 2021-06-23T17:34:48+02:00 Mael Rouxel-Labbé
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -29,17 +29,15 @@
 namespace CGAL {
 
 template<typename K>
-typename K::Boolean
-do_intersect(const CGAL::Bbox_3& box,
-             const Triangle_3<K>& tr)
+bool do_intersect(const CGAL::Bbox_3& box,
+                  const Triangle_3<K>& tr)
 {
   return K().do_intersect_3_object()(box, tr);
 }
 
 template<typename K>
-typename K::Boolean
-do_intersect(const Triangle_3<K>& tr,
-             const CGAL::Bbox_3& box)
+bool do_intersect(const Triangle_3<K>& tr,
+                  const CGAL::Bbox_3& box)
 {
   return K().do_intersect_3_object()(tr, box);
 }

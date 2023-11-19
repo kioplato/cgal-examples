@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Kernel_23/include/CGAL/Kernel_23/internal/Projection_traits_base_3.h $
-// $Id: Projection_traits_base_3.h 4547818 2022-11-15T13:39:40+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Kernel_23/include/CGAL/Kernel_23/internal/Projection_traits_base_3.h $
+// $Id: Projection_traits_base_3.h dacbd18 2021-08-30T12:35:34+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -462,7 +462,6 @@ public:
   typedef typename K::Construct_translated_point_3  Construct_translated_point_2;
   typedef typename K::Construct_midpoint_3          Construct_midpoint_2;
   typedef typename K::Construct_circumcenter_3      Construct_circumcenter_2;
-  typedef typename K::Construct_barycenter_3        Construct_barycenter_2;
 
   typedef typename K::Compute_area_3                Compute_area_2;
   typedef typename K::Construct_bbox_3              Construct_bbox_2;
@@ -545,9 +544,6 @@ public:
   Construct_circumcenter_2  construct_circumcenter_2_object() const
     {return Construct_circumcenter_2();}
 
-  Construct_barycenter_2  construct_barycenter_2_object() const
-    {return Construct_barycenter_2();}
-
   Construct_translated_point_2  construct_translated_point_2_object() const
     {return Construct_translated_point_2();}
 
@@ -567,7 +563,7 @@ public:
 
   // Special functor, not in the Kernel concept
   class Projection_to_plan {
-    // Remember: Point_2 is K::Point_3
+    // Remeber: Point_2 is K::Point_3
     const Point_2& plane_point;
     const Vector_3& normal;
   public:

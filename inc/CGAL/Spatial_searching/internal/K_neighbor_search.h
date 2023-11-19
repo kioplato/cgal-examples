@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Spatial_searching/include/CGAL/Spatial_searching/internal/K_neighbor_search.h $
-// $Id: K_neighbor_search.h 9c2f8ff 2023-01-13T18:51:28+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Spatial_searching/include/CGAL/Spatial_searching/internal/K_neighbor_search.h $
+// $Id: K_neighbor_search.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -60,8 +60,8 @@ protected:
 
   public:
 
-    Distance_larger(bool search_the_nearest_neighbor)
-      : search_nearest(search_the_nearest_neighbor)
+    Distance_larger(bool search_the_nearest_neighbour)
+      : search_nearest(search_the_nearest_neighbour)
     {}
 
     bool operator()(const Point_ptr_with_transformed_distance& p1,

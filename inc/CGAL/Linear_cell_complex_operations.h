@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Linear_cell_complex/include/CGAL/Linear_cell_complex_operations.h $
-// $Id: Linear_cell_complex_operations.h 999a813 2022-05-05T13:34:19+02:00 Guillaume Damiand
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Linear_cell_complex/include/CGAL/Linear_cell_complex_operations.h $
+// $Id: Linear_cell_complex_operations.h 0779373 2020-03-26T13:31:46+01:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Guillaume Damiand <guillaume.damiand@liris.cnrs.fr>
@@ -15,7 +15,6 @@
 #include <CGAL/Cell_iterators.h>
 #include <CGAL/Cell_const_iterators.h>
 #include <CGAL/Origin.h>
-#include <CGAL/assertions.h>
 
 namespace CGAL {
 
@@ -48,12 +47,12 @@ namespace CGAL {
    */
   template <class LCC>
   typename LCC::Vector compute_normal_of_cell_2
-  (const LCC& amap, typename LCC::Dart_const_descriptor adart)
+  (const LCC& amap, typename LCC::Dart_const_handle adart)
   {
     typedef typename LCC::Point Point;
     typedef typename LCC::Vector Vector;
 
-    typename LCC::Dart_const_descriptor start=adart;
+    typename LCC::Dart_const_handle start=adart;
     Vector normal(CGAL::NULL_VECTOR);
 
     // We go to the beginning of the face (first dart)
@@ -67,7 +66,7 @@ namespace CGAL {
     adart=start;
     do
     {
-      if (amap.other_extremity(adart)==LCC::null_descriptor)
+      if (amap.other_extremity(adart)==LCC::null_handle)
         adart=start; // To leave the loop, because we know that adart has no next dart
       else
       {
@@ -83,7 +82,7 @@ namespace CGAL {
     }
     while(adart!=start);
 
-    CGAL_assertion(nb>0);
+    assert(nb>0);
     return (typename LCC::Traits::Construct_scaled_vector()(normal, 1.0/nb));
     //  return normal / std::sqrt(normal * normal);
   }
@@ -95,7 +94,7 @@ namespace CGAL {
    */
   template <class LCC>
   typename LCC::Vector compute_normal_of_cell_0
-  (const LCC& amap, typename LCC::Dart_const_descriptor adart)
+  (const LCC& amap, typename LCC::Dart_const_handle adart)
   {
     typedef typename LCC::Vector Vector;
     Vector normal(CGAL::NULL_VECTOR);
@@ -118,10 +117,10 @@ namespace CGAL {
   struct Barycenter_functor
   {
     static typename LCC::Point run(const LCC& amap,
-                                   typename LCC::Dart_const_descriptor adart)
+                                   typename LCC::Dart_const_handle adart)
     {
       CGAL_static_assertion(0<i && i<=LCC::dimension);
-      CGAL_assertion(adart != LCC::null_descriptor);
+      CGAL_assertion(adart != LCC::null_handle);
 
       typename LCC::Vector vec
         (typename LCC::Traits::Construct_vector()(CGAL::ORIGIN,
@@ -149,12 +148,12 @@ namespace CGAL {
   struct Barycenter_functor<LCC, 1, dim>
   {
     static typename LCC::Point run(const LCC& amap,
-                                   typename LCC::Dart_const_descriptor adart)
+                                   typename LCC::Dart_const_handle adart)
     {
       CGAL_static_assertion(1<=LCC::dimension);
-      CGAL_assertion(adart != LCC::null_descriptor);
-      typename LCC::Dart_const_descriptor d2=amap.other_extremity(adart);
-      if (d2==amap.null_descriptor) return amap.point(adart);
+      CGAL_assertion(adart != LCC::null_handle);
+      typename LCC::Dart_const_handle d2=amap.other_extremity(adart);
+      if (d2==amap.null_handle) return amap.point(adart);
       return typename LCC::Traits::Construct_midpoint()
         (amap.point(adart),
          amap.point(d2));
@@ -166,13 +165,13 @@ namespace CGAL {
   struct Barycenter_functor<LCC, 2, dim>
   {
     static typename LCC::Point run(const LCC& amap,
-                                   typename LCC::Dart_const_descriptor adart)
+                                   typename LCC::Dart_const_handle adart)
     {
       CGAL_static_assertion(2<=LCC::dimension);
-      CGAL_assertion(adart != LCC::null_descriptor);
+      CGAL_assertion(adart != LCC::null_handle);
 
       // We go to the beginning of the face (first dart, case of open face)
-      typename LCC::Dart_const_descriptor start=adart;
+      typename LCC::Dart_const_handle start=adart;
       while ( amap.is_previous_exist(start) && amap.previous(start)!=adart )
         start = amap.previous(start);
 
@@ -202,7 +201,7 @@ namespace CGAL {
       }
       while(adart!=start);
 
-      CGAL_assertion(nb>1);
+      assert(nb>1);
       return typename LCC::Traits::Construct_translated_point()
         (CGAL::ORIGIN, typename LCC::Traits::Construct_scaled_vector()
          (vec, 1.0/nb));

@@ -3,8 +3,8 @@
 //
 // This file is part of CGAL (www.cgal.org).
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Hyperbolic_triangulation_2/include/CGAL/Hyperbolic_triangulation_2/internal/Hyperbolic_Delaunay_triangulation_traits_2_functions.h $
-// $Id: Hyperbolic_Delaunay_triangulation_traits_2_functions.h 4547818 2022-11-15T13:39:40+01:00 albert-github
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Hyperbolic_triangulation_2/include/CGAL/Hyperbolic_triangulation_2/internal/Hyperbolic_Delaunay_triangulation_traits_2_functions.h $
+// $Id: Hyperbolic_Delaunay_triangulation_traits_2_functions.h 98e4718 2021-08-26T11:33:39+02:00 Sébastien Loriot
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Author(s)     : Mikhail Bogdanov
@@ -17,7 +17,6 @@
 
 #include <CGAL/Origin.h>
 #include <CGAL/enum.h>
-#include <CGAL/assertions.h>
 
 namespace CGAL {
 
@@ -33,6 +32,7 @@ class Construct_circle_or_line_supporting_bisector
   typedef typename Traits::Euclidean_line_2                   Euclidean_line_2;
   typedef typename Traits::Euclidean_circle_or_line_2         Euclidean_circle_or_line_2;
   typedef typename Traits::Circle_2                           Circle_2;
+  typedef typename Traits::Point_3                            Point_3;
 
 public:
   Construct_circle_or_line_supporting_bisector(const Traits& gt = Traits()) : _gt(gt) {}
@@ -40,13 +40,19 @@ public:
   Euclidean_circle_or_line_2 operator()(const Hyperbolic_point_2& p,
                                         const Hyperbolic_point_2& q) const
   {
-    const Hyperbolic_point_2 po = CGAL::ORIGIN;
+    Hyperbolic_point_2 po = CGAL::ORIGIN;
+
     if(_gt.compare_distance_2_object()(po, p, q) == EQUAL)
       return _gt.construct_bisector_2_object()(p, q);
 
+    FT dop2 = p.x()*p.x() + p.y()*p.y();
+    FT doq2 = q.x()*q.x() + q.y()*q.y();
+    Point_3 p3(p.x(), p.y(), dop2);
+    Point_3 q3(q.x(), q.y(), doq2);
+
     // TODO MT improve
 
-    // The circle belongs to the pencil with limit points p and q
+    // The cirle belongs to the pencil with limit points p and q
     // p, q are zero-circles
     // (x, y, xˆ2 + yˆ2 - rˆ2) = alpha*(xp, yp, xpˆ2 + ypˆ2) + (1-alpha)*(xq, yq, xqˆ2 + yqˆ2)
     // xˆ2 + yˆ2 - rˆ2 = 1 (= radius of the Poincare disc)
@@ -79,6 +85,8 @@ public:
 private:
   const Traits& _gt;
 }; // end Construct_supporting_circle_of_bisector
+
+
 
 template <typename Traits>
 class Construct_hyperbolic_segment_2
@@ -115,7 +123,7 @@ public:
 
     Circle_2 circle = _gt.construct_circle_2_object()(center, sq_radius);
     // uncomment!!!
-    // CGAL_assertion(circle.has_on_boundary(p) && circle.has_on_boundary(q));
+    //assert(circle.has_on_boundary(p) && circle.has_on_boundary(q));
 
     if(_gt.orientation_2_object()(p, q, center) == LEFT_TURN)
       return Circular_arc_2(circle, p, q);
@@ -127,6 +135,8 @@ private:
   const Traits& _gt;
 }; // end Construct_hyperbolic_segment_2
 
+
+
 // For details see the JoCG paper (5:56-85, 2014)
 template <typename Traits>
 class Is_Delaunay_hyperbolic
@@ -135,6 +145,7 @@ public:
   typedef typename Traits::FT                                 FT;
   typedef typename Traits::Hyperbolic_point_2                 Hyperbolic_point_2;
   typedef typename Traits::Direction_2                        Direction_2;
+  typedef typename Traits::Point_3                            Point_3;
   typedef typename Traits::Vector_3                           Vector_3;
 
   Is_Delaunay_hyperbolic(const Traits& gt = Traits())
@@ -166,7 +177,7 @@ public:
                   const Hyperbolic_point_2& p2,
                   int& ind) const
   {
-    if(!this->operator()(p0, p1, p2))
+    if(this->operator()(p0, p1, p2) == false)
     {
       ind = find_non_hyperbolic_edge(p0, p1, p2);
       return false;
@@ -176,7 +187,7 @@ public:
   }
 
 private:
-  // assumes that the face (p0, p1, p2) is non-hyperbolic
+  // assume the face (p0, p1, p2) is non-hyperbolic
   int find_non_hyperbolic_edge(const Hyperbolic_point_2& p0,
                                const Hyperbolic_point_2& p1,
                                const Hyperbolic_point_2& p2) const
@@ -241,7 +252,18 @@ public:
     {
       Euclidean_line_2 seg(p, q);
       Orientation qori = _gt.orientation_2_object()(p, q, query);
-      return qori;
+      if(qori == COLLINEAR)
+      {
+        return ON_ORIENTED_BOUNDARY;
+      }
+      else
+      {
+        // It is sufficient that these are consistent.
+        if(qori == LEFT_TURN)
+          return ON_POSITIVE_SIDE;
+        else
+          return ON_NEGATIVE_SIDE;
+      }
     }
 
     Weighted_point_2 wp(p);
@@ -253,7 +275,17 @@ public:
 
     Circle_2 circle = _gt.construct_circle_2_object()(center, sq_radius);
     Bounded_side bs = _gt.bounded_side_2_object()(circle, query);
-    return enum_cast<Oriented_side>(bs);
+    if(bs == ON_BOUNDARY)
+    {
+      return ON_ORIENTED_BOUNDARY;
+    }
+    else
+    {
+      if(bs == ON_BOUNDED_SIDE)
+        return ON_POSITIVE_SIDE;
+      else
+        return ON_NEGATIVE_SIDE;
+    }
   }
 
 private:

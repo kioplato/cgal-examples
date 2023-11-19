@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/STL_Extension/include/CGAL/vector.h $
-// $Id: vector.h 697e1ab 2022-02-24T11:34:31+01:00 Sébastien Loriot
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/STL_Extension/include/CGAL/vector.h $
+// $Id: vector.h b42bbde 2021-05-05T06:46:57+01:00 Giles Bathgate
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <memory>
 #include <cstddef>
-#include <functional>
 #include <boost/type_traits/remove_const.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
@@ -135,13 +134,6 @@ public:
               ( const_cast<Ptr_no_c>(ptr) );
     }
 };
-
-template < class T, class Ref, class Ptr>
-std::size_t hash_value(const vector_iterator<T, Ref, Ptr>& i)
-{
-  Ptr ptr = i.operator->();
-  return reinterpret_cast<std::size_t>(ptr)/ sizeof(T);
-}
 
 template < class T, class Ref, class Ptr> inline
 vector_iterator<T,Ref,Ptr>
@@ -616,32 +608,5 @@ void vector<T, Alloc>::insert( iterator position, size_type n, const T& x) {
 } // namespace internal
 
 } //namespace CGAL
-
-namespace std {
-
-#if defined(BOOST_MSVC)
-#  pragma warning(push)
-#  pragma warning(disable:4099) // For VC10 it is class hash
-#endif
-
-#ifndef CGAL_CFG_NO_STD_HASH
-
-  template < class T, class Ref, class Ptr>
-  struct hash<CGAL::internal::vector_iterator<T, Ref, Ptr> >
-    : public CGAL::cpp98::unary_function<CGAL::internal::vector_iterator<T, Ref, Ptr>, std::size_t>  {
-
-    std::size_t operator()(const CGAL::internal::vector_iterator<T, Ref, Ptr>& i) const
-    {
-      return CGAL::internal::hash_value(i);
-    }
-  };
-
-#endif // CGAL_CFG_NO_STD_HASH
-
-#if defined(BOOST_MSVC)
-#  pragma warning(pop)
-#endif
-
-} // namespace std
 
 #endif // CGAL_VECTOR_H //

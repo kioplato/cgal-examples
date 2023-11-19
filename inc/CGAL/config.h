@@ -7,8 +7,8 @@
 //
 // This file is part of CGAL (www.cgal.org)
 //
-// $URL: https://github.com/CGAL/cgal/blob/v5.6/Installation/include/CGAL/config.h $
-// $Id: config.h d2bc415 2023-05-04T16:37:17+02:00 Laurent Rineau
+// $URL: https://github.com/CGAL/cgal/blob/v5.4.5/Installation/include/CGAL/config.h $
+// $Id: config.h ab7aa75 2022-04-28T13:59:14+02:00 Sébastien Loriot
 // SPDX-License-Identifier: LGPL-3.0-or-later OR LicenseRef-Commercial
 //
 //
@@ -52,7 +52,7 @@
 #endif // CGAL_TEST_SUITE and NDEBUG
 
 // See [[Small features/Visual_Leak_Detector]] in CGAL developers wiki
-// See also: https://kinddragon.github.io/vld/
+// See also: http://vld.codeplex.com/
 #if defined(CGAL_ENABLE_VLD)
 #  include <vld.h>
 #endif // CGAL_ENABLE_VLD
@@ -111,6 +111,17 @@
 #undef CGAL_LINKED_WITH_TBB
 #endif
 #endif
+
+// Macro used by Boost Parameter. Mesh_3 needs at least 12, before the
+// Boost Parameter headers are included: <boost/parameter/config.hpp>
+// defines the value to 8, if it is not yet defined.
+// The CGAL BGL properties mechanism includes
+// <boost/graph/named_function_params.hpp>, that includes
+// <boost/parameter/name.hpp>, and maybe other Boost libraries may use
+// Boost Parameter as well.
+// That is why that is important to define that macro as early as possible,
+// in <CGAL/config.h>
+#define BOOST_PARAMETER_MAX_ARITY 12
 
 // The following header file defines among other things  BOOST_PREVENT_MACRO_SUBSTITUTION
 #include <boost/config.hpp>
@@ -296,7 +307,7 @@ using std::max;
 
 // Macros to detect features of clang. We define them for the other
 // compilers.
-// See https://clang.llvm.org/docs/LanguageExtensions.html
+// See http://clang.llvm.org/docs/LanguageExtensions.html
 // See also https://en.cppreference.com/w/cpp/experimental/feature_test
 #ifndef __has_feature
   #define __has_feature(x) 0  // Compatibility with non-clang compilers.
@@ -346,10 +357,7 @@ using std::max;
 #define CGAL_NORETURN  [[noreturn]]
 
 // Macro to specify [[no_unique_address]] if supported
-#if _MSC_VER >= 1929 && _MSVC_LANG >= 202002L
-// see https://devblogs.microsoft.com/cppblog/msvc-cpp20-and-the-std-cpp20-switch/#c20-no_unique_address
-#  define CGAL_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
-#elif __has_cpp_attribute(no_unique_address)
+#if __has_cpp_attribute(no_unique_address)
 #  define CGAL_NO_UNIQUE_ADDRESS [[no_unique_address]]
 #else
 #  define CGAL_NO_UNIQUE_ADDRESS
@@ -476,7 +484,7 @@ namespace cpp11{
 
 // The fallthrough attribute
 // See for clang:
-//   https://clang.llvm.org/docs/AttributeReference.html#statement-attributes
+//   http://clang.llvm.org/docs/AttributeReference.html#statement-attributes
 // See for gcc:
 //   https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 #if __cplusplus > 201402L && __has_cpp_attribute(fallthrough)
@@ -489,12 +497,6 @@ namespace cpp11{
 #  define CGAL_FALLTHROUGH __attribute__ ((fallthrough))
 #else
 #  define CGAL_FALLTHROUGH while(false){}
-#endif
-
-#if CGAL_CXX17
-#  define CGAL_CPP17_INLINE inline
-#else
-#  define CGAL_CPP17_INLINE
 #endif
 
 #ifndef CGAL_NO_ASSERTIONS
@@ -521,7 +523,7 @@ namespace cpp11{
 /// Macro `CGAL_WARNING`.
 /// Must be used with `#pragma`, this way:
 ///
-///     #pragma CGAL_WARNING("This line should trigger a warning")
+///     #pragma CGAL_WARNING(This line should trigger a warning)
 ///
 /// @{
 #ifdef BOOST_MSVC
@@ -552,7 +554,7 @@ namespace cpp11{
 namespace CGAL {
 
 // Returns filename prefixed by the directory of CGAL containing data.
-// This directory is either defined in the environment variable CGAL_DATA_DIR,
+// This directory is either defined in the environement variable CGAL_DATA_DIR,
 // otherwise it is taken from the constant CGAL_DATA_DIR (defined in CMake),
 // otherwise it is empty (and thus returns filename unmodified).
 inline std::string data_file_path(const std::string& filename)
@@ -599,62 +601,5 @@ inline std::string data_file_path(const std::string& filename)
 }
 
 } // end namespace CGAL
-
-
-#if BOOST_VERSION < 107900
-
-// Workaround for an accidental enable if of Eigen::Matrix in the
-// boost::multiprecision::cpp_int constructor for some versions of
-// boost
-
-namespace Eigen{
-  template <class A, int B, int C, int D, int E, int F>
-  class Matrix;
-  template <class A, int B, class C>
-  class Ref;
-
-  template <class A, class B, int C>
-  class Product;
-
-  template<typename BinaryOp, typename Lhs, typename Rhs>  class CwiseBinaryOp;
-
-}
-
-namespace boost {
-    namespace multiprecision {
-        namespace detail {
-            template <typename T>
-            struct is_byte_container;
-
-
-            template <class A, int B, int C, int D, int E, int F>
-            struct is_byte_container< Eigen::Matrix<A, B, C, D, E, F>>
-            {
-                static const bool value = false;
-            };
-
-            template <class A, int B, class C>
-            struct is_byte_container< Eigen::Ref<A, B, C>>
-            {
-                static const bool value = false;
-            };
-
-            template <class A, class B, int C>
-            struct is_byte_container< Eigen::Product<A, B, C>>
-            {
-                static const bool value = false;
-            };
-
-            template <class A, class B, class C>
-            struct is_byte_container< Eigen::CwiseBinaryOp<A, B, C>>
-            {
-                static const bool value = false;
-            };
-
-        }
-    }
-}
-
-#endif // BOOST_VERSION < 107900
 
 #endif // CGAL_CONFIG_H
