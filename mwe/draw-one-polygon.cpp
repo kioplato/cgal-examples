@@ -2,10 +2,6 @@
  * Purpose: Draw a polygon using CGAL's draw function.
  */
 
-#include "../inc/CGAL/Qt/ui_ImageInterface.h"
-
-#define CGAL_USE_BASIC_VIEWER
-
 #include <iostream>
 
 #include "CGAL/Exact_predicates_exact_constructions_kernel.h"
