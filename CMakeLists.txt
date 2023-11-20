@@ -1,41 +1,40 @@
-# Created by the script cgal_create_CMakeLists
-# This is the CMake script for compiling a set of CGAL applications.
-
 cmake_minimum_required(VERSION 3.1...3.15)
 
 set(CMAKE_CXX_COMPILER "g++")
 
-project( draw-one-polygon )
+project(cgal-examples)
 
 set(CMAKE_BUILD_TYPE Release)
 
-# CGAL and its components
-find_package( CGAL REQUIRED COMPONENTS Qt5 Core)
+# CGAL and its components.
+find_package(CGAL REQUIRED COMPONENTS Qt5 Core)
 
-if ( NOT CGAL_FOUND )
+if (NOT CGAL_FOUND)
 	message(STATUS "This project requires the CGAL library, and will not be compiled.")
 	return()  
 endif()
 
-if ( NOT CGAL_Qt5_FOUND )
+if (NOT CGAL_Qt5_FOUND)
 	message(STATUS "This project requires the CGAL part for Qt5 library (libCGAL_Qt5.so), and will not be compiled.")
 	return()
 endif()
 
 find_package(Qt5 COMPONENTS Core Xml Script OpenGL Svg)
 
-# Boost and its components
-find_package( Boost REQUIRED )
+# Boost and its components.
+find_package(Boost REQUIRED)
 
-if ( NOT Boost_FOUND )
+if (NOT Boost_FOUND)
 	message(STATUS "This project requires the Boost library, and will not be compiled.")
 	return()  
 endif()
 
-# include for local directory
-#include_directories(inc)
+# Creating entries for all C++ files with "main" routine.
+add_executable(compute-convex-hull-of-polygon mwe/compute-convex-hull-of-polygon.cpp)
+target_link_libraries(compute-convex-hull-of-polygon PUBLIC CGAL::CGAL)
 
-# Creating entries for all C++ files with "main" routine
-# ##########################################################
-add_executable(${PROJECT_NAME} mwe/draw-one-polygon.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC CGAL::CGAL CGAL::CGAL_Basic_viewer)
+add_executable(draw-one-polygon mwe/draw-one-polygon.cpp)
+target_link_libraries(draw-one-polygon PUBLIC CGAL::CGAL CGAL::CGAL_Basic_viewer)
+
+add_executable(draw-multiple-polygons mwe/draw-multiple-polygons.cpp)
+target_link_libraries(draw-multiple-polygons PUBLIC CGAL::CGAL CGAL::CGAL_Basic_viewer)
