@@ -27,3 +27,5 @@ Run `make help` to get a brief description about the available targets.
 If you are lazy and can't be bothered, just run `make` and it will
 compile all minimal working examples with maximum optimization.
 Compiled minimal working examples will be stored in `bin/`.
+
+`docker run -it -e "DISPLAY=$DISPLAY" -v "/home/kioplato/.local/state/X11/Xauthority:/root/.Xauthority:ro" --network host --name cgal-examples-container cgal-examples:v0.1 /bin/bash`
